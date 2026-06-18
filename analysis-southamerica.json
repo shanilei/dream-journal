@@ -1,0 +1,20 @@
+{
+  "emotions": [
+    { "name": "סקרנות", "intensity": 0.9 },
+    { "name": "כיף", "intensity": 0.85 },
+    { "name": "התרגשות", "intensity": 0.8 },
+    { "name": "בלבול", "intensity": 0.65 },
+    { "name": "חרטה", "intensity": 0.7 }
+  ],
+  "characters": ["אלמוג גרוס", "חברה"],
+  "locations": ["דרום אמריקה", "מסיבה", "קומה תת-קרקעית נסתרת"],
+  "symbols": [
+    "ירידה נסתרת מתחת לאדמה",
+    "הלילה האחרון",
+    "ספק בפתח הכניסה",
+    "חרטה ושינוי כיוון",
+    "עולם סמוי מתחת לרצפה"
+  ],
+  "themes": ["עולמות נסתרים", "פחד להחמיץ", "ספק ויציאה מאזור הנוחות", "הרפתקה בלילה האחרון"],
+  "visual_scene": "Two figures standing at the edge of a hidden trapdoor in a party venue floor, looking down at a glowing staircase descending underground. The underground level glows warmly below. One figure points downward, the other hesitates. A lively South American nightclub scene surrounds them — tropical plants, warm light, festive atmosphere. The tension: last night, hidden world below, should we go?"
+}

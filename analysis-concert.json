@@ -1,0 +1,13 @@
+{
+  "emotions": [
+    { "name": "שמחה", "intensity": 0.98 },
+    { "name": "התרגשות", "intensity": 0.95 },
+    { "name": "חברות", "intensity": 0.9 },
+    { "name": "כיף", "intensity": 0.95 }
+  ],
+  "characters": ["חברה הכי טובה"],
+  "locations": ["מטוס", "הופעה"],
+  "symbols": ["טיסה", "עלייה לאוויר", "אורות הופעה", "צחוק", "קהל", "מוזיקה", "חופש תנועה"],
+  "themes": ["שמחה עצומה", "חברות וחוויה משותפת", "חופש ועצמאות", "התרוממות רוח"],
+  "visual_scene": "Two friends flying through the air toward a glowing concert stage, laughing — streaks of concert light in warm coral and gold cutting through a deep joyful dark, crowd below dissolving into layers of color and motion"
+}

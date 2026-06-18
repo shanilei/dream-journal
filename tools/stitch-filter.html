@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Artisan Stitch Filter — Dream Journal</title>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f1ea;
+      color: #333;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    h1 { font-size: 20px; }
+    .panel {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      padding: 16px;
+      border-radius: 8px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 900px;
+    }
+    .control { display: flex; flex-direction: column; font-size: 13px; gap: 4px; }
+    .canvas-area {
+      max-width: 900px;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      background: repeating-conic-gradient(#eee 0% 25%, #fff 0% 50%) 50% / 20px 20px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    canvas { display: block; max-width: 100%; height: auto; }
+    button, input[type="file"] {
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      background: #fff;
+      cursor: pointer;
+    }
+    button:hover { background: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h1>Artisan Stitch Filter — סינון לסטייל רקמת מצליבה</h1>
+
+  <div class="panel">
+    <div class="control">
+      <label for="imageInput">תמונת מקור</label>
+      <input type="file" id="imageInput" accept="image/*">
+    </div>
+    <div class="control">
+      <label for="density">צפיפות תפר (density): <span id="densityVal"></span></label>
+      <input type="range" id="density" min="20" max="200" step="1">
+    </div>
+    <div class="control">
+      <label for="thickness">עובי תפר (thickness): <span id="thicknessVal"></span></label>
+      <input type="range" id="thickness" min="0.5" max="8" step="0.1">
+    </div>
+    <div class="control">
+      <label for="wobble">"רעידה" של התפר (wobble): <span id="wobbleVal"></span></label>
+      <input type="range" id="wobble" min="0" max="1" step="0.01">
+    </div>
+    <div class="control">
+      <label for="paletteSize">מספר צבעים (palette size): <span id="paletteSizeVal"></span></label>
+      <input type="range" id="paletteSize" min="2" max="32" step="1">
+    </div>
+    <div class="control">
+      <button id="randomizeBtn">רענון תפרים (randomize)</button>
+    </div>
+    <div class="control">
+      <button id="downloadBtn">הורדת תוצאה (PNG)</button>
+    </div>
+  </div>
+
+  <div class="canvas-area">
+    <canvas id="canvas"></canvas>
+  </div>
+
+  <script>
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+
+    var values = { density: 104, thickness: 2.8, wobble: 0.44, paletteSize: 15 };
+
+    var sourceImg = new Image();
+    var processedData = null;
+    var palette = [];
+    var wobbleSeeds = [];
+
+    // Re-rendering the full grid is expensive, so coalesce rapid slider
+    // events (e.g. while dragging) into at most one render per frame.
+    var renderRAF = null;
+    function scheduleRender() {
+      if (renderRAF) return;
+      renderRAF = requestAnimationFrame(function () {
+        renderRAF = null;
+        render();
+      });
+    }
+
+    function bindSlider(id, key, formatter) {
+      var input = document.getElementById(id);
+      var label = document.getElementById(id + 'Val');
+      input.value = values[key];
+      label.textContent = formatter ? formatter(values[key]) : values[key];
+      input.addEventListener('input', function () {
+        values[key] = parseFloat(input.value);
+        label.textContent = formatter ? formatter(values[key]) : values[key];
+        if (key === 'density' || key === 'paletteSize') {
+          processImage();
+        }
+        scheduleRender();
+      });
+    }
+
+    bindSlider('density', 'density');
+    bindSlider('thickness', 'thickness', function (v) { return v.toFixed(1); });
+    bindSlider('wobble', 'wobble', function (v) { return v.toFixed(2); });
+    bindSlider('paletteSize', 'paletteSize');
+
+    document.getElementById('imageInput').addEventListener('change', function (e) {
+      var file = e.target.files[0];
+      if (!file) return;
+      var reader = new FileReader();
+      reader.onload = function (ev) {
+        sourceImg.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    document.getElementById('randomizeBtn').addEventListener('click', function () {
+      generateWobbleSeeds();
+      render();
+    });
+
+    document.getElementById('downloadBtn').addEventListener('click', function () {
+      var link = document.createElement('a');
+      link.download = 'dream-stitch.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    sourceImg.onload = function () {
+      processImage();
+      render();
+    };
+    // Default demo image so the tool shows something on first load.
+    sourceImg.crossOrigin = 'anonymous';
+    sourceImg.src = 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400';
+
+    function generateWobbleSeeds() {
+      var gridW = processedData ? processedData.width : values.density;
+      var gridH = processedData ? processedData.height : Math.round(gridW * (sourceImg.naturalHeight / sourceImg.naturalWidth || 1));
+      wobbleSeeds = [];
+      for (var i = 0; i < gridW * gridH * 2; i++) {
+        wobbleSeeds.push(Math.random() - 0.5);
+      }
+    }
+
+    function processImage() {
+      if (!sourceImg.complete || sourceImg.naturalWidth === 0) return;
+
+      var density = values.density;
+      var paletteSize = values.paletteSize;
+
+      var aspect = sourceImg.naturalHeight / sourceImg.naturalWidth;
+      var gridW = density;
+      var gridH = Math.round(density * aspect);
+
+      var exportScale = 1600 / Math.max(gridW, gridH);
+      canvas.width = Math.round(gridW * exportScale);
+      canvas.height = Math.round(gridH * exportScale);
+
+      var procCanvas = document.createElement('canvas');
+      procCanvas.width = gridW;
+      procCanvas.height = gridH;
+      var pCtx = procCanvas.getContext('2d');
+
+      pCtx.drawImage(sourceImg, 0, 0, gridW, gridH);
+      var imgData = pCtx.getImageData(0, 0, gridW, gridH).data;
+
+      var pixels = [];
+      for (var i = 0; i < imgData.length; i += 4) {
+        pixels.push([imgData[i], imgData[i + 1], imgData[i + 2]]);
+      }
+
+      var centroids = [];
+      for (var c = 0; c < paletteSize; c++) {
+        centroids.push(pixels[Math.floor(Math.random() * pixels.length)]);
+      }
+
+      for (var iter = 0; iter < 5; iter++) {
+        var clusters = [];
+        for (var k = 0; k < paletteSize; k++) clusters.push([]);
+        for (var p = 0; p < pixels.length; p++) {
+          var px = pixels[p];
+          var minDist = Infinity;
+          var bestIdx = 0;
+          for (var ci = 0; ci < paletteSize; ci++) {
+            var d = Math.hypot(px[0] - centroids[ci][0], px[1] - centroids[ci][1], px[2] - centroids[ci][2]);
+            if (d < minDist) { minDist = d; bestIdx = ci; }
+          }
+          clusters[bestIdx].push(px);
+        }
+        centroids = clusters.map(function (cluster) {
+          if (cluster.length === 0) return pixels[Math.floor(Math.random() * pixels.length)];
+          var sum = cluster.reduce(function (acc, p) { return [acc[0] + p[0], acc[1] + p[1], acc[2] + p[2]]; }, [0, 0, 0]);
+          return [sum[0] / cluster.length, sum[1] / cluster.length, sum[2] / cluster.length];
+        });
+      }
+
+      palette = centroids.map(function (c) { return 'rgb(' + Math.round(c[0]) + ',' + Math.round(c[1]) + ',' + Math.round(c[2]) + ')'; });
+
+      processedData = {
+        width: gridW,
+        height: gridH,
+        indices: pixels.map(function (px) {
+          var minDist = Infinity;
+          var bestIdx = 0;
+          for (var ci = 0; ci < centroids.length; ci++) {
+            var d = Math.hypot(px[0] - centroids[ci][0], px[1] - centroids[ci][1], px[2] - centroids[ci][2]);
+            if (d < minDist) { minDist = d; bestIdx = ci; }
+          }
+          return bestIdx;
+        })
+      };
+
+      generateWobbleSeeds();
+    }
+
+    function drawAidaCloth(w, h, cellSize) {
+      ctx.save();
+      ctx.globalAlpha = 0.6;
+      ctx.fillStyle = '#fdfaf0';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(0,0,0,0.05)';
+      ctx.lineWidth = 1;
+      for (var x = 0; x <= w; x += cellSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (var y = 0; y <= h; y += cellSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,0.1)';
+      var holeSize = cellSize * 0.15;
+      for (var xx = 0; xx <= w; xx += cellSize) {
+        for (var yy = 0; yy <= h; yy += cellSize) {
+          ctx.fillRect(xx - holeSize / 2, yy - holeSize / 2, holeSize, holeSize);
+        }
+      }
+      ctx.restore();
+    }
+
+    function render() {
+      if (!processedData) return;
+
+      var w = canvas.width;
+      var h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+
+      var gridW = processedData.width;
+      var gridH = processedData.height;
+      var cellSize = w / gridW;
+
+      drawAidaCloth(w, h, cellSize);
+
+      var wobble = values.wobble * cellSize * 0.3;
+      var thickness = values.thickness;
+
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      for (var y = 0; y < gridH; y++) {
+        for (var x = 0; x < gridW; x++) {
+          var idx = processedData.indices[y * gridW + x];
+          var color = palette[idx];
+          var cx = x * cellSize + cellSize / 2;
+          var cy = y * cellSize + cellSize / 2;
+
+          var s = cellSize * 0.35;
+          var seedIdx = (y * gridW + x) * 2;
+          var j1 = wobbleSeeds[seedIdx] * wobble;
+          var j2 = wobbleSeeds[seedIdx + 1] * wobble;
+
+          ctx.strokeStyle = color;
+          ctx.lineWidth = thickness;
+
+          ctx.beginPath();
+          ctx.moveTo(cx - s + j1, cy - s + j2);
+          ctx.lineTo(cx + s - j2, cy + s - j1);
+          ctx.moveTo(cx + s + j2, cy - s + j1);
+          ctx.lineTo(cx - s - j1, cy + s + j2);
+          ctx.stroke();
+        }
+      }
+    }
+  </script>
+</body>
+</html>
