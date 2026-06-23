@@ -1,0 +1,109 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  background: linear-gradient(180deg, #eaf3ff 0%, #c9d6f5 100%);
+}
+
+:global([data-theme="dark"]) .screen {
+  background: radial-gradient(
+    circle at 50% 40%,
+    var(--dark-bg-highlight) 0%,
+    var(--dark-bg) 45%,
+    var(--dark-bg-deep) 100%
+  );
+}
+
+.prompt {
+  position: absolute;
+  left: 50%;
+  top: calc(23.08% - 14px);
+  transform: translateX(-50%);
+  width: 192px;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: #000624;
+  text-align: center;
+}
+
+:global([data-theme="dark"]) .prompt {
+  color: var(--dark-text-primary);
+}
+
+.ambientGlow {
+  position: absolute;
+  left: 50%;
+  top: calc(30.77% + 35px);
+  width: 179px;
+  height: 179px;
+  transform: translate(-50%, 0) scale(1.8);
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(var(--dark-glow-blue-rgb), 0.55) 0%,
+    rgba(var(--dark-glow-blue-rgb), 0.25) 45%,
+    rgba(var(--dark-glow-blue-rgb), 0) 75%
+  );
+  filter: blur(20px);
+  pointer-events: none;
+}
+
+.recordButton {
+  position: absolute;
+  left: 50%;
+  top: calc(30.77% + 35px);
+  transform: translateX(-50%);
+  width: 179px;
+  height: 179px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.recordButtonGlow {
+  position: absolute;
+  inset: -28%;
+}
+
+.recordButtonGlow img {
+  width: 100%;
+  height: 100%;
+}
+
+.typeFallback {
+  position: absolute;
+  left: 50%;
+  top: calc(53.85% + 57px);
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.typeFallbackOr {
+  font-size: 12px;
+  color: rgba(0, 6, 36, 0.5);
+}
+
+:global([data-theme="dark"]) .typeFallbackOr {
+  color: var(--dark-text-secondary);
+}
+
+.typeFallbackLink {
+  font-size: 12px;
+  color: #000624;
+  text-decoration: underline;
+}
+
+:global([data-theme="dark"]) .typeFallbackLink {
+  color: var(--dark-text-primary);
+}

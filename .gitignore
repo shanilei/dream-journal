@@ -1,5 +1,12 @@
 node_modules/
 .env
 images/
+data/
 .DS_Store
 *.js.map
+.next/
+next-env.d.ts
+tsconfig.tsbuildinfo
+*.log
+analysis-*.json
+dream-*.txt

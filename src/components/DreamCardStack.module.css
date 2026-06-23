@@ -1,0 +1,74 @@
+.cardStack {
+  position: absolute;
+  inset: 0;
+}
+
+.dreamCard {
+  position: absolute;
+  width: 53.26%;
+  height: 36.02%;
+  border-radius: 40px;
+  overflow: hidden;
+  cursor: pointer;
+  box-shadow: 0 12px 30px rgba(20, 30, 60, 0.18);
+  transition: left 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    top 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+    transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.4s ease;
+}
+
+.dreamCardFront {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.dreamCardDragging {
+  cursor: grabbing;
+  transition: opacity 0.4s ease;
+}
+
+.dreamCardImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.dreamCardFooter {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 56px;
+  background: rgba(153, 153, 153, 0.3);
+  border-radius: 0 0 30px 30px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 16px;
+}
+
+.moodTag {
+  background: #fff;
+  color: #333;
+  font-size: 12px;
+  line-height: 18px;
+  padding: 2px 7px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.metaGroup {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.metaText {
+  color: #fff;
+  font-size: 12px;
+  line-height: 18px;
+  white-space: nowrap;
+}

@@ -1,0 +1,116 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  background: linear-gradient(
+    to bottom,
+    rgba(234, 243, 255, 0.7),
+    rgba(86, 129, 240, 0.7)
+  );
+}
+
+:global([data-theme="dark"]) .screen {
+  background: radial-gradient(
+    circle at 50% 40%,
+    var(--dark-bg-highlight) 0%,
+    var(--dark-bg) 45%,
+    var(--dark-bg-deep) 100%
+  );
+}
+
+.backButton {
+  position: absolute;
+  left: 31px;
+  top: calc(7.69% - 13px);
+  width: 37px;
+  height: 37px;
+  border-radius: 50%;
+  background: rgba(214, 230, 254, 0.5);
+  color: #000624;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+:global([data-theme="dark"]) .backButton {
+  background: var(--dark-glass);
+  color: var(--dark-text-primary);
+}
+
+.errorText {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 96px;
+  margin: 0;
+  font-size: 13px;
+  color: #c93638;
+  text-align: center;
+}
+
+.inputPill {
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 32px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 32px;
+  padding: 9px 9px 9px 16px;
+}
+
+:global([data-theme="dark"]) .inputPill {
+  background: var(--dark-glass);
+}
+
+.textarea {
+  flex: 1;
+  min-width: 0;
+  resize: none;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(30, 41, 59, 0.9);
+  max-height: 120px;
+  padding: 6px 0;
+}
+
+:global([data-theme="dark"]) .textarea {
+  color: var(--dark-text-primary);
+}
+
+.textarea::placeholder {
+  color: rgba(30, 41, 59, 0.65);
+}
+
+:global([data-theme="dark"]) .textarea::placeholder {
+  color: var(--dark-text-secondary);
+}
+
+.submitButton {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.5);
+  color: #000624;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+}
+
+.submitButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

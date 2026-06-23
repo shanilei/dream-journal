@@ -1,0 +1,210 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #eaf3ff 0%, #c9d6f5 100%);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-bottom: 140px;
+}
+
+:global([data-theme="dark"]) .screen {
+  background: var(--dark-bg-deep);
+}
+
+.glow1,
+.glow2,
+.glow3 {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.glow1 {
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(circle, rgba(var(--dark-glow-blue-rgb), 1) 0%, transparent 70%);
+}
+
+.glow2 {
+  top: 220px;
+  right: -80px;
+  background: radial-gradient(circle, rgba(var(--dark-glow-purple-rgb), 1) 0%, transparent 70%);
+}
+
+.glow3 {
+  top: 440px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(var(--dark-glow-pink-rgb), 1) 0%, transparent 70%);
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  padding: 0 31px;
+}
+
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 48px;
+}
+
+.iconButton {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(214, 230, 254, 0.5);
+  color: #000624;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+:global([data-theme="dark"]) .iconButton {
+  background: var(--dark-glass);
+  color: var(--dark-text-primary);
+}
+
+.title {
+  margin: 24px 0 0;
+  font-size: 36px;
+  font-weight: 400;
+  color: #000624;
+}
+
+:global([data-theme="dark"]) .title {
+  color: var(--dark-text-primary);
+}
+
+.ctaButton {
+  margin-top: 20px;
+  height: 75px;
+  border-radius: 20px;
+  background: #5244f3;
+}
+
+.sectionLabel {
+  margin: 28px 0 12px;
+  font-size: 18px;
+  color: #000624;
+}
+
+:global([data-theme="dark"]) .sectionLabel {
+  color: var(--dark-text-primary);
+}
+
+.goalsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.goalCard,
+.goalCardWide {
+  min-height: 87px;
+  border-radius: 20px;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-size: 14px;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+}
+
+:global([data-theme="dark"]) .goalCard,
+:global([data-theme="dark"]) .goalCardWide {
+  background: var(--dark-glass);
+  color: var(--dark-text-primary);
+}
+
+.goalCard {
+  flex: 1 1 calc(50% - 6px);
+  min-width: 140px;
+}
+
+.goalCardWide {
+  flex: 1 1 100%;
+}
+
+.settingsCard {
+  margin-top: 12px;
+  background: #f5f5f5;
+  border-radius: 20px;
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 0;
+}
+
+.settingLabel {
+  font-size: 13px;
+  color: #000624;
+}
+
+.settingLabelMuted {
+  font-size: 13px;
+  color: rgba(26, 24, 21, 0.85);
+}
+
+.settingValue {
+  font-size: 14px;
+  color: #000624;
+}
+
+.divider {
+  height: 1px;
+  background: var(--dark-divider);
+}
+
+.toggleTrack {
+  position: relative;
+  width: 46px;
+  height: 24px;
+  border-radius: 999px;
+  background: #c4c9d4;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.toggleTrack.toggleOn {
+  background: var(--dark-toggle-on);
+}
+
+.toggleKnob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 6, 36, 0.3);
+  transition: left 0.2s ease;
+}
+
+.toggleTrack.toggleOn .toggleKnob {
+  left: 24px;
+}

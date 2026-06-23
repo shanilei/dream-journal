@@ -1,3 +1,4 @@
+
 import "dotenv/config";
 import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "node:fs";
@@ -69,6 +70,7 @@ export interface DreamAnalysis {
   symbols: string[];
   themes: string[];
   visual_scene?: string; // English description for image generation styles that need it
+  palette?: string[]; // Explicit named colors for abstract image styles — more reliable than deriving color from mood text
 }
 
 export async function analyzeDream(dreamText: string): Promise<DreamAnalysis> {
@@ -112,7 +114,10 @@ async function main() {
 }
 
 // מריצים את main רק כשהקובץ מורץ ישירות (לא כשמייבאים את analyzeDream)
-main().catch((err) => {
-  console.error("שגיאה:", err.message);
-  process.exit(1);
-});
+const isDirectRun = process.argv[1] && import.meta.url === `file://${process.argv[1]}`;
+if (isDirectRun) {
+  main().catch((err) => {
+    console.error("שגיאה:", err.message);
+    process.exit(1);
+  });
+}

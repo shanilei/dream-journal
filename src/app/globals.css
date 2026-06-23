@@ -1,0 +1,51 @@
+:root {
+  /* Dark-mode tokens — shared rules for every screen converted to the dark theme */
+  --dark-bg-highlight: #181f52;
+  --dark-bg: #0a0d24;
+  --dark-bg-deep: #05060f;
+
+  --dark-text-primary: #ffffff;
+  --dark-text-secondary: rgba(255, 255, 255, 0.75);
+
+  --dark-glass: rgba(255, 255, 255, 0.15);
+  --dark-divider: #dfe5eb;
+  --dark-toggle-on: #116dff;
+
+  --dark-glow-blue-rgb: 86, 129, 240;
+  --dark-glow-purple-rgb: 138, 92, 246;
+  --dark-glow-pink-rgb: 224, 85, 122;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-urbanist), -apple-system, BlinkMacSystemFont, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  color: #333;
+  background: #fff;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+p {
+  margin: 0;
+}

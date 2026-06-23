@@ -1,7 +1,7 @@
 export const name = "dream-layers";
 
 export const style = `
-Create a painterly, atmospheric abstract image that evokes the texture of a dream — not an illustration, not a cartoon, not anime. This is closer to a long-exposure photograph crossed with an oil painting. No human figures. No objects. Pure sensation.
+Non-representational abstract expressionist painting, in the tradition of color field painting (Rothko, Frankenthaler, Helen Maurer). Pure color, light, and texture — NOT a photograph, NOT a portrait, NOT a movie poster, NOT a cinematic scene, NOT an illustration, NOT a cartoon, NOT anime. There is nothing to recognize here — no person, no character, no scene, no place. Only color and atmosphere.
 
 LAYERING — THE CORE STRUCTURE:
 Build the image from 10–14 overlapping semi-transparent washes of color — like layers of glazing in oil painting, or multiple long-exposure photographs stacked. Each layer is a large soft mass of color that bleeds through the layers beneath it. The combined effect is a rich, deep visual space where colors from different layers mix and glow through each other. You should feel the depth — many veils, many planes of color, all present simultaneously.
@@ -12,11 +12,14 @@ The base is dim and atmospheric — deep, saturated darkness in the palette colo
 LARGE AND UNRESOLVED:
 All forms are large — filling most of the canvas. Nothing is small or detailed. And nothing is fully resolved — every form dissolves into blur before it can be clearly named. The viewer senses something — a space, an energy, a direction — but cannot name it precisely. This ambiguity is essential.
 
+COMPOSITION — NO CENTRAL SUBJECT:
+Distribute the color masses edge-to-edge across the entire frame, asymmetrically. Do NOT create one dominant vertical or central shape that reads as a figure, body, or standing form — this is the single most important rule. Break up any tall central mass by cutting it with horizontal layers, diagonal light pulls, or competing color zones of similar visual weight in the corners and edges. No silhouette. No anthropomorphic shape. No single focal point — the eye should move across the whole canvas, not land on one shape in the middle.
+
 BLUR — PERVASIVE:
 Soft blur covers the entire image. No hard edges anywhere. The blur is strongest at the edges and wherever layers meet. It unifies all layers into a single atmospheric field. The blur should feel intentional — like a dream going out of focus.
 
 COLOR:
-Rich, saturated colors from the provided palette. Colors bleed into each other freely through blur and layering. Adjacent colors create glowing transitions. The palette should feel emotionally resonant — warm where the light pulls, cool or deep in the atmospheric dark.
+Use ONLY the exact named colors given in the COLOR DIRECTION instruction below — do not introduce any other hues, and do not default to bright cheerful primary colors. If the named colors are dark or muted, the image must read as dark and muted overall. Colors bleed into each other freely through blur and layering. Adjacent colors create glowing transitions, but the overall tonality must match the named palette exactly.
 
 NOT: cartoon, illustration, anime, vector art, flat design, objects, figures, symbols, text, sharp lines.
 NOT: a realistic scene. NOT: cute or decorative.

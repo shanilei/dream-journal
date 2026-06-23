@@ -1,0 +1,141 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #5681f0;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 70% 45% at 50% 22%,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(86, 129, 240, 0) 70%
+  );
+}
+
+.logo {
+  position: absolute;
+  left: 50%;
+  top: calc(15.38% - 1px);
+  transform: translateX(-50%);
+  width: 90%;
+  text-align: center;
+  margin: 0;
+  font-family: var(--font-urbanist), sans-serif;
+  font-weight: 800;
+  font-size: 68px;
+  line-height: 1.1;
+  color: #fff;
+  filter: blur(8px);
+  letter-spacing: 1px;
+}
+
+.card {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 106px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 10px;
+  padding: 16px 24px;
+  overflow: hidden;
+  transition: opacity 0.25s ease;
+}
+
+.cardProminent {
+  left: calc(12.5% + 30px);
+  top: calc(53.85% + 46px);
+  width: 223px;
+}
+
+.cardRightPeek {
+  left: calc(75% + 31px);
+  top: calc(61.54% + 54px);
+  width: 223px;
+}
+
+.cardLeftPeek {
+  left: -163px;
+  top: calc(61.54% + 54px);
+  width: 223px;
+}
+
+.cardNum {
+  flex-shrink: 0;
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+.cardLabel {
+  font-size: 22px;
+  font-weight: 600;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.controls {
+  position: absolute;
+  left: 50%;
+  bottom: calc(15.38% - 16px);
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 70px;
+  height: 75px;
+  width: min(347px, 88%);
+  padding: 4px 10px;
+  background: rgba(217, 217, 217, 0.2);
+  border-radius: 40px;
+  justify-content: space-between;
+}
+
+.navBtn {
+  flex-shrink: 0;
+  width: 55px;
+  height: 55px;
+  border-radius: 33.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backBtn {
+  background: rgba(214, 230, 254, 0.5);
+}
+
+.backBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.nextBtn {
+  background: rgba(218, 251, 113, 0.5);
+  cursor: pointer;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transition: background 0.2s ease;
+}
+
+.dotActive {
+  background: #fff;
+}

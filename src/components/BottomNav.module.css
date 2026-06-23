@@ -1,0 +1,37 @@
+.nav {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 430px;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 10px 24px;
+}
+
+.circle {
+  position: relative;
+  width: 67px;
+  height: 67px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.circle.active {
+  background: #fff;
+}
+
+.iconLayer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

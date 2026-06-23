@@ -1,0 +1,117 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  background: linear-gradient(180deg, #d0d9f5 0%, #fffdf5 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  overflow: hidden;
+}
+
+:global([data-theme="dark"]) .screen {
+  background: radial-gradient(circle at 0% 30%, rgba(86, 129, 240, 0.35), transparent 40%),
+    radial-gradient(circle at 60% 0%, rgba(138, 92, 246, 0.3), transparent 40%),
+    radial-gradient(circle at 100% 30%, rgba(86, 129, 240, 0.3), transparent 40%),
+    var(--dark-bg-deep);
+}
+
+.orbWrap {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbGlow {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(60, 92, 240, 0.95) 0%,
+    rgba(60, 92, 240, 0.55) 40%,
+    rgba(60, 92, 240, 0) 75%
+  );
+  filter: blur(14px);
+  animation: orbPulse 2.6s ease-in-out infinite;
+}
+
+.orbRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: #4f6df0;
+  animation: orbRotate 18s linear infinite;
+}
+
+:global([data-theme="dark"]) .orbRing {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.messageRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #333;
+  animation: messageIn 0.4s ease;
+}
+
+:global([data-theme="dark"]) .messageRow {
+  color: var(--dark-text-primary);
+}
+
+.messageText {
+  margin: 0;
+  font-size: 12px;
+  color: inherit;
+  white-space: nowrap;
+}
+
+@keyframes orbPulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
+@keyframes orbRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes messageIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
