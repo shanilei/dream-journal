@@ -68,16 +68,6 @@
   cursor: pointer;
 }
 
-.recordButtonGlow {
-  position: absolute;
-  inset: -28%;
-}
-
-.recordButtonGlow img {
-  width: 100%;
-  height: 100%;
-}
-
 .typeFallback {
   position: absolute;
   left: 50%;

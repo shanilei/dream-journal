@@ -13,6 +13,7 @@ type DreamResult = {
   mood: string;
   summaryText: string;
   symbols: string[];
+  dreamText: string;
 };
 
 function formatDateLabel(): string {
@@ -54,6 +55,7 @@ export default function TypeDreamPage() {
         mood: data.mood,
         summaryText: summarize(data.analysis.themes ?? []),
         symbols: (data.analysis.symbols ?? []).slice(0, 3).map(shortSymbol),
+        dreamText: text,
       });
       setStatus("result");
     } catch {

@@ -8,6 +8,8 @@ export interface DreamEntry {
   mood: string;
   summaryText: string;
   symbols: string[];
+  imagePrompt?: string;
+  dreamText?: string;
 }
 
 const DATA_DIR = join(process.cwd(), "data");

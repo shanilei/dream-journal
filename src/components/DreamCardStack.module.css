@@ -36,6 +36,16 @@
   pointer-events: none;
 }
 
+.dreamCardFrost {
+  position: absolute;
+  inset: 0;
+  border-radius: 40px;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.16);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+}
+
 .dreamCardFooter {
   position: absolute;
   left: 0;

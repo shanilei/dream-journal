@@ -8,13 +8,11 @@
     "build": "next build",
     "start": "next start",
     "analyze": "tsx src/analyze.ts",
-    "generate-image": "tsx src/generate-image.ts",
-    "apply-stitch": "tsx src/apply-stitch.ts"
+    "generate-image": "tsx src/generate-image.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.104.1",
     "@google/genai": "^2.8.0",
-    "@napi-rs/canvas": "^1.0.0",
     "dotenv": "^17.4.2",
     "next": "^16.2.9",
     "react": "^19.2.7",

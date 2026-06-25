@@ -6,6 +6,7 @@ import styles from "./record.module.css";
 import BottomNav from "@/components/BottomNav";
 import DreamLoadingScreen from "@/components/DreamLoadingScreen";
 import DreamResultScreen from "@/components/DreamResultScreen";
+import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 
 const MOCK_LOADING_MS = 4800;
 
@@ -53,14 +54,8 @@ export default function RecordPage() {
         onClick={() => setStatus(isRecording ? "loading" : "recording")}
         aria-pressed={isRecording}
         aria-label="Record dream"
-        style={{
-          animation: isRecording ? "lucid-pulse 1.4s ease-in-out infinite" : undefined,
-        }}
       >
-        <span className={styles.recordButtonGlow}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/record-blob.svg" alt="" />
-        </span>
+        <VoiceRecordCircle isRecording={isRecording} onPermissionDenied={() => setStatus("idle")} />
       </button>
 
       <div className={styles.typeFallback}>
@@ -71,13 +66,6 @@ export default function RecordPage() {
       </div>
 
       <BottomNav active="record" />
-
-      <style>{`
-        @keyframes lucid-pulse {
-          0%, 100% { transform: translate(-50%, 0) scale(1); }
-          50% { transform: translate(-50%, 0) scale(1.06); }
-        }
-      `}</style>
     </div>
   );
 }

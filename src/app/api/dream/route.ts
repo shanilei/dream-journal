@@ -29,11 +29,10 @@ export async function POST(req: NextRequest) {
     mkdirSync(outDir, { recursive: true });
     const outputPath = join(outDir, `${randomUUID()}.png`);
 
-    const { rawPath } = await generateImage(
+    const { rawPath, prompt } = await generateImage(
       analysis,
       outputPath,
-      true,
-      "phantom-blur",
+      "surreal-minimalist",
       undefined,
       "gemini"
     );
@@ -52,6 +51,8 @@ export async function POST(req: NextRequest) {
       mood,
       summaryText,
       symbols,
+      imagePrompt: prompt,
+      dreamText,
     });
 
     return NextResponse.json({

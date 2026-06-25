@@ -10,6 +10,7 @@ export default function DreamDetailClient({
   mood,
   summaryText,
   symbols,
+  dreamText,
 }: {
   imageUrl: string;
   dateLabel: string;
@@ -17,6 +18,7 @@ export default function DreamDetailClient({
   mood: string;
   summaryText: string;
   symbols: string[];
+  dreamText?: string;
 }) {
   const router = useRouter();
 
@@ -28,6 +30,7 @@ export default function DreamDetailClient({
       mood={mood}
       summaryText={summaryText}
       symbols={symbols}
+      dreamText={dreamText}
       onBack={() => router.push("/")}
     />
   );

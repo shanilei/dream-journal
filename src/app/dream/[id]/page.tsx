@@ -32,6 +32,7 @@ export default async function DreamDetailPage({
       mood={dream.mood}
       summaryText={dream.summaryText}
       symbols={dream.symbols.slice(0, 3).map(shortSymbol)}
+      dreamText={dream.dreamText}
     />
   );
 }

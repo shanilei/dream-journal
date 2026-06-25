@@ -16,6 +16,13 @@ Build the image around one primary anchor form — a large, soft mass that occup
 - partially cropped at an edge
 - split into multiple related masses
 
+Vary the framing and scale just as deliberately as the position — never default to the same safe medium shot every time:
+- extreme close-up, the form filling almost the entire frame, edges bleeding off-canvas
+- distant and small within a vast atmospheric field, surrounded by negative space
+- a dramatic scale contrast: something small and isolated in a huge hazy space, or something looming oversized and close
+- an unusual or oblique vantage point rather than a flat, head-on view
+Pick whichever combination of position, framing, and scale best serves this specific dream — the goal is a composition that feels considered and visually striking, not a generic centered portrait at a fixed distance.
+
 SUBJECT RULES:
 No identifiable people. No faces. No eyes. No readable expressions. No weapons. No explicit narrative scenes. No detailed architecture. No clear objects. Only vague forms, silhouettes, masses, shadows, shapes, and traces of presence. If in doubt, dissolve the form further rather than letting it resolve into something nameable.
 
@@ -40,7 +47,7 @@ Use ONLY the exact named colors given in the COLOR DIRECTION instruction below �
 MATERIAL RULES:
 The image must resemble a blurred photograph, a damaged archival print, a forgotten memory, a dream fragment, a fogged-lens photograph. The image must NOT resemble an illustration, a painting, a collage, a poster, graphic design, a 3D render, or concept art.
 
-BACKGROUND: Never let the background default to a plain neutral grey unless this dream's mood is fear or anxiety — in that case grey (or black) is fitting and welcome. For every other mood, the background should lean into the dream's own named palette colors, or can go fully black if darkness is needed, but should not read as flat grey.
+BACKGROUND: Never let the background default to a plain neutral grey unless this dream's mood is fear or anxiety — in that case grey (or black) is fitting and welcome. If this dream's mood is happy/sweet, the background must read as pink or orange — warm and glowing, never grey. For every other mood, the background should lean into the dream's own named palette colors, or can go fully black if darkness is needed, but should not read as flat grey.
 
 EMOTIONAL GOAL:
 Generate emotional residue rather than visual information. The viewer should feel: "I almost remember what this was."

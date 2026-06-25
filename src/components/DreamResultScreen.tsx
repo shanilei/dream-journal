@@ -3,14 +3,46 @@
 import { useEffect, useRef, useState } from "react";
 import styles from "./DreamResultScreen.module.css";
 import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
+import BottomNav from "./BottomNav";
 
-function getFiveWordCaption(text: string): string {
+const CAPTION_MAX_WORDS = 7;
+
+function getCaptionWords(text: string, maxWords: number): string {
   return text
     .replace(/[.,!?]/g, "")
     .split(/\s+/)
     .filter(Boolean)
-    .slice(0, 5)
+    .slice(0, maxWords)
     .join(" ");
+}
+
+function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
+  const [expanded, setExpanded] = useState(false);
+  const [overflowing, setOverflowing] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    const el = textRef.current;
+    if (el) setOverflowing(el.scrollHeight > el.clientHeight + 1);
+  }, [text]);
+
+  return (
+    <div className={styles.collapsibleBlock}>
+      <p
+        ref={textRef}
+        className={`${styles.bodyText} ${expanded ? "" : styles.bodyTextClamped} ${
+          dark ? styles.bodyTextDark : ""
+        }`}
+      >
+        {text}
+      </p>
+      {(overflowing || expanded) && (
+        <button type="button" className={styles.readMoreBtn} onClick={() => setExpanded((v) => !v)}>
+          {expanded ? "Read less" : "Read more"}
+        </button>
+      )}
+    </div>
+  );
 }
 
 export default function DreamResultScreen({
@@ -20,6 +52,7 @@ export default function DreamResultScreen({
   mood,
   summaryText,
   symbols,
+  dreamText,
   onBack,
 }: {
   imageUrl: string;
@@ -28,11 +61,13 @@ export default function DreamResultScreen({
   mood: string;
   summaryText: string;
   symbols: string[];
+  dreamText?: string;
   onBack: () => void;
 }) {
   const imgRef = useRef<HTMLImageElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
-  const captionText = getFiveWordCaption(summaryText);
+  const [showPrintModal, setShowPrintModal] = useState(false);
+  const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
 
   function sampleBrightness() {
     const img = imgRef.current;
@@ -62,6 +97,11 @@ export default function DreamResultScreen({
     if (imgRef.current?.complete) sampleBrightness();
   }, [imageUrl]);
 
+  function handlePrint() {
+    setShowPrintModal(false);
+    window.print();
+  }
+
   return (
     <div className={styles.screen}>
       <div className={styles.topBar}>
@@ -72,7 +112,12 @@ export default function DreamResultScreen({
           <button type="button" className={styles.iconButton} aria-label="Share">
             <ShareIcon size={16} color="currentColor" />
           </button>
-          <button type="button" className={styles.iconButton} aria-label="Print">
+          <button
+            type="button"
+            className={styles.iconButton}
+            aria-label="Print"
+            onClick={() => setShowPrintModal(true)}
+          >
             <PrinterIcon size={16} color="currentColor" />
           </button>
         </div>
@@ -89,12 +134,33 @@ export default function DreamResultScreen({
               alt="Generated dream artwork"
               onLoad={sampleBrightness}
             />
+            <div className={styles.imageFrost} />
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
-            {captionText && (
+            {(captionText || dateLabel) && (
               <div className={styles.captionOverlay}>
-                <p className={`${styles.captionText} ${textColor === "black" ? styles.captionTextDark : ""}`}>
-                  {captionText}
-                </p>
+                {captionText && (
+                  <p className={`${styles.captionText} ${textColor === "black" ? styles.captionTextDark : ""}`}>
+                    {captionText}
+                  </p>
+                )}
+                <div className={styles.captionMeta}>
+                  <span
+                    className={`${styles.captionMetaText} ${
+                      textColor === "black" ? styles.captionMetaTextDark : ""
+                    }`}
+                  >
+                    {dateLabel}
+                  </span>
+                  {timeLabel && (
+                    <span
+                      className={`${styles.captionMetaText} ${
+                        textColor === "black" ? styles.captionMetaTextDark : ""
+                      }`}
+                    >
+                      {timeLabel}
+                    </span>
+                  )}
+                </div>
               </div>
             )}
           </div>
@@ -112,21 +178,48 @@ export default function DreamResultScreen({
         {summaryText && (
           <div className={styles.block}>
             <p className={styles.blockHeading}>What does it say?</p>
-            <p className={styles.bodyText}>{summaryText}</p>
+            <CollapsibleText text={summaryText} dark={false} />
           </div>
         )}
 
         {symbols.length > 0 && (
           <div className={styles.block}>
             <p className={styles.blockHeading}>Symbols in your dream</p>
-            {symbols.map((symbol, i) => (
-              <p key={i} className={styles.bodyText}>
-                {symbol}
-              </p>
-            ))}
+            <div className={styles.symbolsRow}>
+              {symbols.map((symbol, i) => (
+                <span key={i} className={styles.symbolChip}>
+                  {symbol}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {dreamText && (
+          <div className={styles.block}>
+            <p className={styles.blockHeading}>The dream itself</p>
+            <CollapsibleText text={dreamText} dark={false} />
           </div>
         )}
       </div>
+
+      <BottomNav active="dreams" />
+
+      {showPrintModal && (
+        <div className={styles.printModalOverlay} onClick={() => setShowPrintModal(false)}>
+          <div className={styles.printModalCard} onClick={(e) => e.stopPropagation()}>
+            <p className={styles.printModalTitle}>To print your dream?</p>
+            <div className={styles.printModalActions}>
+              <button type="button" className={styles.printModalCancel} onClick={() => setShowPrintModal(false)}>
+                Cancel
+              </button>
+              <button type="button" className={styles.printModalConfirm} onClick={handlePrint}>
+                Print
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

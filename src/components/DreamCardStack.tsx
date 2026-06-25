@@ -111,6 +111,7 @@ export default function DreamCardStack({ cards }: { cards?: DreamCard[] }) {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className={styles.dreamCardImg} src={card.image} alt="" draggable={false} />
+            <div className={styles.dreamCardFrost} />
             <div className={styles.dreamCardFooter}>
               <span className={styles.moodTag}>{card.mood}</span>
               <span className={styles.metaGroup}>

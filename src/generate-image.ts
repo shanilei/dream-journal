@@ -3,7 +3,6 @@ import { GoogleGenAI } from "@google/genai";
 import { writeFileSync, readFileSync, mkdirSync, existsSync } from "node:fs";
 import { dirname, basename, extname, join } from "node:path";
 import type { DreamAnalysis } from "./analyze";
-import { applyStitchEffect } from "./stitch";
 import { style as botanicalPrintStyle } from "./styles/botanical-print";
 import { style as invertGlowStyle } from "./styles/invert-glow";
 import { style as happyGlowStyle } from "./styles/happy-glow";
@@ -22,6 +21,7 @@ import { style as dreamTopographyStyle } from "./styles/dream-topography";
 import { style as dreamFragmentsStyle } from "./styles/dream-fragments";
 import { style as dreamCollageStyle } from "./styles/dream-collage";
 import { style as lucidSystemStyle } from "./styles/lucid-system";
+import { style as surrealMinimalistStyle } from "./styles/surreal-minimalist";
 
 const ai = new GoogleGenAI({}); // קורא את GEMINI_API_KEY מהסביבה
 
@@ -47,6 +47,7 @@ const STYLES: Record<string, string> = {
   "dream-fragments": dreamFragmentsStyle,
   "dream-collage": dreamCollageStyle,
   "lucid-system": lucidSystemStyle,
+  "surreal-minimalist": surrealMinimalistStyle,
 };
 
 
@@ -90,6 +91,13 @@ const LUCID_SYSTEM_COLORS: Record<ProfileKey, string> = {
   sweet: "peach, coral, cream, gold, blush pink, soft apricot",
   confused: "muted blue, lavender, beige, grey, dusty mauve, faded teal",
   fear: "charcoal, navy, olive, burgundy, rust, slate grey",
+};
+
+// רקע שטוח וצבעוני לכל מצב-רוח, לפי "SURREAL MINIMALIST & ANALOG DREAMSCAPE" — תואם לתמונות הרפרנס שהמשתמש שלח
+const SURREAL_MINIMALIST_COLORS: Record<ProfileKey, string> = {
+  sweet: "a warm sunset gradient of glowing pink and orange, soft golden light",
+  confused: "a flat, deep midnight blue, almost black at its edges",
+  fear: "a flat, intensely saturated crimson red",
 };
 
 // מילות מפתח לזיהוי רגש דומיננטי → פרופיל
@@ -150,6 +158,8 @@ function buildPrompt(analysis: DreamAnalysis, profile: ProfileKey, styleText: st
       ? `Translate this dream into 4–8 emotional/sensory associations per the DREAM TRANSLATION METHOD above — never the literal event. Draw associations from these symbols and themes without depicting any of them directly: ${elements || "the dream's symbols"}; ${analysis.themes?.join(", ") || "dreamlike energy"}. Each association becomes one incomplete, partially-hidden visual layer.`
       : styleName === "lucid-system"
       ? `Identify the Anchor, the Emotional Field, and the Intrusion for this specific dream — these elements and themes are emotional raw material only, never a literal object, scene, or recognizable equipment to draw: ${elements || "the dream's symbols"}. Anchor (the emotional center): build it from several overlapping layered fragments and patches that together suggest a feeling — never a single clean shape, and never a literal illustration of any specific symbol listed above (e.g. no medical equipment, no literal hospital or military iconography, no crosses, no vehicles, no architecture). Emotional Field (secondary shapes spreading the atmosphere): drawn from ${analysis.themes?.join(", ") || "the dream's emotional atmosphere"}. Intrusion (the force that disrupts, transforms, threatens, attracts, divides, or overwhelms the Anchor): infer it from the tension between the Anchor and the dream's themes. Choose ONE dominant shape family (circles and rounded forms; particles and repetition; arches and portals; waves and flowing forms; fractures and shards; or clouds and soft masses) that best fits this dream, and let it drive most of the image.`
+      : styleName === "surreal-minimalist"
+      ? `Choose the single most visually striking element from these dream symbols/locations and render it literally and sharply: ${elements || analysis.themes?.join(", ") || "the dream's central image"}. Place it in a magical-realism context — dramatically scaled up or down, or set somewhere it would not normally belong — against the flat color-blocked backdrop. If a human or animal figure naturally belongs in this scene, render ONLY that figure with directional motion blur or a glowing dissolve silhouette — never a sharp, identifiable face — while every other element in the frame stays crisp and in focus.`
       : ABSTRACT_STYLES.has(styleName)
       ? `Do NOT render any of these as literal recognizable objects or figures: ${elements || "the dream's symbols"}. Let them influence ONLY the weight, density, and rhythm of the abstract shapes/patches — denser and heavier for tension, lighter and looser for ease. The sensation to evoke: ${analysis.themes?.join(", ") || "dreamlike energy"}. Every shape stays an abstract patch or mass, never a named thing.`
       : `Incorporate these specific dream elements as glowing, symbolic, dreamlike forms within the composition — each rendered with its own color glow stroke, layered and overlapping at different scales and blur depths: ${elements || "(none specified)"}.`;
@@ -167,6 +177,8 @@ function buildPrompt(analysis: DreamAnalysis, profile: ProfileKey, styleText: st
       ? `COLOR RULES: Use exactly these four to six named colors as the dominant palette, chosen by emotion, not objects — ${LUCID_SYSTEM_COLORS[profile]}. No other hues, no rainbow palette.`
       : styleName === "riso-panels"
       ? `MOOD LEAN: Stay strictly within the established coral/orange/mustard/teal family — do not introduce other hues. Lean warmer (more coral/mustard) or cooler (more teal) based on this dream's mood: ${analysis.themes?.join(", ") || "dreamlike energy"}.`
+      : styleName === "surreal-minimalist"
+      ? `FLAT BACKDROP COLOR: The sky or backdrop must be ${SURREAL_MINIMALIST_COLORS[profile]} — a bold, unbroken, color-blocked expanse. The foreground subject and environment should contrast cleanly against it, never blend in.`
       : ABSTRACT_STYLES.has(styleName)
       ? `COLOR DIRECTION: Use exactly these named colors as the dominant palette — ${analysis.palette?.length ? analysis.palette.join(", ") : ABSTRACT_MOOD_COLORS[profile]}. No named objects, pure color sensation only.`
       : PROFILES[profile];
@@ -191,15 +203,13 @@ ${elementsInstruction}
 }
 
 export interface GeneratedImagePaths {
-  rawPath: string; // הקולאז' הנקי מ-Gemini, ללא אפקט רקמה
-  stitchedPath: string; // אותה תמונה עם אפקט הרקמה
+  rawPath: string; // הקולאז' שנוצר מ-Gemini
+  prompt: string; // הפרומפט המלא שנשלח למודל ליצירת התמונה
 }
 
-// שתי הגרסאות נשמרות כדי לאפשר ב-UI "סליידר" בין הקולאז' הנקי לגרסה הרקומה
 export async function generateImage(
   analysis: DreamAnalysis,
   outputPath: string,
-  rawOnly = false,
   styleName = "botanical-print",
   refImagePath?: string,
   engine: "gemini" | "imagen" | "stability" = "gemini",
@@ -216,7 +226,6 @@ export async function generateImage(
   const ext = extname(outputPath);
   const base = join(dirname(outputPath), basename(outputPath, ext));
   const rawPath = `${base}-raw${ext}`;
-  const stitchedPath = `${base}-stitched${ext}`;
 
   if (engine === "stability") {
     const negativePrompt = ABSTRACT_STYLES.has(styleName)
@@ -264,12 +273,7 @@ export async function generateImage(
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(rawPath, rawImage);
     console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
-    if (!rawOnly) {
-      const stitched = await applyStitchEffect(rawImage);
-      writeFileSync(stitchedPath, stitched);
-      console.log(`התמונה עם אפקט הרקמה נשמרה ב: ${stitchedPath}`);
-    }
-    return { rawPath, stitchedPath: rawOnly ? "" : stitchedPath };
+    return { rawPath, prompt };
   }
 
   if (engine === "imagen") {
@@ -286,12 +290,7 @@ export async function generateImage(
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(rawPath, rawImage);
     console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
-    if (!rawOnly) {
-      const stitched = await applyStitchEffect(rawImage);
-      writeFileSync(stitchedPath, stitched);
-      console.log(`התמונה עם אפקט הרקמה נשמרה ב: ${stitchedPath}`);
-    }
-    return { rawPath, stitchedPath: rawOnly ? "" : stitchedPath };
+    return { rawPath, prompt };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -328,33 +327,26 @@ export async function generateImage(
       writeFileSync(rawPath, rawImage);
       console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
 
-      if (!rawOnly) {
-        const stitched = await applyStitchEffect(rawImage);
-        writeFileSync(stitchedPath, stitched);
-        console.log(`התמונה עם אפקט הרקמה נשמרה ב: ${stitchedPath}`);
-      }
-
-      return { rawPath, stitchedPath: rawOnly ? "" : stitchedPath };
+      return { rawPath, prompt };
     }
   }
   throw new Error("המודל לא החזיר תמונה");
 }
 
 // ===== הרצה מהטרמינל =====
-// שימוש: npm run generate-image -- --file analysis.json [--out images/dream.png] [--style invert-glow] [--raw-only]
+// שימוש: npm run generate-image -- --file analysis.json [--out images/dream.png] [--style invert-glow]
 async function main() {
   const args = process.argv.slice(2);
   const fileFlag = args.indexOf("--file");
 
   if (fileFlag === -1 || !args[fileFlag + 1]) {
-    console.error(`שימוש:\n  npm run generate-image -- --file analysis.json [--out images/dream.png] [--style ${Object.keys(STYLES).join("|")}] [--raw-only]`);
+    console.error(`שימוש:\n  npm run generate-image -- --file analysis.json [--out images/dream.png] [--style ${Object.keys(STYLES).join("|")}]`);
     process.exit(1);
   }
 
   const analysis: DreamAnalysis = JSON.parse(readFileSync(args[fileFlag + 1], "utf-8"));
   const outFlag = args.indexOf("--out");
   const outputPath = outFlag !== -1 && args[outFlag + 1] ? args[outFlag + 1] : "images/dream.png";
-  const rawOnly = args.includes("--raw-only");
   const styleFlag = args.indexOf("--style");
   const styleName = styleFlag !== -1 && args[styleFlag + 1] ? args[styleFlag + 1] : "botanical-print";
   const refFlag = args.indexOf("--ref");
@@ -372,7 +364,7 @@ async function main() {
     process.exit(1);
   }
 
-  await generateImage(analysis, outputPath, rawOnly, styleName, refImagePath, engine, seed, cfgScale);
+  await generateImage(analysis, outputPath, styleName, refImagePath, engine, seed, cfgScale);
 }
 
 // מריצים את main רק כשהקובץ מורץ ישירות (לא כשמייבאים את generateImage)
