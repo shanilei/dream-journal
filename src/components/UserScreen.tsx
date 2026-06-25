@@ -6,7 +6,12 @@ import BottomNav from "./BottomNav";
 import { UserIcon, BellIcon } from "./Icons";
 import { useTheme } from "./ThemeProvider";
 
-const GOALS = ["Analysis", "Interpretation", "Analysis"];
+const STATS = [
+  { value: "32", label: "This month" },
+  { value: "12 Days in a row", label: "Dream Streak" },
+  { value: "Water", label: "Most Common Symbol" },
+  { value: "Anxious", label: "Average Mood" },
+];
 
 function Toggle({
   checked,
@@ -46,22 +51,21 @@ export default function UserScreen() {
       <div className={styles.content}>
         <div className={styles.topBar}>
           <button type="button" className={styles.iconButton} aria-label="Profile">
-            <UserIcon size={20} color="currentColor" />
+            <UserIcon size={16} color="currentColor" />
           </button>
           <button type="button" className={styles.iconButton} aria-label="Notifications">
-            <BellIcon size={20} color="currentColor" />
+            <BellIcon size={16} color="currentColor" />
           </button>
         </div>
 
         <p className={styles.title}>User Dreams</p>
 
-        <div className={styles.ctaButton} />
-
         <p className={styles.sectionLabel}>My goals</p>
         <div className={styles.goalsGrid}>
-          {GOALS.map((goal, i) => (
-            <div key={i} className={i < 2 ? styles.goalCard : styles.goalCardWide}>
-              {goal}
+          {STATS.map((stat, i) => (
+            <div key={i} className={styles.goalCard}>
+              <p className={styles.goalValue}>{stat.value}</p>
+              <p className={styles.goalLabel}>{stat.label}</p>
             </div>
           ))}
         </div>
@@ -71,12 +75,6 @@ export default function UserScreen() {
           <div className={styles.settingRow}>
             <span className={styles.settingLabel}>Dark mood</span>
             <Toggle checked={darkMood} onChange={toggleTheme} label="Dark mood" />
-          </div>
-          <div className={styles.divider} />
-
-          <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>Recording length</span>
-            <span className={styles.settingValue}>15 sec</span>
           </div>
           <div className={styles.divider} />
 
