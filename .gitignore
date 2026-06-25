@@ -11,3 +11,5 @@ tsconfig.tsbuildinfo
 analysis-*.json
 dream-*.txt
 supabase/.temp/
+.vercel
+.env*
