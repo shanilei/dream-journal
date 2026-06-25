@@ -16,6 +16,14 @@ function getCaptionWords(text: string, maxWords: number): string {
     .join(" ");
 }
 
+type CaptionLayout = "right" | "bottom";
+
+function pickCaptionLayout(seed: string): CaptionLayout {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  return hash % 4 === 0 ? "bottom" : "right";
+}
+
 function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
@@ -68,6 +76,7 @@ export default function DreamResultScreen({
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
   const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
+  const captionLayout = pickCaptionLayout(imageUrl);
 
   function sampleBrightness() {
     const img = imgRef.current;
@@ -137,7 +146,11 @@ export default function DreamResultScreen({
             <div className={styles.imageFrost} />
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
             {(captionText || dateLabel) && (
-              <div className={styles.captionOverlay}>
+              <div
+                className={`${styles.captionOverlay} ${
+                  captionLayout === "right" ? styles.captionOverlayRight : styles.captionOverlayBottom
+                }`}
+              >
                 {captionText && (
                   <p className={`${styles.captionText} ${textColor === "black" ? styles.captionTextDark : ""}`}>
                     {captionText}

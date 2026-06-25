@@ -15,12 +15,8 @@ export function ChevronRightIcon({ size = 24, color = "#000624" }: { size?: numb
 export function AddAIIcon({ size = 24, color = "#fff" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="3" width="14" height="14" rx="4" stroke={color} strokeWidth={1.6} />
-      <path d="M10 7v6M7 10h6" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
-      <path
-        d="M19 15.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9.9-2.1z"
-        fill={color}
-      />
+      <rect x="5" y="5" width="14" height="14" rx="4" stroke={color} strokeWidth={1.6} />
+      <path d="M12 9v6M9 12h6" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
     </svg>
   );
 }
