@@ -1,5 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
+import { supabase } from "./supabase";
 
 export interface DreamEntry {
   id: string;
@@ -12,29 +11,55 @@ export interface DreamEntry {
   dreamText?: string;
 }
 
-const DATA_DIR = join(process.cwd(), "data");
-const DATA_FILE = join(DATA_DIR, "dreams.json");
-
-function readAll(): DreamEntry[] {
-  if (!existsSync(DATA_FILE)) return [];
-  try {
-    return JSON.parse(readFileSync(DATA_FILE, "utf-8"));
-  } catch {
-    return [];
-  }
+interface DreamRow {
+  id: string;
+  created_at: string;
+  image_url: string;
+  mood: string;
+  summary_text: string;
+  symbols: string[];
+  image_prompt: string | null;
+  dream_text: string | null;
 }
 
-export function saveDream(entry: DreamEntry): void {
-  mkdirSync(DATA_DIR, { recursive: true });
-  const all = readAll();
-  all.push(entry);
-  writeFileSync(DATA_FILE, JSON.stringify(all, null, 2));
+function fromRow(row: DreamRow): DreamEntry {
+  return {
+    id: row.id,
+    createdAt: row.created_at,
+    imageUrl: row.image_url,
+    mood: row.mood,
+    summaryText: row.summary_text,
+    symbols: row.symbols ?? [],
+    imagePrompt: row.image_prompt ?? undefined,
+    dreamText: row.dream_text ?? undefined,
+  };
 }
 
-export function listDreams(): DreamEntry[] {
-  return readAll().sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+export async function saveDream(entry: DreamEntry): Promise<void> {
+  const { error } = await supabase.from("dreams").insert({
+    id: entry.id,
+    created_at: entry.createdAt,
+    image_url: entry.imageUrl,
+    mood: entry.mood,
+    summary_text: entry.summaryText,
+    symbols: entry.symbols,
+    image_prompt: entry.imagePrompt ?? null,
+    dream_text: entry.dreamText ?? null,
+  });
+  if (error) throw error;
 }
 
-export function getDream(id: string): DreamEntry | undefined {
-  return readAll().find((dream) => dream.id === id);
+export async function listDreams(): Promise<DreamEntry[]> {
+  const { data, error } = await supabase
+    .from("dreams")
+    .select("*")
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return (data ?? []).map(fromRow);
+}
+
+export async function getDream(id: string): Promise<DreamEntry | undefined> {
+  const { data, error } = await supabase.from("dreams").select("*").eq("id", id).maybeSingle();
+  if (error) throw error;
+  return data ? fromRow(data) : undefined;
 }

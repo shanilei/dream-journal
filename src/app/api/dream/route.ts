@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mkdirSync } from "node:fs";
-import { join, relative } from "node:path";
+import { mkdirSync, readFileSync, rmSync } from "node:fs";
+import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { analyzeDream } from "@/analyze";
 import { generateImage, pickProfile } from "@/generate-image";
 import { saveDream } from "@/dreams-store";
+import { supabase } from "@/supabase";
 
 export const runtime = "nodejs";
 
@@ -25,7 +26,7 @@ export async function POST(req: NextRequest) {
   try {
     const analysis = await analyzeDream(dreamText);
 
-    const outDir = join(process.cwd(), "public", "images", "generated");
+    const outDir = join(process.env.TMPDIR ?? "/tmp", "dream-journal");
     mkdirSync(outDir, { recursive: true });
     const outputPath = join(outDir, `${randomUUID()}.png`);
 
@@ -37,14 +38,21 @@ export async function POST(req: NextRequest) {
       "gemini"
     );
 
-    const finalPath = rawPath;
-    const publicDir = join(process.cwd(), "public");
-    const imageUrl = "/" + relative(publicDir, finalPath).split("\\").join("/");
+    const imageBuffer = readFileSync(rawPath);
+    rmSync(rawPath, { force: true });
+    const storagePath = `${randomUUID()}.png`;
+    const { error: uploadError } = await supabase.storage
+      .from("dream-images")
+      .upload(storagePath, imageBuffer, { contentType: "image/png" });
+    if (uploadError) throw uploadError;
+    const { data: publicUrlData } = supabase.storage.from("dream-images").getPublicUrl(storagePath);
+    const imageUrl = publicUrlData.publicUrl;
+
     const mood = MOOD_LABELS[pickProfile(analysis)];
     const summaryText = analysis.themes?.length ? `${analysis.themes.slice(0, 2).join(". ")}.` : "";
     const symbols = (analysis.symbols ?? []).slice(0, 3).map(shortSymbol);
 
-    saveDream({
+    await saveDream({
       id: randomUUID(),
       createdAt: new Date().toISOString(),
       imageUrl,

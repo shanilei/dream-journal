@@ -10,3 +10,4 @@ tsconfig.tsbuildinfo
 *.log
 analysis-*.json
 dream-*.txt
+supabase/.temp/

@@ -20,8 +20,8 @@ function formatTime(iso: string): string {
   return new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
 }
 
-export default function HomePage() {
-  const cards = listDreams()
+export default async function HomePage() {
+  const cards = (await listDreams())
     .slice(0, 3)
     .map((dream) => ({
       id: dream.id,

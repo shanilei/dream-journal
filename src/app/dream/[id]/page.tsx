@@ -20,7 +20,7 @@ export default async function DreamDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const dream = getDream(id);
+  const dream = await getDream(id);
 
   if (!dream) notFound();
 
