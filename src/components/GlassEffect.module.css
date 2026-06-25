@@ -47,8 +47,6 @@
   position: absolute;
   inset: 0.64% 0.47% 0.51% 0.47%;
   border-radius: 50%;
-  border: calc(2.236px * var(--glass-scale, 1)) solid #fff;
-  filter: blur(calc(0.559px * var(--glass-scale, 1)));
   pointer-events: none;
   box-shadow:
     0 calc(53.925px * var(--glass-scale, 1)) calc(53.925px * var(--glass-scale, 1)) 0 rgba(0, 0, 0, 0.08),
