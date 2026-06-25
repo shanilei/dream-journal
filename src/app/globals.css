@@ -14,6 +14,26 @@
   --dark-glow-blue-rgb: 86, 129, 240;
   --dark-glow-purple-rgb: 138, 92, 246;
   --dark-glow-pink-rgb: 224, 85, 122;
+
+  /* Responsive shell width — every screen's root .screen class should use
+     max-width: var(--shell-max-width) instead of a hardcoded px value, so
+     widening the breakpoints here updates every screen at once. */
+  --shell-max-width: 430px;
+  --shell-padding: 20px;
+}
+
+@media (min-width: 700px) {
+  :root {
+    --shell-max-width: 640px;
+    --shell-padding: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --shell-max-width: 900px;
+    --shell-padding: 48px;
+  }
 }
 
 * {
@@ -30,7 +50,7 @@ body {
   font-family: var(--font-urbanist), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   color: #333;
-  background: #fff;
+  background: #090a13;
 }
 
 a {
