@@ -1,8 +1,14 @@
-.circle {
+.clip {
   width: 70%;
   height: 70%;
   border-radius: 50%;
-  filter: blur(40px);
+  overflow: hidden;
+}
+
+.circle {
+  width: 100%;
+  height: 100%;
+  filter: blur(35px);
   animation: color-cycle 6s linear infinite;
 }
 

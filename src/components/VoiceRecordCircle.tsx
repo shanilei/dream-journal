@@ -35,5 +35,9 @@ export default function VoiceRecordCircle({ isRecording, onPermissionDenied }: P
     };
   }, [isRecording, onPermissionDenied]);
 
-  return <div className={isRecording ? `${styles.circle} ${styles.recording}` : styles.circle} />;
+  return (
+    <div className={styles.clip}>
+      <div className={isRecording ? `${styles.circle} ${styles.recording}` : styles.circle} />
+    </div>
+  );
 }
