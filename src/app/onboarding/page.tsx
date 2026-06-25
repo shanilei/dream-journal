@@ -1,5 +1,5 @@
-import OnboardingCarousel from "@/components/OnboardingCarousel";
+import OnboardingScreen from "@/components/OnboardingScreen";
 
 export default function OnboardingPage() {
-  return <OnboardingCarousel />;
+  return <OnboardingScreen />;
 }

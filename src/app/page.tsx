@@ -2,6 +2,7 @@ import styles from "./home.module.css";
 import BottomNav from "@/components/BottomNav";
 import DreamCardStack from "@/components/DreamCardStack";
 import GlassEffect from "@/components/GlassEffect";
+import OnboardingGate from "@/components/OnboardingGate";
 import { FilterIcon, LayoutGalleryIcon, TableChartIcon } from "@/components/Icons";
 import { listDreams } from "@/dreams-store";
 
@@ -33,6 +34,7 @@ export default async function HomePage() {
 
   return (
     <div className={styles.screen}>
+      <OnboardingGate />
       <div className={styles.toolbar}>
         <div className={styles.toolbarGroup}>
           <button type="button" className={styles.pillBtn} aria-label="Table view">

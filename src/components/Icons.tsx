@@ -103,6 +103,20 @@ export function ArrowLeftIcon({ size = 24, color = "#000624" }: { size?: number;
   );
 }
 
+export function ArrowRightIcon({ size = 24, color = "#000624" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M9 5l7 7-7 7"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ArrowUpIcon({ size = 20, color = "#000624" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

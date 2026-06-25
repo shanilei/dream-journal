@@ -1,0 +1,89 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: 430px;
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 40px;
+  padding: 0 24px 48px;
+  background: #090a13 url("/images/onboarding/starfield.png") center top / cover no-repeat;
+}
+
+.headline {
+  margin: 0;
+  font-size: 44px;
+  font-weight: 500;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.accent1 {
+  color: #5244f3;
+}
+
+.accent2 {
+  color: #6871ff;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.dotActive {
+  width: 40px;
+  height: 8px;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.cta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ctaLabel {
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.ctaButton {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: 50%;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow:
+    0 0 0 12px rgba(255, 255, 255, 0.08),
+    0 0 0 24px rgba(255, 255, 255, 0.04);
+}

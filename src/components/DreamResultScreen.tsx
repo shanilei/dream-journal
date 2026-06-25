@@ -16,12 +16,12 @@ function getCaptionWords(text: string, maxWords: number): string {
     .join(" ");
 }
 
-type CaptionLayout = "right" | "bottom";
+type CaptionLayout = "center" | "bottom";
 
 function pickCaptionLayout(seed: string): CaptionLayout {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  return hash % 4 === 0 ? "bottom" : "right";
+  return hash % 4 === 0 ? "bottom" : "center";
 }
 
 function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
@@ -148,7 +148,7 @@ export default function DreamResultScreen({
             {(captionText || dateLabel) && (
               <div
                 className={`${styles.captionOverlay} ${
-                  captionLayout === "right" ? styles.captionOverlayRight : styles.captionOverlayBottom
+                  captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
                 }`}
               >
                 {captionText && (
