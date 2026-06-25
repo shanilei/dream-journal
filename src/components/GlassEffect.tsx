@@ -21,11 +21,10 @@ export default function GlassEffect({
         } as React.CSSProperties
       }
     >
-      <div className={styles.baseBlur} />
-      <div className={styles.maskedBlur} />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img className={styles.highlight} src="/images/glass/glass-highlight.svg" alt="" />
-      <div className={styles.rim} />
+      <div className={styles.tintLayer} />
+      <div className={styles.plusLighterLayer} />
+      <div className={styles.luminosityLayer} />
+      <div className={styles.sheenLayer} />
     </div>
   );
 }
