@@ -21,6 +21,7 @@ export default function GlassEffect({
         } as React.CSSProperties
       }
     >
+      <div className={styles.blurLayer} />
       <div className={styles.tintLayer} />
       <div className={styles.plusLighterLayer} />
       <div className={styles.luminosityLayer} />
