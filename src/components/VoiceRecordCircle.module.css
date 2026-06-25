@@ -1,8 +1,7 @@
 .circle {
   width: 100%;
   height: 100%;
-  clip-path: circle(50%);
-  filter: blur(28px);
+  border-radius: 50%;
   animation: color-cycle 6s linear infinite;
 }
 
@@ -15,18 +14,23 @@
 @keyframes color-cycle {
   0% {
     background-color: #5681f0;
+    box-shadow: 0 0 55px 18px #5681f0;
   }
   25% {
     background-color: #eaf3ff;
+    box-shadow: 0 0 55px 18px #eaf3ff;
   }
   50% {
     background-color: #5244f3;
+    box-shadow: 0 0 55px 18px #5244f3;
   }
   75% {
     background-color: #5463f2;
+    box-shadow: 0 0 55px 18px #5463f2;
   }
   100% {
     background-color: #5681f0;
+    box-shadow: 0 0 55px 18px #5681f0;
   }
 }
 
