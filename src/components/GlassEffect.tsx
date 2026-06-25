@@ -25,6 +25,7 @@ export default function GlassEffect({
       <div className={styles.tintLayer} />
       <div className={styles.plusLighterLayer} />
       <div className={styles.luminosityLayer} />
+      <div className={styles.specularHighlight} />
       <div className={styles.sheenLayer} />
     </div>
   );
