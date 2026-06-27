@@ -69,3 +69,9 @@ button {
 p {
   margin: 0;
 }
+
+@media print {
+  body {
+    background: #fff;
+  }
+}

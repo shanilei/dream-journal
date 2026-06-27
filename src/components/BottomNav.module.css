@@ -35,3 +35,9 @@
   align-items: center;
   justify-content: center;
 }
+
+@media print {
+  .nav {
+    display: none;
+  }
+}

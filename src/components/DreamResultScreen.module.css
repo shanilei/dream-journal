@@ -329,3 +329,28 @@
   background: #5a46fc;
   cursor: pointer;
 }
+
+@media print {
+  .screen {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+    background: #fff;
+    padding-bottom: 0;
+  }
+
+  .topBar,
+  .titleBlock,
+  .block,
+  .printModalOverlay {
+    display: none;
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .imageCard {
+    animation: none;
+  }
+}
