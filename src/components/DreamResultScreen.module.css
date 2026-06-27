@@ -342,7 +342,8 @@
   .topBar,
   .titleBlock,
   .block,
-  .printModalOverlay {
+  .printModalOverlay,
+  .imageFrost {
     display: none;
   }
 
