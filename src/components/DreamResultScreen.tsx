@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./DreamResultScreen.module.css";
 import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
 import BottomNav from "./BottomNav";
+import { useLanguage } from "./LanguageProvider";
 
 const CAPTION_MAX_WORDS = 7;
 
@@ -25,6 +26,7 @@ function pickCaptionLayout(seed: string): CaptionLayout {
 }
 
 function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
+  const { t } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
@@ -46,7 +48,7 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
       </p>
       {(overflowing || expanded) && (
         <button type="button" className={styles.readMoreBtn} onClick={() => setExpanded((v) => !v)}>
-          {expanded ? "Read less" : "Read more"}
+          {expanded ? t.readLess : t.readMore}
         </button>
       )}
     </div>
@@ -72,11 +74,13 @@ export default function DreamResultScreen({
   dreamText?: string;
   onBack: () => void;
 }) {
+  const { lang, t } = useLanguage();
   const imgRef = useRef<HTMLImageElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
   const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
   const captionLayout = pickCaptionLayout(imageUrl);
+  const dreamTitle = lang === "he" ? `${t.dreamTitleSuffix} ${dateLabel}` : `${dateLabel} ${t.dreamTitleSuffix}`;
 
   function sampleBrightness() {
     const img = imgRef.current;
@@ -114,17 +118,17 @@ export default function DreamResultScreen({
   return (
     <div className={styles.screen}>
       <div className={styles.topBar}>
-        <button type="button" className={styles.iconButton} onClick={onBack} aria-label="Back">
+        <button type="button" className={styles.iconButton} onClick={onBack} aria-label={t.back}>
           <ArrowLeftIcon size={20} color="currentColor" />
         </button>
         <div className={styles.topBarRight}>
-          <button type="button" className={styles.iconButton} aria-label="Share">
+          <button type="button" className={styles.iconButton} aria-label={t.share}>
             <ShareIcon size={16} color="currentColor" />
           </button>
           <button
             type="button"
             className={styles.iconButton}
-            aria-label="Print"
+            aria-label={t.print}
             onClick={() => setShowPrintModal(true)}
           >
             <PrinterIcon size={16} color="currentColor" />
@@ -182,7 +186,7 @@ export default function DreamResultScreen({
         </div>
 
         <div className={styles.titleBlock}>
-          <p className={styles.title}>{dateLabel} dream</p>
+          <p className={styles.title}>{dreamTitle}</p>
           <div className={styles.metaRow}>
             <span className={styles.moodPill}>{mood}</span>
             <span className={styles.metaText}>{dateLabel}</span>
@@ -192,14 +196,14 @@ export default function DreamResultScreen({
 
         {summaryText && (
           <div className={styles.block}>
-            <p className={styles.blockHeading}>What does it say?</p>
+            <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
             <CollapsibleText text={summaryText} dark={false} />
           </div>
         )}
 
         {symbols.length > 0 && (
           <div className={styles.block}>
-            <p className={styles.blockHeading}>Symbols in your dream</p>
+            <p className={styles.blockHeading}>{t.symbolsInYourDream}</p>
             <div className={styles.symbolsRow}>
               {symbols.map((symbol, i) => (
                 <span key={i} className={styles.symbolChip}>
@@ -212,7 +216,7 @@ export default function DreamResultScreen({
 
         {dreamText && (
           <div className={styles.block}>
-            <p className={styles.blockHeading}>The dream itself</p>
+            <p className={styles.blockHeading}>{t.theDreamItself}</p>
             <CollapsibleText text={dreamText} dark={false} />
           </div>
         )}
@@ -223,13 +227,13 @@ export default function DreamResultScreen({
       {showPrintModal && (
         <div className={styles.printModalOverlay} onClick={() => setShowPrintModal(false)}>
           <div className={styles.printModalCard} onClick={(e) => e.stopPropagation()}>
-            <p className={styles.printModalTitle}>To print your dream?</p>
+            <p className={styles.printModalTitle}>{t.printConfirmTitle}</p>
             <div className={styles.printModalActions}>
               <button type="button" className={styles.printModalCancel} onClick={() => setShowPrintModal(false)}>
-                Cancel
+                {t.cancel}
               </button>
               <button type="button" className={styles.printModalConfirm} onClick={handlePrint}>
-                Print
+                {t.print}
               </button>
             </div>
           </div>
