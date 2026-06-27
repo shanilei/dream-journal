@@ -15,6 +15,7 @@ type Card = {
   mood: string;
   date: string;
   time: string;
+  summary?: string;
 };
 
 type Category = {

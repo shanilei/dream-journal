@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./DreamCardStack.module.css";
 
-const FALLBACK_CARDS = [
+const FALLBACK_CARDS: DreamCard[] = [
   { id: "fallback-1", image: "/images/cards/dream-1.png", mood: "Sweet", date: "May 24", time: "10:30" },
   { id: "fallback-2", image: "/images/cards/dream-2.png", mood: "Confusion", date: "May 24", time: "10:30" },
   { id: "fallback-3", image: "/images/cards/dream-3.png", mood: "Confusion", date: "May 24", time: "10:30" },
@@ -28,6 +28,7 @@ export interface DreamCard {
   mood: string;
   date: string;
   time: string;
+  summary?: string;
 }
 
 export default function DreamCardStack({ cards }: { cards?: DreamCard[] }) {
@@ -112,6 +113,7 @@ export default function DreamCardStack({ cards }: { cards?: DreamCard[] }) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img className={styles.dreamCardImg} src={card.image} alt="" draggable={false} />
             <div className={styles.dreamCardFrost} />
+            {card.summary && <p className={styles.dreamCardCaption}>{card.summary}</p>}
             <div className={styles.dreamCardFooter}>
               <span className={styles.moodTag}>{card.mood}</span>
               <span className={styles.metaGroup}>

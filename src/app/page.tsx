@@ -20,6 +20,7 @@ export default async function HomePage() {
     mood: dream.mood,
     date: formatDate(dream.createdAt),
     time: formatTime(dream.createdAt),
+    summary: dream.summaryText,
   }));
 
   const categories = MOOD_TYPES.map((mood) => ({
