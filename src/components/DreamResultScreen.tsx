@@ -7,14 +7,20 @@ import BottomNav from "./BottomNav";
 import { useLanguage } from "./LanguageProvider";
 
 const CAPTION_MAX_WORDS = 7;
+const CAPTION_WORDS_PER_LINE = 4;
 
 function getCaptionWords(text: string, maxWords: number): string {
-  return text
+  const words = text
     .replace(/[.,!?]/g, "")
     .split(/\s+/)
     .filter(Boolean)
-    .slice(0, maxWords)
-    .join(" ");
+    .slice(0, maxWords);
+
+  const lines: string[] = [];
+  for (let i = 0; i < words.length; i += CAPTION_WORDS_PER_LINE) {
+    lines.push(words.slice(i, i + CAPTION_WORDS_PER_LINE).join(" "));
+  }
+  return lines.join("\n");
 }
 
 type CaptionLayout = "center" | "bottom";
