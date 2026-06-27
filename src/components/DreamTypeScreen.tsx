@@ -37,7 +37,9 @@ export default function DreamTypeScreen({
   return (
     <div className={styles.screen}>
       <Link href="/record" className={styles.backButton} aria-label="Back">
-        <ArrowLeftIcon size={20} color="currentColor" />
+        <span className={styles.backIcon}>
+          <ArrowLeftIcon size={20} color="currentColor" />
+        </span>
       </Link>
 
       {status === "error" && (

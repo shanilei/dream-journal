@@ -119,7 +119,9 @@ export default function DreamResultScreen({
     <div className={styles.screen}>
       <div className={styles.topBar}>
         <button type="button" className={styles.iconButton} onClick={onBack} aria-label={t.back}>
-          <ArrowLeftIcon size={20} color="currentColor" />
+          <span className={styles.backIcon}>
+            <ArrowLeftIcon size={20} color="currentColor" />
+          </span>
         </button>
         <div className={styles.topBarRight}>
           <button type="button" className={styles.iconButton} aria-label={t.share}>

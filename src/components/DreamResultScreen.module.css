@@ -43,6 +43,14 @@
   flex-shrink: 0;
 }
 
+.backIcon {
+  display: flex;
+}
+
+:global([dir="rtl"]) .backIcon {
+  transform: scaleX(-1);
+}
+
 .content {
   position: relative;
   padding: 4px 20px 0;

@@ -17,7 +17,9 @@ export default function DreamsByTypeScreen({ mood, dreams }: { mood: string; dre
     <div className={styles.screen}>
       <div className={styles.topBar}>
         <Link href="/" className={styles.iconButton} aria-label="Back">
-          <ArrowLeftIcon size={20} color="currentColor" />
+          <span className={styles.backIcon}>
+            <ArrowLeftIcon size={20} color="currentColor" />
+          </span>
         </Link>
         <p className={styles.title}>
           {mood} <span className={styles.count}>({dreams.length})</span>

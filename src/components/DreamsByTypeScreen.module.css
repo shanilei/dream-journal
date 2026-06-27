@@ -34,6 +34,14 @@
   flex-shrink: 0;
 }
 
+.backIcon {
+  display: flex;
+}
+
+:global([dir="rtl"]) .backIcon {
+  transform: scaleX(-1);
+}
+
 .title {
   margin: 0;
   font-size: 24px;

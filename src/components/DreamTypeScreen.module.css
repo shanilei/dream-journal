@@ -36,6 +36,19 @@
   justify-content: center;
 }
 
+:global([dir="rtl"]) .backButton {
+  left: auto;
+  right: 31px;
+}
+
+.backIcon {
+  display: flex;
+}
+
+:global([dir="rtl"]) .backIcon {
+  transform: scaleX(-1);
+}
+
 :global([data-theme="dark"]) .backButton {
   background: var(--dark-glass);
   color: var(--dark-text-primary);
