@@ -11,14 +11,18 @@ Vertical format. Build the image around ONE combined subject — formed by weavi
 MAGICAL REALISM RULE:
 Render the dream's central symbols or objects literally and recognizably — each one detailed enough to be identified on close inspection — but combine them and place them in an impossible or surreal context — an everyday object scaled dramatically up or down, an interior object sitting outdoors, an ordinary landscape with one reality-bending anomaly (an impossible drop-off, an opening that frames something it shouldn't, a scale mismatch). The surrealism comes from context, combination, and scale, not from distorting or abstracting the objects themselves.
 
-FOCUS RULE — A SHARP WORLD, WITH EXACTLY TWO DELIBERATE EXCEPTIONS:
-This is a deep-focus photograph, never a uniformly soft or hazy one. The environment and every object in the scene default to completely crisp, sharp-edged detail from foreground to background. Never apply lens blur, bokeh, or soft focus as a blanket camera effect over the whole image — that reads as a focus mistake, not a style. Within this sharp world, exactly two kinds of intentional softness are allowed:
+FOCUS RULE — A SHARP PHOTOGRAPH, ATMOSPHERE THROUGH NAMED TECHNIQUES ONLY:
+The base photograph is sharp and in focus. The combined subject and the environment are real, in-focus photographic detail — never start from a vague, hazy, or generally soft image. Never apply lens blur, bokeh, defocus, or a flat uniform soft-focus across the whole frame — that reads as a focus mistake, not a style. Any dreamlike atmosphere must come from one or more of these four specific, named photographic techniques, applied deliberately and locally, never as a blanket effect over everything:
 
-1. MOTION BLUR, for a sense of dizziness: if a human or animal figure appears, it may be caught genuinely spinning, twirling, or whirling in place — the blur curves and circles around the body's own axis of rotation, smearing into an arc or loose spiral that traces exactly where the body moved (like a long-exposure or "spin blur" photo). Never a flat directional streak, never lens blur, never a defocused silhouette. Never a sharp, identifiable face or a frozen, clearly posed figure.
+1. LONG EXPOSURE: something genuinely in motion — light, water, smoke, a spinning figure, drifting particles — captured the way a slow shutter would, leaving a real streak or trail of light/movement, while everything stationary around it stays completely sharp.
 
-2. A FROSTED GLASS LAYER, for a dreamlike quality: somewhere in the composition, an actual pane or veil of frosted, translucent glass — partially crossing the frame, or wrapped around part of the combined subject — through which that portion of the scene reads as soft, hazy, and diffused, as if genuinely viewed through textured glass. This is a real material present in the scene, with deliberate, glass-like edges — not a camera defect, not a blur filter, and not covering the whole image.
+2. ABSTRACT MOTION BLUR: a directional or swirling smear applied to one specific element for energy and motion (e.g. a spinning figure blurred into an arc around its own axis), clearly distinct from the sharp, still parts of the scene — never a flat filter dragged over a static pose.
 
-Either exception may appear alone, together, or neither. Everything else in the frame — and the entire image, if neither exception applies to this particular dream — stays in absolute, perfect focus.
+3. FROSTED GLASS EFFECT: part of the scene is genuinely visible through a real, semi-transparent frosted or textured glass surface — recognizable but softened and diffused, like looking through a frosted window or shower glass. This is a physical surface in the scene with real edges, applied to only part of the frame, never the entire image.
+
+4. GLOW / LIGHT BLOOM (ORTON EFFECT): a warm, soft glow bleeds outward from bright areas, as if a slightly overexposed, glowing soft layer were blended over the sharp photograph beneath it — the underlying detail and sharpness should still read clearly through the glow, not be erased by it.
+
+Use whichever of these four fit the dream — one, several, or none — but always keep the base photograph sharp underneath them. Every soft or hazy area in the final image must be explained by one of these four named techniques; if you can't name which one a piece of softness is, it shouldn't be there.
 
 COLOR RULES:
 Use a flat, boldly color-blocked backdrop — an unbroken or near-unbroken expanse of one dominant saturated hue, never a busy or naturalistic sky. The dream's own subject/foreground colors should contrast cleanly against this backdrop, never blend into it. No rainbow palettes, no muddy in-between tones — every color must read as deliberate and graphic.
@@ -35,5 +39,5 @@ The image must resemble a polished, editorial-quality surreal photograph — cle
 EMOTIONAL GOAL:
 A single, vivid, almost cinematic surreal snapshot — the kind of image that feels both beautiful and slightly impossible. Striking and memorable, not vague or hard to read.
 
-FINAL STYLE DIRECTIVE: surreal minimalist photograph, analog dreamscape, flat color-blocked backdrop, magical realism, deep depth of field, sharp graphic foreground, isolated monumental scale, heavy visible 35mm film grain, nostalgic warm color grading, genuine spinning/whirling motion blur only on a living figure if present, an optional frosted-glass layer over part of the frame for dreaminess, editorial fine-art photography. Photorealistic only — never illustration, painting, collage, or 3D render.
+FINAL STYLE DIRECTIVE: surreal minimalist photograph, analog dreamscape, flat color-blocked backdrop, magical realism, sharp graphic foreground, isolated monumental scale, heavy visible 35mm film grain, nostalgic warm color grading, dreamlike atmosphere built only from long exposure trails, abstract motion blur, a frosted-glass surface, and/or Orton-effect glow — applied locally and deliberately, never as a blanket soft-focus over the whole image — editorial fine-art photography. Photorealistic only — never illustration, painting, collage, or 3D render.
 `.trim();

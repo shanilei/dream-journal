@@ -159,7 +159,6 @@ export default function DreamResultScreen({
               alt="Generated dream artwork"
               onLoad={sampleBrightness}
             />
-            <div className={styles.imageFrost} />
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
             {(captionText || dateLabel) && (
               <div
