@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
 import DreamCardStack from "@/components/DreamCardStack";
@@ -7,13 +8,6 @@ import GlassEffect from "@/components/GlassEffect";
 import OnboardingGate from "@/components/OnboardingGate";
 import { FilterIcon, LayoutGalleryIcon, TableChartIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
-
-const CATEGORIES = [
-  { label: "Fear", count: 220 },
-  { label: "Love", count: 150 },
-  { label: "Confusion", count: 300 },
-  { label: "Confusion", count: 300 },
-];
 
 type Card = {
   id: string;
@@ -23,7 +17,12 @@ type Card = {
   time: string;
 };
 
-export default function HomeScreenClient({ cards }: { cards: Card[] }) {
+type Category = {
+  label: string;
+  count: number;
+};
+
+export default function HomeScreenClient({ cards, categories }: { cards: Card[]; categories: Category[] }) {
   const { t } = useLanguage();
 
   return (
@@ -64,13 +63,17 @@ export default function HomeScreenClient({ cards }: { cards: Card[] }) {
           </a>
         </div>
         <div className={styles.categoryRow}>
-          {CATEGORIES.map((cat, i) => (
-            <div key={i} className={styles.categoryCard}>
+          {categories.map((cat) => (
+            <Link
+              key={cat.label}
+              href={`/type/${encodeURIComponent(cat.label)}`}
+              className={styles.categoryCard}
+            >
               <p className={styles.categoryLabel}>{cat.label}</p>
               <p className={styles.categoryCount}>
                 {cat.count} {t.dreamsCount}
               </p>
-            </div>
+            </Link>
           ))}
         </div>
       </div>
