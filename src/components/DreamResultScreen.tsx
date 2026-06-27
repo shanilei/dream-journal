@@ -9,6 +9,10 @@ import { useLanguage } from "./LanguageProvider";
 const CAPTION_MAX_WORDS = 7;
 const CAPTION_WORDS_PER_LINE = 4;
 
+function capitalizeFirst(text: string): string {
+  return text.length ? text[0].toUpperCase() + text.slice(1) : text;
+}
+
 function getCaptionWords(text: string, maxWords: number): string {
   const words = text
     .replace(/[.,!?]/g, "")
@@ -20,7 +24,7 @@ function getCaptionWords(text: string, maxWords: number): string {
   for (let i = 0; i < words.length; i += CAPTION_WORDS_PER_LINE) {
     lines.push(words.slice(i, i + CAPTION_WORDS_PER_LINE).join(" "));
   }
-  return lines.join("\n");
+  return capitalizeFirst(lines.join("\n"));
 }
 
 type CaptionLayout = "center" | "bottom";

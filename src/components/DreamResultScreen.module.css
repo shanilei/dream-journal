@@ -56,7 +56,7 @@
   padding: 4px 20px 0;
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 14px;
 }
 
 .imageCard {
