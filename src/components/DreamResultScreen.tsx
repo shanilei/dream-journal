@@ -158,6 +158,7 @@ export default function DreamResultScreen({
                 )}
                 <div className={styles.captionMeta}>
                   <span
+                    dir="ltr"
                     className={`${styles.captionMetaText} ${
                       textColor === "black" ? styles.captionMetaTextDark : ""
                     }`}
@@ -166,6 +167,7 @@ export default function DreamResultScreen({
                   </span>
                   {timeLabel && (
                     <span
+                      dir="ltr"
                       className={`${styles.captionMetaText} ${
                         textColor === "black" ? styles.captionMetaTextDark : ""
                       }`}
