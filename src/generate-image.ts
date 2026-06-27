@@ -22,6 +22,7 @@ import { style as dreamFragmentsStyle } from "./styles/dream-fragments";
 import { style as dreamCollageStyle } from "./styles/dream-collage";
 import { style as lucidSystemStyle } from "./styles/lucid-system";
 import { style as surrealMinimalistStyle } from "./styles/surreal-minimalist";
+import { applyMotionBlurLayer } from "./image-postprocess";
 
 const ai = new GoogleGenAI({}); // קורא את GEMINI_API_KEY מהסביבה
 
@@ -159,7 +160,7 @@ function buildPrompt(analysis: DreamAnalysis, profile: ProfileKey, styleText: st
       : styleName === "lucid-system"
       ? `Identify the Anchor, the Emotional Field, and the Intrusion for this specific dream — these elements and themes are emotional raw material only, never a literal object, scene, or recognizable equipment to draw: ${elements || "the dream's symbols"}. Anchor (the emotional center): build it from several overlapping layered fragments and patches that together suggest a feeling — never a single clean shape, and never a literal illustration of any specific symbol listed above (e.g. no medical equipment, no literal hospital or military iconography, no crosses, no vehicles, no architecture). Emotional Field (secondary shapes spreading the atmosphere): drawn from ${analysis.themes?.join(", ") || "the dream's emotional atmosphere"}. Intrusion (the force that disrupts, transforms, threatens, attracts, divides, or overwhelms the Anchor): infer it from the tension between the Anchor and the dream's themes. Choose ONE dominant shape family (circles and rounded forms; particles and repetition; arches and portals; waves and flowing forms; fractures and shards; or clouds and soft masses) that best fits this dream, and let it drive most of the image.`
       : styleName === "surreal-minimalist"
-      ? `Identify up to the 3 most central, dream-defining elements from these dream symbols/locations: ${elements || analysis.themes?.join(", ") || "the dream's central image"}. Render each one literally and sharply, with real visual detail and texture — recognizable on close inspection, not vague or simplified. Then weave them together into ONE single, unexpected composition: let them overlap, nest inside one another, or merge at a shared edge, rather than floating as separate scattered objects — the result should read as one coherent surreal form, interesting and a little hard to fully untangle at first glance, even though every individual piece is sharp and accurate. Place this combined form in a magical-realism context — dramatically scaled up or down, or set somewhere it would not normally belong — against the flat color-blocked backdrop. ALWAYS include a long-exposure light or motion trail somewhere in the frame, and it must show REAL blur/smear from actual motion — if there's a moving figure (dancing, spinning, falling), blur the figure's own body/limbs/fabric directly, never keep it crisp and add a separate sharp glowing ring or shape next to it instead. If nothing in this dream's content suggests an obvious moving subject, make the trail small and localized (a thin, genuinely smeared light streak, a softly blurred drifting wisp) rather than skipping it — but it must still be real blur, not a clean illustrated shape. You may also, optionally, layer in abstract motion blur, a frosted-glass surface, or Orton-effect glow wherever they genuinely fit this dream. The rest of the combined form and the backdrop stay pin-sharp; do not apply any blanket lens blur, bokeh, or soft focus across the whole image.`
+      ? `Identify up to the 3 most central, dream-defining elements from these dream symbols/locations: ${elements || analysis.themes?.join(", ") || "the dream's central image"}. Render each one literally and sharply, with real visual detail and texture — recognizable on close inspection, not vague or simplified. Then weave them together into ONE single, unexpected composition: let them overlap, nest inside one another, or merge at a shared edge, rather than floating as separate scattered objects — the result should read as one coherent surreal form, interesting and a little hard to fully untangle at first glance, even though every individual piece is sharp and accurate. Place this combined form in a magical-realism context — dramatically scaled up or down, or set somewhere it would not normally belong — against the flat color-blocked backdrop. Render this as a clean, sharp, accurate photograph — a separate processing step adds a subtle motion-blur pass afterward, so your job is just the sharp photo itself. You may, optionally, layer in abstract motion blur, a frosted-glass surface, or Orton-effect glow wherever they genuinely fit this dream. The rest of the combined form and the backdrop stay pin-sharp; do not apply any blanket lens blur, bokeh, or soft focus across the whole image.`
       : ABSTRACT_STYLES.has(styleName)
       ? `Do NOT render any of these as literal recognizable objects or figures: ${elements || "the dream's symbols"}. Let them influence ONLY the weight, density, and rhythm of the abstract shapes/patches — denser and heavier for tension, lighter and looser for ease. The sensation to evoke: ${analysis.themes?.join(", ") || "dreamlike energy"}. Every shape stays an abstract patch or mass, never a named thing.`
       : `Incorporate these specific dream elements as glowing, symbolic, dreamlike forms within the composition — each rendered with its own color glow stroke, layered and overlapping at different scales and blur depths: ${elements || "(none specified)"}.`;
@@ -269,7 +270,7 @@ export async function generateImage(
       throw new Error(`Stability AI שגיאה (${stabilityResponse.status}): ${errText}`);
     }
 
-    const rawImage = Buffer.from(await stabilityResponse.arrayBuffer());
+    const rawImage = await applyMotionBlurLayer(Buffer.from(await stabilityResponse.arrayBuffer()));
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(rawPath, rawImage);
     console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
@@ -286,7 +287,7 @@ export async function generateImage(
     if (!imageBytes) {
       throw new Error("Imagen לא החזיר תמונה");
     }
-    const rawImage = Buffer.from(imageBytes, "base64");
+    const rawImage = await applyMotionBlurLayer(Buffer.from(imageBytes, "base64"));
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(rawPath, rawImage);
     console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
@@ -321,7 +322,7 @@ export async function generateImage(
     if (part.text) {
       console.log("תגובת טקסט מהמודל:", part.text);
     } else if (part.inlineData?.data) {
-      const rawImage = Buffer.from(part.inlineData.data, "base64");
+      const rawImage = await applyMotionBlurLayer(Buffer.from(part.inlineData.data, "base64"));
 
       mkdirSync(dirname(outputPath), { recursive: true });
       writeFileSync(rawPath, rawImage);
