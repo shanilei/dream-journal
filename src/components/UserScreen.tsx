@@ -5,13 +5,7 @@ import styles from "./UserScreen.module.css";
 import BottomNav from "./BottomNav";
 import { UserIcon, BellIcon } from "./Icons";
 import { useTheme } from "./ThemeProvider";
-
-const STATS = [
-  { value: "32", label: "This month" },
-  { value: "12 Days in a row", label: "Dream Streak" },
-  { value: "Water", label: "Most Common Symbol" },
-  { value: "Anxious", label: "Average Mood" },
-];
+import { useLanguage } from "./LanguageProvider";
 
 function Toggle({
   checked,
@@ -38,9 +32,18 @@ function Toggle({
 
 export default function UserScreen() {
   const { theme, toggleTheme } = useTheme();
+  const { lang, toggleLang, t } = useLanguage();
   const darkMood = theme === "dark";
+  const isHebrew = lang === "he";
   const [notifications, setNotifications] = useState(true);
   const [saveToLibrary, setSaveToLibrary] = useState(true);
+
+  const stats = [
+    { value: "32", label: t.thisMonth },
+    { value: "12 Days in a row", label: t.dreamStreak },
+    { value: "Water", label: t.mostCommonSymbol },
+    { value: "Anxious", label: t.averageMood },
+  ];
 
   return (
     <div className={styles.screen}>
@@ -58,11 +61,11 @@ export default function UserScreen() {
           </button>
         </div>
 
-        <p className={styles.title}>User Dreams</p>
+        <p className={styles.title}>{t.userTitle}</p>
 
-        <p className={styles.sectionLabel}>My goals</p>
+        <p className={styles.sectionLabel}>{t.myGoals}</p>
         <div className={styles.goalsGrid}>
-          {STATS.map((stat, i) => (
+          {stats.map((stat, i) => (
             <div key={i} className={styles.goalCard}>
               <p className={styles.goalValue}>{stat.value}</p>
               <p className={styles.goalLabel}>{stat.label}</p>
@@ -70,29 +73,35 @@ export default function UserScreen() {
           ))}
         </div>
 
-        <p className={styles.sectionLabel}>Setting</p>
+        <p className={styles.sectionLabel}>{t.setting}</p>
         <div className={styles.settingsCard}>
           <div className={styles.settingRow}>
-            <span className={styles.settingLabel}>Dark mood</span>
-            <Toggle checked={darkMood} onChange={toggleTheme} label="Dark mood" />
+            <span className={styles.settingLabel}>{t.darkMood}</span>
+            <Toggle checked={darkMood} onChange={toggleTheme} label={t.darkMood} />
           </div>
           <div className={styles.divider} />
 
           <div className={styles.settingRow}>
-            <span className={styles.settingLabelMuted}>Connected alarm</span>
+            <span className={styles.settingLabel}>{t.hebrewMode}</span>
+            <Toggle checked={isHebrew} onChange={toggleLang} label={t.hebrewMode} />
+          </div>
+          <div className={styles.divider} />
+
+          <div className={styles.settingRow}>
+            <span className={styles.settingLabelMuted}>{t.connectedAlarm}</span>
             <span className={styles.settingValue}>07:30 AM</span>
           </div>
           <div className={styles.divider} />
 
           <div className={styles.settingRow}>
-            <span className={styles.settingLabelMuted}>Notifications</span>
-            <Toggle checked={notifications} onChange={setNotifications} label="Notifications" />
+            <span className={styles.settingLabelMuted}>{t.notifications}</span>
+            <Toggle checked={notifications} onChange={setNotifications} label={t.notifications} />
           </div>
           <div className={styles.divider} />
 
           <div className={styles.settingRow}>
-            <span className={styles.settingLabelMuted}>Save to library</span>
-            <Toggle checked={saveToLibrary} onChange={setSaveToLibrary} label="Save to library" />
+            <span className={styles.settingLabelMuted}>{t.saveToLibrary}</span>
+            <Toggle checked={saveToLibrary} onChange={setSaveToLibrary} label={t.saveToLibrary} />
           </div>
         </div>
       </div>

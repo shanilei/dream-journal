@@ -2,12 +2,22 @@ import type { Metadata } from "next";
 import { Urbanist } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { LanguageProvider } from "@/components/LanguageProvider";
 import "./globals.css";
 
 const THEME_INIT_SCRIPT = `
   try {
     var t = localStorage.getItem("dream-journal-theme");
     document.documentElement.setAttribute("data-theme", t === "light" ? "light" : "dark");
+  } catch (e) {}
+`;
+
+const LANG_INIT_SCRIPT = `
+  try {
+    var l = localStorage.getItem("dream-journal-lang");
+    var lang = l === "he" ? "he" : "en";
+    document.documentElement.setAttribute("lang", lang);
+    document.documentElement.setAttribute("dir", lang === "he" ? "rtl" : "ltr");
   } catch (e) {}
 `;
 
@@ -31,9 +41,14 @@ export default function RootLayout({
         <Script id="theme-init" strategy="beforeInteractive">
           {THEME_INIT_SCRIPT}
         </Script>
+        <Script id="lang-init" strategy="beforeInteractive">
+          {LANG_INIT_SCRIPT}
+        </Script>
       </head>
       <body className={urbanist.variable}>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <LanguageProvider>{children}</LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
