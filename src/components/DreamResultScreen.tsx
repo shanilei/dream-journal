@@ -172,25 +172,34 @@ export default function DreamResultScreen({
                     {captionText}
                   </p>
                 )}
-                <div className={styles.captionMeta}>
-                  <span
-                    dir="ltr"
-                    className={`${styles.captionMetaText} ${
-                      textColor === "black" ? styles.captionMetaTextDark : ""
-                    }`}
-                  >
-                    {dateLabel}
-                  </span>
-                  {timeLabel && (
+                <div className={styles.captionMetaGroup}>
+                  {captionText && dateLabel && (
+                    <div
+                      className={`${styles.captionDivider} ${
+                        textColor === "black" ? styles.captionDividerDark : ""
+                      }`}
+                    />
+                  )}
+                  <div className={styles.captionMeta}>
                     <span
                       dir="ltr"
-                      className={`${styles.captionMetaText} ${
-                        textColor === "black" ? styles.captionMetaTextDark : ""
+                      className={`${styles.captionMetaDate} ${
+                        textColor === "black" ? styles.captionMetaDark : ""
                       }`}
                     >
-                      {timeLabel}
+                      {dateLabel}
                     </span>
-                  )}
+                    {timeLabel && (
+                      <span
+                        dir="ltr"
+                        className={`${styles.captionMetaTime} ${
+                          textColor === "black" ? styles.captionMetaDark : ""
+                        }`}
+                      >
+                        {timeLabel}
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             )}
