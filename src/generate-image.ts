@@ -22,7 +22,7 @@ import { style as dreamFragmentsStyle } from "./styles/dream-fragments";
 import { style as dreamCollageStyle } from "./styles/dream-collage";
 import { style as lucidSystemStyle } from "./styles/lucid-system";
 import { style as surrealMinimalistStyle } from "./styles/surreal-minimalist";
-import { applyMotionBlurLayer } from "./image-postprocess";
+import { applyMotionBlurLayer, applyFrostedGlassLayer } from "./image-postprocess";
 
 const ai = new GoogleGenAI({}); // קורא את GEMINI_API_KEY מהסביבה
 
@@ -270,7 +270,9 @@ export async function generateImage(
       throw new Error(`Stability AI שגיאה (${stabilityResponse.status}): ${errText}`);
     }
 
-    const rawImage = await applyMotionBlurLayer(Buffer.from(await stabilityResponse.arrayBuffer()));
+    const rawImage = await applyFrostedGlassLayer(
+      await applyMotionBlurLayer(Buffer.from(await stabilityResponse.arrayBuffer()))
+    );
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(rawPath, rawImage);
     console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
@@ -287,7 +289,7 @@ export async function generateImage(
     if (!imageBytes) {
       throw new Error("Imagen לא החזיר תמונה");
     }
-    const rawImage = await applyMotionBlurLayer(Buffer.from(imageBytes, "base64"));
+    const rawImage = await applyFrostedGlassLayer(await applyMotionBlurLayer(Buffer.from(imageBytes, "base64")));
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(rawPath, rawImage);
     console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
@@ -322,7 +324,9 @@ export async function generateImage(
     if (part.text) {
       console.log("תגובת טקסט מהמודל:", part.text);
     } else if (part.inlineData?.data) {
-      const rawImage = await applyMotionBlurLayer(Buffer.from(part.inlineData.data, "base64"));
+      const rawImage = await applyFrostedGlassLayer(
+        await applyMotionBlurLayer(Buffer.from(part.inlineData.data, "base64"))
+      );
 
       mkdirSync(dirname(outputPath), { recursive: true });
       writeFileSync(rawPath, rawImage);
