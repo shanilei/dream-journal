@@ -4,11 +4,9 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from "
 import { translations, type Lang, type TranslationKey } from "@/i18n/translations";
 
 const STORAGE_KEY = "dream-journal-lang";
-export const LANGUAGE_CHOSEN_KEY = "dream-journal-language-chosen";
 
 const LanguageContext = createContext<{
   lang: Lang;
-  setLang: (lang: Lang) => void;
   toggleLang: () => void;
   t: Record<TranslationKey, string>;
 } | null>(null);
@@ -37,7 +35,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <LanguageContext.Provider value={{ lang, setLang, toggleLang, t: translations[lang] }}>
+    <LanguageContext.Provider value={{ lang, toggleLang, t: translations[lang] }}>
       {children}
     </LanguageContext.Provider>
   );
