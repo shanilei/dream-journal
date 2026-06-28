@@ -1,0 +1,71 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell-max-width);
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #090a13;
+}
+
+.starfield {
+  position: absolute;
+  inset: -10%;
+  background: url("/images/onboarding/starfield.png") center center / cover no-repeat;
+  animation: drift 40s ease-in-out infinite alternate;
+}
+
+@keyframes drift {
+  0% {
+    transform: scale(1.08) translate(0, 0);
+  }
+  50% {
+    transform: scale(1.15) translate(-2%, -1.5%);
+  }
+  100% {
+    transform: scale(1.08) translate(1.5%, 1%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .starfield {
+    animation: none;
+  }
+}
+
+.logoButton {
+  position: relative;
+  z-index: 1;
+  border: none;
+  background: none;
+  padding: 24px 32px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logoWrap {
+  opacity: 0;
+  transition: opacity 900ms ease;
+}
+
+.logoWrapVisible {
+  opacity: 1;
+}
+
+.hint {
+  position: absolute;
+  bottom: 64px;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  text-align: center;
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.5);
+}
