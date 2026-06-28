@@ -5,6 +5,7 @@ import styles from "./DreamResultScreen.module.css";
 import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
 import BottomNav from "./BottomNav";
 import { useLanguage } from "./LanguageProvider";
+import { translateMood } from "@/i18n/translations";
 
 const CAPTION_MAX_WORDS = 7;
 const CAPTION_WORDS_PER_LINE = 4;
@@ -208,7 +209,7 @@ export default function DreamResultScreen({
         <div className={styles.titleBlock}>
           <p className={styles.title}>{dreamTitle}</p>
           <div className={styles.metaRow}>
-            <span className={styles.moodPill}>{mood}</span>
+            <span className={styles.moodPill}>{translateMood(mood, lang)}</span>
             <span className={styles.metaText}>{dateLabel}</span>
             {timeLabel && <span className={styles.metaText}>{timeLabel}</span>}
           </div>

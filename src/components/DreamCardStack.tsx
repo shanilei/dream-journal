@@ -3,6 +3,8 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./DreamCardStack.module.css";
+import { useLanguage } from "./LanguageProvider";
+import { translateMood } from "@/i18n/translations";
 
 const FALLBACK_CARDS: DreamCard[] = [
   { id: "fallback-1", image: "/images/cards/dream-1.png", mood: "Sweet", date: "May 24", time: "10:30" },
@@ -34,6 +36,7 @@ export interface DreamCard {
 export default function DreamCardStack({ cards }: { cards?: DreamCard[] }) {
   const CARDS = cards && cards.length > 0 ? cards : FALLBACK_CARDS;
   const router = useRouter();
+  const { lang } = useLanguage();
   const [deckOrder, setDeckOrder] = useState(() => CARDS.map((_, i) => i));
   const [dragX, setDragX] = useState(0);
   const [dragging, setDragging] = useState(false);
@@ -115,7 +118,7 @@ export default function DreamCardStack({ cards }: { cards?: DreamCard[] }) {
             <div className={styles.dreamCardFrost} />
             {card.summary && <p className={styles.dreamCardCaption}>{card.summary}</p>}
             <div className={styles.dreamCardFooter}>
-              <span className={styles.moodTag}>{card.mood}</span>
+              <span className={styles.moodTag}>{translateMood(card.mood, lang)}</span>
               <span className={styles.metaGroup}>
                 <span className={styles.metaText}>{card.date}</span>
                 <span className={styles.metaText}>{card.time}</span>

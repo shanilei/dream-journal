@@ -36,7 +36,9 @@ export default function OnboardingScreen() {
         <div className={styles.cta}>
           <span className={styles.ctaLabel}>Get started</span>
           <button type="button" className={styles.ctaButton} onClick={handleGetStarted} aria-label="Get started">
-            <ArrowRightIcon size={24} color="#5244f3" />
+            <span className={styles.ctaIcon}>
+              <ArrowRightIcon size={24} color="#5244f3" />
+            </span>
           </button>
         </div>
       </div>

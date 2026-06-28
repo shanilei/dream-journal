@@ -62,3 +62,20 @@ export const translations = {
 } as const;
 
 export type TranslationKey = keyof typeof translations.en;
+
+const moodLabels: Record<Lang, Record<string, string>> = {
+  en: {
+    Fear: "Fear",
+    Confused: "Confused",
+    Sweet: "Sweet",
+  },
+  he: {
+    Fear: "פחד",
+    Confused: "מבולבל",
+    Sweet: "מתוק",
+  },
+};
+
+export function translateMood(mood: string, lang: Lang): string {
+  return moodLabels[lang][mood] ?? mood;
+}

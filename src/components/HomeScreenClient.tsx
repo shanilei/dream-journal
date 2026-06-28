@@ -8,6 +8,7 @@ import GlassEffect from "@/components/GlassEffect";
 import OnboardingGate from "@/components/OnboardingGate";
 import { FilterIcon, LayoutGalleryIcon, TableChartIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
+import { translateMood } from "@/i18n/translations";
 
 type Card = {
   id: string;
@@ -24,7 +25,7 @@ type Category = {
 };
 
 export default function HomeScreenClient({ cards, categories }: { cards: Card[]; categories: Category[] }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   return (
     <div className={styles.screen}>
@@ -70,7 +71,7 @@ export default function HomeScreenClient({ cards, categories }: { cards: Card[];
               href={`/type/${encodeURIComponent(cat.label)}`}
               className={styles.categoryCard}
             >
-              <p className={styles.categoryLabel}>{cat.label}</p>
+              <p className={styles.categoryLabel}>{translateMood(cat.label, lang)}</p>
               <p className={styles.categoryCount}>
                 {cat.count} {t.dreamsCount}
               </p>
