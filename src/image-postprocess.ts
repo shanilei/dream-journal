@@ -1,10 +1,11 @@
 import sharp from "sharp";
 
 // How long the motion-blur smear is, in pixels — matches Photoshop's
-// directional Motion Blur dialog at Distance: 140px, Angle: 0°.
-const BLUR_LENGTH_PX = 140;
-// How much of the blurred version to mix in (0 = untouched, 1 = fully blurred).
-const BLUR_STRENGTH = 0.45;
+// directional Motion Blur dialog at Distance: 200px, Angle: 0°.
+const BLUR_LENGTH_PX = 200;
+// How much of the blurred version to mix in (0 = untouched, 1 = fully blurred)
+// — this is the "mask opacity" controlling how strongly the blur shows through.
+const BLUR_STRENGTH = 0.7;
 // Opacity of the horizontal grain-streak overlay. A flat-colored region
 // convolved with any kernel that sums to 1 comes back exactly as flat as it
 // started — blur mathematically cannot change a uniform area, no matter how
