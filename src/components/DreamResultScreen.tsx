@@ -69,6 +69,7 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
 
 export default function DreamResultScreen({
   imageUrl,
+  clearImageUrl,
   dateLabel,
   timeLabel,
   mood,
@@ -78,6 +79,7 @@ export default function DreamResultScreen({
   onBack,
 }: {
   imageUrl: string;
+  clearImageUrl?: string;
   dateLabel: string;
   timeLabel?: string;
   mood: string;
@@ -91,6 +93,7 @@ export default function DreamResultScreen({
   const imgRef = useRef<HTMLImageElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
+  const [revealed, setRevealed] = useState(false);
   const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
   const captionLayout = pickCaptionLayout(imageUrl);
   const dreamTitle = lang === "he" ? `${t.dreamTitleSuffix} ${dateLabel}` : `${dateLabel} ${t.dreamTitleSuffix}`;
@@ -153,7 +156,14 @@ export default function DreamResultScreen({
 
       <div className={styles.content}>
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
-          <div className={styles.imageWrap}>
+          <div
+            className={styles.imageWrap}
+            onMouseEnter={() => clearImageUrl && setRevealed(true)}
+            onMouseLeave={() => setRevealed(false)}
+            onTouchStart={() => clearImageUrl && setRevealed(true)}
+            onTouchEnd={() => setRevealed(false)}
+            onTouchCancel={() => setRevealed(false)}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               ref={imgRef}
@@ -162,12 +172,25 @@ export default function DreamResultScreen({
               alt="Generated dream artwork"
               onLoad={sampleBrightness}
             />
-            <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
+            {clearImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                className={`${styles.imageClear} ${revealed ? styles.imageClearRevealed : ""}`}
+                src={clearImageUrl}
+                alt=""
+                aria-hidden="true"
+              />
+            )}
+            <div
+              className={`${textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} ${
+                revealed ? styles.imageOverlayHidden : ""
+              }`}
+            />
             {(captionText || dateLabel) && (
               <div
                 className={`${styles.captionOverlay} ${
                   captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
-                }`}
+                } ${revealed ? styles.imageOverlayHidden : ""}`}
               >
                 {captionText && (
                   <p className={`${styles.captionText} ${textColor === "black" ? styles.captionTextDark : ""}`}>

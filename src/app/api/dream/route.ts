@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     mkdirSync(outDir, { recursive: true });
     const outputPath = join(outDir, `${randomUUID()}.png`);
 
-    const { rawPath, prompt } = await generateImage(
+    const { rawPath, clearPath, prompt } = await generateImage(
       analysis,
       outputPath,
       "surreal-minimalist",
@@ -39,7 +39,10 @@ export async function POST(req: NextRequest) {
     );
 
     const imageBuffer = readFileSync(rawPath);
+    const clearBuffer = readFileSync(clearPath);
     rmSync(rawPath, { force: true });
+    rmSync(clearPath, { force: true });
+
     const storagePath = `${randomUUID()}.png`;
     const { error: uploadError } = await supabase.storage
       .from("dream-images")
@@ -47,6 +50,14 @@ export async function POST(req: NextRequest) {
     if (uploadError) throw uploadError;
     const { data: publicUrlData } = supabase.storage.from("dream-images").getPublicUrl(storagePath);
     const imageUrl = publicUrlData.publicUrl;
+
+    const clearStoragePath = `${randomUUID()}.png`;
+    const { error: clearUploadError } = await supabase.storage
+      .from("dream-images")
+      .upload(clearStoragePath, clearBuffer, { contentType: "image/png" });
+    if (clearUploadError) throw clearUploadError;
+    const { data: clearPublicUrlData } = supabase.storage.from("dream-images").getPublicUrl(clearStoragePath);
+    const clearImageUrl = clearPublicUrlData.publicUrl;
 
     const mood = MOOD_LABELS[pickProfile(analysis)];
     const summaryText = analysis.themes?.length ? `${analysis.themes.slice(0, 2).join(". ")}.` : "";
@@ -56,6 +67,7 @@ export async function POST(req: NextRequest) {
       id: randomUUID(),
       createdAt: new Date().toISOString(),
       imageUrl,
+      clearImageUrl,
       mood,
       summaryText,
       symbols,
@@ -67,6 +79,7 @@ export async function POST(req: NextRequest) {
       analysis,
       mood,
       imageUrl,
+      clearImageUrl,
     });
   } catch (err) {
     console.error("שגיאה בעיבוד החלום:", err);

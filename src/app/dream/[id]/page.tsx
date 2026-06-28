@@ -27,6 +27,7 @@ export default async function DreamDetailPage({
   return (
     <DreamDetailClient
       imageUrl={dream.imageUrl}
+      clearImageUrl={dream.clearImageUrl}
       dateLabel={formatDateLabel(dream.createdAt)}
       timeLabel={formatTimeLabel(dream.createdAt)}
       mood={dream.mood}

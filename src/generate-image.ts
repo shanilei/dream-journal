@@ -204,7 +204,8 @@ ${elementsInstruction}
 }
 
 export interface GeneratedImagePaths {
-  rawPath: string; // הקולאז' שנוצר מ-Gemini
+  rawPath: string; // התמונה הסופית, אחרי טשטוש התנועה ואפקט הזכוכית
+  clearPath: string; // אותה תמונה לפני העיבוד — לאפקט "ההתבהרות" בהובר/מגע
   prompt: string; // הפרומפט המלא שנשלח למודל ליצירת התמונה
 }
 
@@ -227,6 +228,7 @@ export async function generateImage(
   const ext = extname(outputPath);
   const base = join(dirname(outputPath), basename(outputPath, ext));
   const rawPath = `${base}-raw${ext}`;
+  const clearPath = `${base}-clear${ext}`;
 
   if (engine === "stability") {
     const negativePrompt = ABSTRACT_STYLES.has(styleName)
@@ -270,13 +272,13 @@ export async function generateImage(
       throw new Error(`Stability AI שגיאה (${stabilityResponse.status}): ${errText}`);
     }
 
-    const rawImage = await applyFrostedGlassLayer(
-      await applyMotionBlurLayer(Buffer.from(await stabilityResponse.arrayBuffer()))
-    );
+    const clearImage = Buffer.from(await stabilityResponse.arrayBuffer());
+    const rawImage = await applyFrostedGlassLayer(await applyMotionBlurLayer(clearImage));
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(rawPath, rawImage);
+    writeFileSync(clearPath, clearImage);
     console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
-    return { rawPath, prompt };
+    return { rawPath, clearPath, prompt };
   }
 
   if (engine === "imagen") {
@@ -289,11 +291,13 @@ export async function generateImage(
     if (!imageBytes) {
       throw new Error("Imagen לא החזיר תמונה");
     }
-    const rawImage = await applyFrostedGlassLayer(await applyMotionBlurLayer(Buffer.from(imageBytes, "base64")));
+    const clearImage = Buffer.from(imageBytes, "base64");
+    const rawImage = await applyFrostedGlassLayer(await applyMotionBlurLayer(clearImage));
     mkdirSync(dirname(outputPath), { recursive: true });
     writeFileSync(rawPath, rawImage);
+    writeFileSync(clearPath, clearImage);
     console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
-    return { rawPath, prompt };
+    return { rawPath, clearPath, prompt };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -324,15 +328,15 @@ export async function generateImage(
     if (part.text) {
       console.log("תגובת טקסט מהמודל:", part.text);
     } else if (part.inlineData?.data) {
-      const rawImage = await applyFrostedGlassLayer(
-        await applyMotionBlurLayer(Buffer.from(part.inlineData.data, "base64"))
-      );
+      const clearImage = Buffer.from(part.inlineData.data, "base64");
+      const rawImage = await applyFrostedGlassLayer(await applyMotionBlurLayer(clearImage));
 
       mkdirSync(dirname(outputPath), { recursive: true });
       writeFileSync(rawPath, rawImage);
+      writeFileSync(clearPath, clearImage);
       console.log(`התמונה הנקייה נשמרה ב: ${rawPath}`);
 
-      return { rawPath, prompt };
+      return { rawPath, clearPath, prompt };
     }
   }
   throw new Error("המודל לא החזיר תמונה");
