@@ -1,20 +1,33 @@
 import sharp from "sharp";
 
 // How long the motion-blur smear is, in pixels.
-const BLUR_LENGTH_PX = 21;
+const BLUR_LENGTH_PX = 25;
 // How much of the blurred version to mix in (0 = untouched, 1 = fully blurred).
 // Baked directly into the convolution kernel so this is a single-pass blend —
 // no separate compositing step needed.
-const BLUR_STRENGTH = 0.4;
+const BLUR_STRENGTH = 0.45;
 
 function buildMotionBlurKernel(lengthPx: number, strength: number) {
   const size = lengthPx % 2 === 0 ? lengthPx + 1 : lengthPx; // odd size so there's a center pixel
   const mid = Math.floor(size / 2);
   const kernel = new Array(size * size).fill(0);
 
-  const smearWeight = strength / size;
+  // Gaussian taper along the line instead of a flat/uniform weight — a flat
+  // box profile has a hard cutoff at both ends, which reads as a duplicated
+  // "ghost" edge rather than a smooth photographic smear. Tapering the
+  // weight smoothly to near-zero at the ends fixes that.
+  const sigma = size / 4;
+  const lineWeights: number[] = [];
+  let lineSum = 0;
   for (let i = 0; i < size; i++) {
-    kernel[mid * size + i] = smearWeight; // horizontal line through the middle row
+    const dist = i - mid;
+    const w = Math.exp(-(dist * dist) / (2 * sigma * sigma));
+    lineWeights.push(w);
+    lineSum += w;
+  }
+
+  for (let i = 0; i < size; i++) {
+    kernel[mid * size + i] = (lineWeights[i] / lineSum) * strength;
   }
   kernel[mid * size + mid] += 1 - strength; // keep (1 - strength) of the original sharp pixel
 
