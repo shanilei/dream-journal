@@ -65,6 +65,11 @@
   animation: eyeOpen 1900ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.imageCardNoBorder {
+  background: transparent;
+  padding: 0;
+}
+
 @keyframes eyeOpen {
   0% {
     opacity: 0;

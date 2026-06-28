@@ -3,6 +3,7 @@ import { Urbanist } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
+import { PhotoBorderProvider } from "@/components/PhotoBorderProvider";
 import "./globals.css";
 
 const THEME_INIT_SCRIPT = `
@@ -47,7 +48,9 @@ export default function RootLayout({
       </head>
       <body className={urbanist.variable}>
         <ThemeProvider>
-          <LanguageProvider>{children}</LanguageProvider>
+          <LanguageProvider>
+            <PhotoBorderProvider>{children}</PhotoBorderProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

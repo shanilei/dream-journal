@@ -5,6 +5,7 @@ import styles from "./DreamResultScreen.module.css";
 import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
 import BottomNav from "./BottomNav";
 import { useLanguage } from "./LanguageProvider";
+import { usePhotoBorder } from "./PhotoBorderProvider";
 import { translateMood } from "@/i18n/translations";
 
 const CAPTION_MAX_WORDS = 7;
@@ -86,6 +87,7 @@ export default function DreamResultScreen({
   onBack: () => void;
 }) {
   const { lang, t } = useLanguage();
+  const { showBorder } = usePhotoBorder();
   const imgRef = useRef<HTMLImageElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -150,7 +152,7 @@ export default function DreamResultScreen({
       </div>
 
       <div className={styles.content}>
-        <div className={styles.imageCard}>
+        <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
           <div className={styles.imageWrap}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img

@@ -6,6 +6,7 @@ import BottomNav from "./BottomNav";
 import { UserIcon, BellIcon } from "./Icons";
 import { useTheme } from "./ThemeProvider";
 import { useLanguage } from "./LanguageProvider";
+import { usePhotoBorder } from "./PhotoBorderProvider";
 
 function Toggle({
   checked,
@@ -33,6 +34,7 @@ function Toggle({
 export default function UserScreen() {
   const { theme, toggleTheme } = useTheme();
   const { lang, toggleLang, t } = useLanguage();
+  const { showBorder, toggleBorder } = usePhotoBorder();
   const darkMood = theme === "dark";
   const isHebrew = lang === "he";
   const [notifications, setNotifications] = useState(true);
@@ -102,6 +104,12 @@ export default function UserScreen() {
           <div className={styles.settingRow}>
             <span className={styles.settingLabelMuted}>{t.saveToLibrary}</span>
             <Toggle checked={saveToLibrary} onChange={setSaveToLibrary} label={t.saveToLibrary} />
+          </div>
+          <div className={styles.divider} />
+
+          <div className={styles.settingRow}>
+            <span className={styles.settingLabelMuted}>{t.photoBorder}</span>
+            <Toggle checked={showBorder} onChange={toggleBorder} label={t.photoBorder} />
           </div>
         </div>
       </div>
