@@ -242,10 +242,10 @@ export default function DreamResultScreen({
           </div>
         </div>
 
-        {interpretationText && (
+        {(interpretationText || summaryText) && (
           <div className={styles.block}>
             <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
-            <CollapsibleText text={interpretationText} dark={false} />
+            <CollapsibleText text={interpretationText || summaryText} dark={false} />
           </div>
         )}
 
