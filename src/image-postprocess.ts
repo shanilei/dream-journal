@@ -21,7 +21,7 @@ const STREAK_OPACITY = 0.18;
 // a flat per-pixel alpha rather than a contrast-driven filter, for the same
 // reason as the streak layer above: a flat alpha blend shows up identically
 // on a busy subject and an empty backdrop.
-const FROSTED_GLASS_STRENGTH = 0.4;
+const FROSTED_GLASS_STRENGTH = 0.3;
 
 function buildHorizontalKernel(lengthPx: number, strength: number) {
   const size = lengthPx % 2 === 0 ? lengthPx + 1 : lengthPx; // odd size so there's a center pixel
