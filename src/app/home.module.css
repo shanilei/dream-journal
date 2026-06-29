@@ -123,12 +123,28 @@
   width: 104px;
   height: 105px;
   border-radius: 10px;
-  background: rgba(0, 0, 0, 0.25);
+  background: #000;
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
   padding: 0 11px 9px;
   color: #fff;
+  overflow: hidden;
+}
+
+/* Sweet — warm red/pink glow */
+.categoryCardSweet {
+  background: radial-gradient(at 65% 68%, #c64652 0%, #5c1f26 35%, #14070a 70%, #000 100%);
+}
+
+/* Fear — dark green/teal glow */
+.categoryCardFear {
+  background: radial-gradient(at 65% 68%, #4a8e6a 0%, #1f4a37 35%, #07120d 70%, #000 100%);
+}
+
+/* Confused — teal fading into indigo glow */
+.categoryCardConfused {
+  background: radial-gradient(at 60% 55%, #1c9cc0 0%, #2a49b5 45%, #0a1130 75%, #000 100%);
 }
 
 .categoryLabel {

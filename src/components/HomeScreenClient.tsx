@@ -14,14 +14,19 @@ type Card = {
   id: string;
   image: string;
   mood: string;
-  date: string;
-  time: string;
+  createdAt: string;
   summary?: string;
 };
 
 type Category = {
   label: string;
   count: number;
+};
+
+const CATEGORY_CARD_CLASS: Record<string, string> = {
+  Sweet: styles.categoryCardSweet,
+  Fear: styles.categoryCardFear,
+  Confused: styles.categoryCardConfused,
 };
 
 export default function HomeScreenClient({ cards, categories }: { cards: Card[]; categories: Category[] }) {
@@ -69,7 +74,7 @@ export default function HomeScreenClient({ cards, categories }: { cards: Card[];
             <Link
               key={cat.label}
               href={`/type/${encodeURIComponent(cat.label)}`}
-              className={styles.categoryCard}
+              className={`${styles.categoryCard} ${CATEGORY_CARD_CLASS[cat.label] ?? ""}`}
             >
               <p className={styles.categoryLabel}>{translateMood(cat.label, lang)}</p>
               <p className={styles.categoryCount}>
