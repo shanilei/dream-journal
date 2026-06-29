@@ -1,37 +1,94 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import styles from "./record.module.css";
 import BottomNav from "@/components/BottomNav";
 import DreamLoadingScreen from "@/components/DreamLoadingScreen";
 import DreamResultScreen from "@/components/DreamResultScreen";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 
-const MOCK_LOADING_MS = 4800;
-
-const MOCK_RESULT = {
-  imageUrl: "/images/cards/dream-2.png",
-  dateLabel: "Jun 22",
-  timeLabel: "06:08 PM",
-  mood: "Confused",
-  summaryText: "Demo result — voice transcription isn't connected yet.",
-  symbols: ["Demo", "Voice", "Coming soon"],
+type DreamResult = {
+  imageUrl: string;
+  clearImageUrl?: string;
+  dateLabel: string;
+  timeLabel: string;
+  mood: string;
+  summaryText: string;
+  symbols: string[];
+  dreamText: string;
 };
 
-type Status = "idle" | "recording" | "loading" | "result";
+type Status = "idle" | "recording" | "loading" | "result" | "error";
+
+function formatDateLabel(): string {
+  return new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+function formatTimeLabel(): string {
+  return new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+}
+
+function summarize(themes: string[]): string {
+  return themes.length ? `${themes.slice(0, 2).join(". ")}.` : "";
+}
+
+function shortSymbol(symbol: string): string {
+  return symbol.split(" - ")[0].trim();
+}
 
 export default function RecordPage() {
+  const router = useRouter();
   const [status, setStatus] = useState<Status>("idle");
+  const [result, setResult] = useState<DreamResult | null>(null);
 
-  useEffect(() => {
-    if (status !== "loading") return;
-    const timer = setTimeout(() => setStatus("result"), MOCK_LOADING_MS);
-    return () => clearTimeout(timer);
-  }, [status]);
+  async function handleRecordingComplete(audio: Blob) {
+    setStatus("loading");
+    console.log("recorded audio blob:", audio.type, audio.size, "bytes");
+    try {
+      if (audio.size === 0) throw new Error("recorded audio was empty");
 
-  if (status === "result") {
-    return <DreamResultScreen {...MOCK_RESULT} onBack={() => setStatus("idle")} />;
+      const audioForm = new FormData();
+      audioForm.append("audio", audio, "dream.webm");
+      const transcribeRes = await fetch("/api/transcribe", { method: "POST", body: audioForm });
+      if (!transcribeRes.ok) {
+        console.error("transcribe failed:", transcribeRes.status, await transcribeRes.text());
+        throw new Error("transcription failed");
+      }
+      const { text } = await transcribeRes.json();
+      if (!text) throw new Error("empty transcript");
+
+      const dreamRes = await fetch("/api/dream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text }),
+      });
+      if (!dreamRes.ok) {
+        console.error("dream processing failed:", dreamRes.status, await dreamRes.text());
+        throw new Error("dream processing failed");
+      }
+      const data = await dreamRes.json();
+
+      setResult({
+        imageUrl: data.imageUrl,
+        clearImageUrl: data.clearImageUrl,
+        dateLabel: formatDateLabel(),
+        timeLabel: formatTimeLabel(),
+        mood: data.mood,
+        summaryText: summarize(data.analysis.themes ?? []),
+        symbols: (data.analysis.symbols ?? []).slice(0, 3).map(shortSymbol),
+        dreamText: text,
+      });
+      setStatus("result");
+    } catch (err) {
+      console.error("voice dream flow failed:", err);
+      setStatus("error");
+    }
+  }
+
+  if (status === "result" && result) {
+    return <DreamResultScreen {...result} onBack={() => router.push("/")} />;
   }
 
   if (status === "loading") {
@@ -43,7 +100,11 @@ export default function RecordPage() {
   return (
     <div className={styles.screen}>
       <p className={styles.prompt}>
-        {isRecording ? "Listening to the dream" : "Tap to record the dream"}
+        {status === "error"
+          ? "Something went wrong — tap to try again"
+          : isRecording
+          ? "Listening to the dream"
+          : "Tap to record the dream"}
       </p>
 
       <div className={styles.ambientGlow} />
@@ -55,7 +116,11 @@ export default function RecordPage() {
         aria-pressed={isRecording}
         aria-label="Record dream"
       >
-        <VoiceRecordCircle isRecording={isRecording} onPermissionDenied={() => setStatus("idle")} />
+        <VoiceRecordCircle
+          isRecording={isRecording}
+          onPermissionDenied={() => setStatus("idle")}
+          onRecordingComplete={handleRecordingComplete}
+        />
       </button>
 
       <div className={styles.typeFallback}>
