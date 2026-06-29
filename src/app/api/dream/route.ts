@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { analyzeDream } from "@/analyze";
+import { interpretDream } from "@/interpret";
 import { generateImage, pickProfile } from "@/generate-image";
 import { saveDream } from "@/dreams-store";
 import { supabase } from "@/supabase";
@@ -25,6 +26,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const analysis = await analyzeDream(dreamText);
+    const interpretation = await interpretDream(dreamText, analysis);
 
     const outDir = join(process.env.TMPDIR ?? "/tmp", "dream-journal");
     mkdirSync(outDir, { recursive: true });
@@ -73,6 +75,8 @@ export async function POST(req: NextRequest) {
       symbols,
       imagePrompt: prompt,
       dreamText,
+      interpretationText: interpretation.interpretationText,
+      keywords: interpretation.keywords,
     });
 
     return NextResponse.json({
@@ -80,6 +84,8 @@ export async function POST(req: NextRequest) {
       mood,
       imageUrl,
       clearImageUrl,
+      interpretationText: interpretation.interpretationText,
+      keywords: interpretation.keywords,
     });
   } catch (err) {
     console.error("שגיאה בעיבוד החלום:", err);

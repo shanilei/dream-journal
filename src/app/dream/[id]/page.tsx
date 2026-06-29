@@ -23,6 +23,7 @@ export default async function DreamDetailPage({
       createdAt={dream.createdAt}
       mood={dream.mood}
       summaryText={dream.summaryText}
+      interpretationText={dream.interpretationText}
       symbols={dream.symbols.slice(0, 3).map(shortSymbol)}
       dreamText={dream.dreamText}
     />

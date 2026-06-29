@@ -10,6 +10,8 @@ export interface DreamEntry {
   symbols: string[];
   imagePrompt?: string;
   dreamText?: string;
+  interpretationText?: string;
+  keywords?: string[];
 }
 
 interface DreamRow {
@@ -22,6 +24,8 @@ interface DreamRow {
   symbols: string[];
   image_prompt: string | null;
   dream_text: string | null;
+  interpretation_text: string | null;
+  keywords: string[] | null;
 }
 
 function fromRow(row: DreamRow): DreamEntry {
@@ -35,6 +39,8 @@ function fromRow(row: DreamRow): DreamEntry {
     symbols: row.symbols ?? [],
     imagePrompt: row.image_prompt ?? undefined,
     dreamText: row.dream_text ?? undefined,
+    interpretationText: row.interpretation_text ?? undefined,
+    keywords: row.keywords ?? [],
   };
 }
 
@@ -49,6 +55,8 @@ export async function saveDream(entry: DreamEntry): Promise<void> {
     symbols: entry.symbols,
     image_prompt: entry.imagePrompt ?? null,
     dream_text: entry.dreamText ?? null,
+    interpretation_text: entry.interpretationText ?? null,
+    keywords: entry.keywords ?? null,
   });
   if (error) throw error;
 }

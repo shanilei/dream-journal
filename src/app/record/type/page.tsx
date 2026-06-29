@@ -12,6 +12,7 @@ type DreamResult = {
   createdAt: string;
   mood: string;
   summaryText: string;
+  interpretationText?: string;
   symbols: string[];
   dreamText: string;
 };
@@ -46,6 +47,7 @@ export default function TypeDreamPage() {
         createdAt: new Date().toISOString(),
         mood: data.mood,
         summaryText: summarize(data.analysis.themes ?? []),
+        interpretationText: data.interpretationText,
         symbols: (data.analysis.symbols ?? []).slice(0, 3).map(shortSymbol),
         dreamText: text,
       });

@@ -9,6 +9,7 @@ export default function DreamDetailClient({
   createdAt,
   mood,
   summaryText,
+  interpretationText,
   symbols,
   dreamText,
 }: {
@@ -17,6 +18,7 @@ export default function DreamDetailClient({
   createdAt: string;
   mood: string;
   summaryText: string;
+  interpretationText?: string;
   symbols: string[];
   dreamText?: string;
 }) {
@@ -29,6 +31,7 @@ export default function DreamDetailClient({
       createdAt={createdAt}
       mood={mood}
       summaryText={summaryText}
+      interpretationText={interpretationText}
       symbols={symbols}
       dreamText={dreamText}
       onBack={() => router.push("/")}

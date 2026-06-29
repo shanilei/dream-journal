@@ -73,6 +73,7 @@ export default function DreamResultScreen({
   createdAt,
   mood,
   summaryText,
+  interpretationText,
   symbols,
   dreamText,
   onBack,
@@ -82,6 +83,7 @@ export default function DreamResultScreen({
   createdAt: string;
   mood: string;
   summaryText: string;
+  interpretationText?: string;
   symbols: string[];
   dreamText?: string;
   onBack: () => void;
@@ -240,10 +242,10 @@ export default function DreamResultScreen({
           </div>
         </div>
 
-        {summaryText && (
+        {interpretationText && (
           <div className={styles.block}>
             <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
-            <CollapsibleText text={summaryText} dark={false} />
+            <CollapsibleText text={interpretationText} dark={false} />
           </div>
         )}
 

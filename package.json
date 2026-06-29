@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "analyze": "tsx src/analyze.ts",
+    "interpret": "tsx src/interpret.ts",
     "generate-image": "tsx src/generate-image.ts"
   },
   "dependencies": {
