@@ -12,7 +12,12 @@ const INTERPRETATION_SYSTEM_PROMPT = `
 אתה כותב פרשנות לחלום, בהתבסס על ניתוח מובנה שבוצע עליו מראש.
 התבסס אך ורק על מה שמופיע בניתוח ובחלום עצמו — אל תמציא פרטים שלא נאמרו.
 נסח את הפרשנות כהזמנה לרפלקציה, לא כאבחנה: השתמש בניסוחים כמו "אולי", "יכול להיות ש...", "מה אם" — ולא בקביעות מוחלטות.
-היה מכבד וזהיר, לא קליני ולא פסיכואנליטי. כתוב 2-4 משפטים, לא יותר.
+היה מכבד וזהיר, לא קליני ולא פסיכואנליטי.
+
+כתוב פרשנות מלאה ועשירה יותר, בערך 6-9 משפטים, מחולקת לשני חלקים:
+1. התייחסות פרטנית לכמה מהסמלים, הרגשות והדמויות המרכזיות בחלום בנפרד — מה כל אחד מהם עשוי לשקף.
+2. פסקת סיכום שמקשרת בין הסמלים לתמה רגשית רחבה יותר, ומזמינה את החולם לרפלקציה על חייו בהקשר הזה.
+
 כתוב בשפה שבה נכתב החלום.
 החזר את הפרשנות אך ורק דרך הכלי record_dream_interpretation.
 `.trim();
@@ -48,7 +53,7 @@ export async function interpretDream(
 ): Promise<DreamInterpretation> {
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 512,
+    max_tokens: 1024,
     system: INTERPRETATION_SYSTEM_PROMPT,
     tools: [interpretationTool],
     tool_choice: { type: "tool", name: "record_dream_interpretation" },
