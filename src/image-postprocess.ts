@@ -1,11 +1,11 @@
 import sharp from "sharp";
 
 // How long the motion-blur smear is, in pixels — matches Photoshop's
-// directional Motion Blur dialog at Distance: 200px, Angle: 0°.
-const BLUR_LENGTH_PX = 200;
+// directional Motion Blur dialog at Distance: 230px, Angle: 0°.
+const BLUR_LENGTH_PX = 230;
 // How much of the blurred version to mix in (0 = untouched, 1 = fully blurred)
 // — this is the "mask opacity" controlling how strongly the blur shows through.
-const BLUR_STRENGTH = 0.7;
+const BLUR_STRENGTH = 0.78;
 // Opacity of the horizontal grain-streak overlay. A flat-colored region
 // convolved with any kernel that sums to 1 comes back exactly as flat as it
 // started — blur mathematically cannot change a uniform area, no matter how
@@ -14,7 +14,7 @@ const BLUR_STRENGTH = 0.7;
 // stretched horizontally by the same kernel, has no such limitation — it's
 // visible the same everywhere — which is what makes the motion read across
 // the whole frame instead of just the high-contrast elements.
-const STREAK_OPACITY = 0.14;
+const STREAK_OPACITY = 0.18;
 
 // How strongly the frosted-glass haze blends over the sharp photo
 // (0 = untouched, 1 = fully replaced by the hazy/veiled version). Applied as
