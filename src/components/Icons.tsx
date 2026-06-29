@@ -1,3 +1,5 @@
+import { useId } from "react";
+
 export function ChevronRightIcon({ size = 24, color = "#000624" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -8,6 +10,19 @@ export function ChevronRightIcon({ size = 24, color = "#000624" }: { size?: numb
         strokeLinecap="round"
         strokeLinejoin="round"
       />
+    </svg>
+  );
+}
+
+export function CrescentMoonIcon({ size = 24, color = "#fff" }: { size?: number; color?: string }) {
+  const maskId = useId();
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <mask id={maskId}>
+        <rect width="24" height="24" fill="white" />
+        <circle cx="15.5" cy="8.5" r="9" fill="black" />
+      </mask>
+      <circle cx="12" cy="12" r="10" fill={color} mask={`url(#${maskId})`} />
     </svg>
   );
 }

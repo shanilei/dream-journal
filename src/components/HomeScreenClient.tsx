@@ -6,6 +6,8 @@ import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
 import DreamCardStack from "@/components/DreamCardStack";
 import DreamGridView from "@/components/DreamGridView";
+import DreamTypeGalleryGrid from "@/components/DreamTypeGalleryGrid";
+import GalleryFilterChips, { type GalleryFilter } from "@/components/GalleryFilterChips";
 import GlassEffect from "@/components/GlassEffect";
 import OnboardingGate from "@/components/OnboardingGate";
 import { FilterIcon, LayoutGalleryIcon, TableChartIcon } from "@/components/Icons";
@@ -46,6 +48,7 @@ export default function HomeScreenClient({
 }) {
   const { t, lang } = useLanguage();
   const [viewMode, setViewMode] = useState<ViewMode>("stack");
+  const [galleryFilter, setGalleryFilter] = useState<GalleryFilter>("byType");
 
   return (
     <div className={styles.screen}>
@@ -85,38 +88,47 @@ export default function HomeScreenClient({
         </button>
       </div>
 
-      <p className={styles.heading}>{t.latestDreams}</p>
-
       {viewMode === "stack" ? (
-        <DreamCardStack cards={cards} />
+        <>
+          <p className={styles.heading}>{t.latestDreams}</p>
+
+          <DreamCardStack cards={cards} />
+
+          <div className={styles.byType}>
+            <div className={styles.byTypeHeaderRow}>
+              <p className={styles.byTypeHeading}>{t.byType}</p>
+              <a className={styles.seeAll} href="#">
+                {t.seeAll}
+              </a>
+            </div>
+            <div className={styles.categoryRow}>
+              {categories.map((cat) => (
+                <Link
+                  key={cat.label}
+                  href={`/type/${encodeURIComponent(cat.label)}`}
+                  className={`${styles.categoryCard} ${CATEGORY_CARD_CLASS[cat.label] ?? ""}`}
+                >
+                  <p className={styles.categoryLabel}>{translateMood(cat.label, lang)}</p>
+                  <p className={styles.categoryCount}>
+                    {cat.count} {t.dreamsCount}
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </>
       ) : (
-        <div className={styles.gridSection}>
-          <DreamGridView cards={gridCards} />
+        <div className={styles.gallerySection}>
+          <GalleryFilterChips active={galleryFilter} onChange={setGalleryFilter} />
+          <div className={styles.galleryContent}>
+            {galleryFilter === "byType" && <DreamTypeGalleryGrid categories={categories} />}
+            {galleryFilter === "all" && <DreamGridView cards={gridCards} />}
+            {(galleryFilter === "latest" || galleryFilter === "analysis") && (
+              <p className={styles.comingSoon}>{t.comingSoon}</p>
+            )}
+          </div>
         </div>
       )}
-
-      <div className={styles.byType}>
-        <div className={styles.byTypeHeaderRow}>
-          <p className={styles.byTypeHeading}>{t.byType}</p>
-          <a className={styles.seeAll} href="#">
-            {t.seeAll}
-          </a>
-        </div>
-        <div className={styles.categoryRow}>
-          {categories.map((cat) => (
-            <Link
-              key={cat.label}
-              href={`/type/${encodeURIComponent(cat.label)}`}
-              className={`${styles.categoryCard} ${CATEGORY_CARD_CLASS[cat.label] ?? ""}`}
-            >
-              <p className={styles.categoryLabel}>{translateMood(cat.label, lang)}</p>
-              <p className={styles.categoryCount}>
-                {cat.count} {t.dreamsCount}
-              </p>
-            </Link>
-          ))}
-        </div>
-      </div>
 
       <BottomNav active="dreams" />
     </div>

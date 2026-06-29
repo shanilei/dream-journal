@@ -75,13 +75,27 @@
   justify-content: center;
 }
 
-.gridSection {
+.gallerySection {
   position: absolute;
   left: 29px;
   right: 29px;
-  top: calc(15.38% + 50px);
-  bottom: calc(38.46% - 9px);
+  top: calc(7.69% + 61px);
+  bottom: 130px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.galleryContent {
+  flex: 1;
   overflow-y: auto;
+}
+
+.comingSoon {
+  margin: 40px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .heading {
