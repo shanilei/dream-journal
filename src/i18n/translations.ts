@@ -81,3 +81,15 @@ const moodLabels: Record<Lang, Record<string, string>> = {
 export function translateMood(mood: string, lang: Lang): string {
   return moodLabels[lang][mood] ?? mood;
 }
+
+function localeFor(lang: Lang): string {
+  return lang === "he" ? "he-IL" : "en-US";
+}
+
+export function formatDreamDate(iso: string, lang: Lang): string {
+  return new Date(iso).toLocaleDateString(localeFor(lang), { month: "short", day: "numeric" });
+}
+
+export function formatDreamTime(iso: string, lang: Lang): string {
+  return new Date(iso).toLocaleTimeString(localeFor(lang), { hour: "2-digit", minute: "2-digit" });
+}

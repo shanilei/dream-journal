@@ -12,8 +12,7 @@ import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 type DreamResult = {
   imageUrl: string;
   clearImageUrl?: string;
-  dateLabel: string;
-  timeLabel: string;
+  createdAt: string;
   mood: string;
   summaryText: string;
   symbols: string[];
@@ -21,14 +20,6 @@ type DreamResult = {
 };
 
 type Status = "idle" | "recording" | "loading" | "result" | "error";
-
-function formatDateLabel(): string {
-  return new Date().toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function formatTimeLabel(): string {
-  return new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-}
 
 function summarize(themes: string[]): string {
   return themes.length ? `${themes.slice(0, 2).join(". ")}.` : "";
@@ -73,8 +64,7 @@ export default function RecordPage() {
       setResult({
         imageUrl: data.imageUrl,
         clearImageUrl: data.clearImageUrl,
-        dateLabel: formatDateLabel(),
-        timeLabel: formatTimeLabel(),
+        createdAt: new Date().toISOString(),
         mood: data.mood,
         summaryText: summarize(data.analysis.themes ?? []),
         symbols: (data.analysis.symbols ?? []).slice(0, 3).map(shortSymbol),

@@ -1,18 +1,16 @@
+"use client";
+
 import Link from "next/link";
 import styles from "./DreamsByTypeScreen.module.css";
 import BottomNav from "./BottomNav";
 import { ArrowLeftIcon } from "./Icons";
+import { useLanguage } from "./LanguageProvider";
+import { formatDreamDate, formatDreamTime } from "@/i18n/translations";
 import type { DreamEntry } from "@/dreams-store";
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function formatTime(iso: string): string {
-  return new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-}
-
 export default function DreamsByTypeScreen({ mood, dreams }: { mood: string; dreams: DreamEntry[] }) {
+  const { lang } = useLanguage();
+
   return (
     <div className={styles.screen}>
       <div className={styles.topBar}>
@@ -35,7 +33,7 @@ export default function DreamsByTypeScreen({ mood, dreams }: { mood: string; dre
             <div className={styles.rowText}>
               <p className={styles.rowSummary}>{dream.summaryText || mood}</p>
               <p className={styles.rowMeta}>
-                {formatDate(dream.createdAt)} · {formatTime(dream.createdAt)}
+                {formatDreamDate(dream.createdAt, lang)} · {formatDreamTime(dream.createdAt, lang)}
               </p>
             </div>
           </Link>

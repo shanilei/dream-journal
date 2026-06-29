@@ -6,7 +6,7 @@ import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
 import BottomNav from "./BottomNav";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
-import { translateMood } from "@/i18n/translations";
+import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translations";
 
 const CAPTION_MAX_WORDS = 7;
 const CAPTION_WORDS_PER_LINE = 4;
@@ -70,8 +70,7 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
 export default function DreamResultScreen({
   imageUrl,
   clearImageUrl,
-  dateLabel,
-  timeLabel,
+  createdAt,
   mood,
   summaryText,
   symbols,
@@ -80,8 +79,7 @@ export default function DreamResultScreen({
 }: {
   imageUrl: string;
   clearImageUrl?: string;
-  dateLabel: string;
-  timeLabel?: string;
+  createdAt: string;
   mood: string;
   summaryText: string;
   symbols: string[];
@@ -96,6 +94,8 @@ export default function DreamResultScreen({
   const [revealed, setRevealed] = useState(false);
   const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
   const captionLayout = pickCaptionLayout(imageUrl);
+  const dateLabel = formatDreamDate(createdAt, lang);
+  const timeLabel = formatDreamTime(createdAt, lang);
   const dreamTitle = lang === "he" ? `${t.dreamTitleSuffix} ${dateLabel}` : `${dateLabel} ${t.dreamTitleSuffix}`;
 
   function sampleBrightness() {

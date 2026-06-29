@@ -6,14 +6,6 @@ function shortSymbol(symbol: string): string {
   return symbol.split(" - ")[0].trim();
 }
 
-function formatDateLabel(iso: string): string {
-  return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
-function formatTimeLabel(iso: string): string {
-  return new Date(iso).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
-}
-
 export default async function DreamDetailPage({
   params,
 }: {
@@ -28,8 +20,7 @@ export default async function DreamDetailPage({
     <DreamDetailClient
       imageUrl={dream.imageUrl}
       clearImageUrl={dream.clearImageUrl}
-      dateLabel={formatDateLabel(dream.createdAt)}
-      timeLabel={formatTimeLabel(dream.createdAt)}
+      createdAt={dream.createdAt}
       mood={dream.mood}
       summaryText={dream.summaryText}
       symbols={dream.symbols.slice(0, 3).map(shortSymbol)}

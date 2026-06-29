@@ -4,12 +4,12 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./DreamCardStack.module.css";
 import { useLanguage } from "./LanguageProvider";
-import { translateMood } from "@/i18n/translations";
+import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translations";
 
 const FALLBACK_CARDS: DreamCard[] = [
-  { id: "fallback-1", image: "/images/cards/dream-1.png", mood: "Sweet", date: "May 24", time: "10:30" },
-  { id: "fallback-2", image: "/images/cards/dream-2.png", mood: "Confusion", date: "May 24", time: "10:30" },
-  { id: "fallback-3", image: "/images/cards/dream-3.png", mood: "Confusion", date: "May 24", time: "10:30" },
+  { id: "fallback-1", image: "/images/cards/dream-1.png", mood: "Sweet", createdAt: "2026-05-24T10:30:00.000Z" },
+  { id: "fallback-2", image: "/images/cards/dream-2.png", mood: "Confusion", createdAt: "2026-05-24T10:30:00.000Z" },
+  { id: "fallback-3", image: "/images/cards/dream-3.png", mood: "Confusion", createdAt: "2026-05-24T10:30:00.000Z" },
 ];
 
 // front -> middle -> back, lifted from the original Figma stack positions
@@ -28,8 +28,7 @@ export interface DreamCard {
   id: string;
   image: string;
   mood: string;
-  date: string;
-  time: string;
+  createdAt: string;
   summary?: string;
 }
 
@@ -120,8 +119,8 @@ export default function DreamCardStack({ cards }: { cards?: DreamCard[] }) {
             <div className={styles.dreamCardFooter}>
               <span className={styles.moodTag}>{translateMood(card.mood, lang)}</span>
               <span className={styles.metaGroup}>
-                <span className={styles.metaText}>{card.date}</span>
-                <span className={styles.metaText}>{card.time}</span>
+                <span className={styles.metaText}>{formatDreamDate(card.createdAt, lang)}</span>
+                <span className={styles.metaText}>{formatDreamTime(card.createdAt, lang)}</span>
               </span>
             </div>
           </div>
