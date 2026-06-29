@@ -68,5 +68,12 @@ export default function VoiceRecordCircle({ isRecording, onPermissionDenied, onR
     };
   }, [isRecording]);
 
-  return <div className={isRecording ? `${styles.circle} ${styles.recording}` : styles.circle} />;
+  return (
+    <div className={isRecording ? `${styles.circle} ${styles.recording}` : styles.circle}>
+      <span className={styles.band1} />
+      <span className={styles.band2} />
+      <span className={styles.band3} />
+      <span className={styles.band4} />
+    </div>
+  );
 }
