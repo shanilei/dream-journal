@@ -53,7 +53,7 @@ const STYLES: Record<string, string> = {
 
 
 // ===== 3 פרופילים — נבחר אחד לפי הרגש הדומיננטי בחלום, ראה VISUAL_STYLES.md =====
-export type ProfileKey = "sweet" | "confused" | "fear";
+export type ProfileKey = "sweet" | "confused" | "fear" | "sad" | "angry";
 
 const PROFILES: Record<ProfileKey, string> = {
   sweet: `
@@ -71,6 +71,16 @@ Colors — Icy Aqua (#AFFDF0), Light Green (#BEEF8D), Deep Teal (#3A745D), Space
 Mood: suffocating, cold, looming, tense.
 Subjects: choose dense, heavy, threatening organic forms — dark thorned plants, deep-sea organisms, heavy moss, roots pressing inward, forms that loom from shadow. Nothing domestic or recognizable as an object.
 `.trim(),
+  sad: `
+Colors — Pale Silver (#D9DEE3), Faded Denim (#5B6B8C), Dusty Mauve (#7A6E7D), Slate Indigo (#2B3550), Ink Grey (#11131C). Slate Indigo and Ink Grey dominant and heavy, Faded Denim as mid layer, Pale Silver bleeding faintly at edges like weak light.
+Mood: heavy, quiet, hollow, melancholic — stillness rather than threat.
+Subjects: choose drooping, weary nature forms — wilted flowers, fallen petals, rain-soaked branches, bare drooping stems, empty seed pods. Quiet and slow, never violent or sharp.
+`.trim(),
+  angry: `
+Colors — Blood Red (#B3261E), Scorched Orange (#D9621C), Soot Black (#1A0F0A), Charcoal (#2B2422), Ash Grey (#8C8278). Blood Red and Scorched Orange dominant and hot, Soot Black and Charcoal as dense foundation, Ash Grey bleeding at edges like smoke.
+Mood: hot, jagged, combustible, tense.
+Subjects: choose sharp, aggressive nature forms — thorned brambles, cracked scorched bark, jagged broken branches, blackened leaves. Intense and sharp-edged, never soft or rounded.
+`.trim(),
 };
 
 // פלטות צבע מילוליות (לא hex, בלי "Subjects:") לסגנונות אבסטרקטיים — נבחרות לפי הרגש הדומיננטי בלבד
@@ -78,6 +88,8 @@ const ABSTRACT_MOOD_COLORS: Record<ProfileKey, string> = {
   fear: "dark moss green, charcoal grey, deep black, cold ash grey",
   sweet: "soft pink, warm coral, peachy orange, gentle red",
   confused: "electric indigo, deep cyan-blue, dark violet, cool slate grey",
+  sad: "slate grey, faded denim blue, dusty lavender, pale silver",
+  angry: "blood red, scorched orange, charcoal black, ash grey",
 };
 
 // פלטת 4 צבעים מדויקת לכל מצב-רוח, לפי "Lucid Visual Style System v1"
@@ -85,6 +97,8 @@ const LUCID_MOOD_COLORS: Record<ProfileKey, string> = {
   sweet: "soft pink, warm coral, peach orange, cream",
   confused: "dusty lavender, muted beige, faded blue, soft grey",
   fear: "deep red, burnt orange, dark olive, near black",
+  sad: "slate blue, faded grey, dusty mauve, pale silver",
+  angry: "blood red, burnt orange, charcoal black, rust",
 };
 
 // פלטת הצבעים לפי כללי ה-COLOR RULES של "LUCID VISUAL SYSTEM" (הספסיפיקציה החדשה)
@@ -92,6 +106,8 @@ const LUCID_SYSTEM_COLORS: Record<ProfileKey, string> = {
   sweet: "peach, coral, cream, gold, blush pink, soft apricot",
   confused: "muted blue, lavender, beige, grey, dusty mauve, faded teal",
   fear: "charcoal, navy, olive, burgundy, rust, slate grey",
+  sad: "slate blue, faded denim, dove grey, dusty mauve, pale silver, muted indigo",
+  angry: "blood red, scorched orange, charcoal, soot black, rust, ash grey",
 };
 
 // רקע שטוח וצבעוני לכל מצב-רוח, לפי "SURREAL MINIMALIST & ANALOG DREAMSCAPE" — תואם לתמונות הרפרנס שהמשתמש שלח
@@ -99,6 +115,8 @@ const SURREAL_MINIMALIST_COLORS: Record<ProfileKey, string> = {
   sweet: "a warm sunset gradient of glowing pink and orange, soft golden light",
   confused: "a flat, deep midnight blue, almost black at its edges",
   fear: "a flat, intensely saturated crimson red",
+  sad: "a flat, muted slate-blue grey, like an overcast sky",
+  angry: "a flat, scorched burnt-orange red, like hot embers",
 };
 
 // מילות מפתח לזיהוי רגש דומיננטי → פרופיל
@@ -106,6 +124,8 @@ const EMOTION_KEYWORDS: Record<ProfileKey, string[]> = {
   fear: ["פחד", "חרדה", "מתח", "איום", "בהלה", "דחק", "לחץ", "fear", "anxiety", "panic", "dread", "stress", "threat"],
   confused: ["בלבול", "תהייה", "חוסר וודאות", "אובדן כיוון", "מבולבל", "confusion", "confused", "disoriented", "uncertainty"],
   sweet: ["שמחה", "אהבה", "נוסטלגיה", "חמימות", "התרגשות", "כיף", "joy", "love", "warmth", "nostalgia", "excitement", "happiness"],
+  sad: ["עצב", "עצבות", "אבל", "געגוע", "יגון", "דכדוך", "sad", "sadness", "grief", "loss", "melancholy", "sorrow"],
+  angry: ["כעס", "תסכול", "עצבים", "רוגז", "זעם", "anger", "angry", "frustration", "rage", "fury", "resentment"],
 };
 
 export function pickProfile(analysis: DreamAnalysis): ProfileKey {

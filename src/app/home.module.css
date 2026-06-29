@@ -147,6 +147,16 @@
   background: radial-gradient(at 60% 55%, #1c9cc0 0%, #2a49b5 45%, #0a1130 75%, #000 100%);
 }
 
+/* Sad — muted slate-blue grey glow */
+.categoryCardSad {
+  background: radial-gradient(at 60% 55%, #5b6b8c 0%, #2b3550 45%, #0a0d18 75%, #000 100%);
+}
+
+/* Angry — hot scorched red/orange glow */
+.categoryCardAngry {
+  background: radial-gradient(at 65% 68%, #e0492f 0%, #7a1f0f 35%, #1a0704 70%, #000 100%);
+}
+
 .categoryLabel {
   font-size: 12px;
   font-weight: 700;

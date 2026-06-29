@@ -70,11 +70,15 @@ const moodLabels: Record<Lang, Record<string, string>> = {
     Fear: "Fear",
     Confused: "Confused",
     Sweet: "Sweet",
+    Sad: "Sad",
+    Angry: "Angry",
   },
   he: {
     Fear: "פחד",
     Confused: "מבולבל",
     Sweet: "מתוק",
+    Sad: "עצוב",
+    Angry: "כועס",
   },
 };
 

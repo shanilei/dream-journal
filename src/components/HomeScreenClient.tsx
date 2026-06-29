@@ -27,6 +27,8 @@ const CATEGORY_CARD_CLASS: Record<string, string> = {
   Sweet: styles.categoryCardSweet,
   Fear: styles.categoryCardFear,
   Confused: styles.categoryCardConfused,
+  Sad: styles.categoryCardSad,
+  Angry: styles.categoryCardAngry,
 };
 
 export default function HomeScreenClient({ cards, categories }: { cards: Card[]; categories: Category[] }) {

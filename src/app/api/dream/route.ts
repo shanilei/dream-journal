@@ -9,7 +9,7 @@ import { supabase } from "@/supabase";
 
 export const runtime = "nodejs";
 
-const MOOD_LABELS = { sweet: "Sweet", confused: "Confused", fear: "Fear" } as const;
+const MOOD_LABELS = { sweet: "Sweet", confused: "Confused", fear: "Fear", sad: "Sad", angry: "Angry" } as const;
 
 function shortSymbol(symbol: string): string {
   return symbol.split(" - ")[0].trim();

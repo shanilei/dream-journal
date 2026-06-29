@@ -1,7 +1,7 @@
 import HomeScreenClient from "@/components/HomeScreenClient";
 import { listDreams } from "@/dreams-store";
 
-const MOOD_TYPES = ["Fear", "Confused", "Sweet"] as const;
+const MOOD_TYPES = ["Fear", "Confused", "Sweet", "Sad", "Angry"] as const;
 
 export default async function HomePage() {
   const dreams = await listDreams();
