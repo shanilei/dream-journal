@@ -45,6 +45,39 @@
   animation: orbPulse 2.6s ease-in-out infinite;
 }
 
+/* The moon disc itself, drawn on top of the glow halo. The shadow panel
+   inside it animates from covering exactly half (a clean half-moon split
+   straight through the center) to covering none of it (full moon), then
+   back — a continuous waxing/waning cycle while the dream is processed. */
+.moonWrap {
+  position: relative;
+  z-index: 1;
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: radial-gradient(circle at 35% 30%, #fffef6 0%, #f3ecd8 45%, #d8cfa9 75%, #b7ad84 100%);
+  box-shadow: 0 0 40px 6px rgba(255, 248, 222, 0.5), inset 0 0 22px rgba(120, 110, 70, 0.25);
+}
+
+.moonShadow {
+  position: absolute;
+  inset: 0 0 0 auto;
+  right: 0;
+  width: 50%;
+  background: linear-gradient(to left, #161a2c 0%, #161a2c 70%, rgba(22, 26, 44, 0) 100%);
+  animation: moonPhase 3.4s ease-in-out infinite alternate;
+}
+
+@keyframes moonPhase {
+  0% {
+    width: 50%;
+  }
+  100% {
+    width: 0%;
+  }
+}
+
 .orbRing {
   position: absolute;
   inset: 0;
