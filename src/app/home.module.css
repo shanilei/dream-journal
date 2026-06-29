@@ -46,10 +46,16 @@
   align-items: center;
   justify-content: center;
   color: #000;
+  box-shadow: 0 0 0 0 transparent;
+  transition: box-shadow 0.2s ease;
 }
 
 :global([data-theme="dark"]) .pillBtn {
   color: var(--dark-text-primary);
+}
+
+.pillBtnActive {
+  box-shadow: 0 0 0 2px #eca22f;
 }
 
 .iconLayer {
@@ -58,6 +64,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.gridSection {
+  position: absolute;
+  left: 29px;
+  right: 29px;
+  top: calc(15.38% + 50px);
+  bottom: calc(38.46% - 9px);
+  overflow-y: auto;
 }
 
 .heading {

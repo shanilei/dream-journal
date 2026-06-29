@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
 import DreamCardStack from "@/components/DreamCardStack";
+import DreamGridView from "@/components/DreamGridView";
 import GlassEffect from "@/components/GlassEffect";
 import OnboardingGate from "@/components/OnboardingGate";
 import { FilterIcon, LayoutGalleryIcon, TableChartIcon } from "@/components/Icons";
@@ -18,6 +20,8 @@ type Card = {
   summary?: string;
 };
 
+type ViewMode = "stack" | "grid";
+
 type Category = {
   label: string;
   count: number;
@@ -31,21 +35,42 @@ const CATEGORY_CARD_CLASS: Record<string, string> = {
   Angry: styles.categoryCardAngry,
 };
 
-export default function HomeScreenClient({ cards, categories }: { cards: Card[]; categories: Category[] }) {
+export default function HomeScreenClient({
+  cards,
+  gridCards,
+  categories,
+}: {
+  cards: Card[];
+  gridCards: Card[];
+  categories: Category[];
+}) {
   const { t, lang } = useLanguage();
+  const [viewMode, setViewMode] = useState<ViewMode>("stack");
 
   return (
     <div className={styles.screen}>
       <OnboardingGate />
       <div className={styles.toolbar}>
         <div className={styles.toolbarGroup}>
-          <button type="button" className={styles.pillBtn} aria-label="Table view">
+          <button
+            type="button"
+            className={`${styles.pillBtn} ${viewMode === "stack" ? styles.pillBtnActive : ""}`}
+            aria-label="Stack view"
+            aria-pressed={viewMode === "stack"}
+            onClick={() => setViewMode("stack")}
+          >
             <GlassEffect fill size={48} />
             <span className={styles.iconLayer}>
               <TableChartIcon size={16} color="currentColor" />
             </span>
           </button>
-          <button type="button" className={styles.pillBtn} aria-label="Gallery view">
+          <button
+            type="button"
+            className={`${styles.pillBtn} ${viewMode === "grid" ? styles.pillBtnActive : ""}`}
+            aria-label="Grid view"
+            aria-pressed={viewMode === "grid"}
+            onClick={() => setViewMode("grid")}
+          >
             <GlassEffect fill size={48} />
             <span className={styles.iconLayer}>
               <LayoutGalleryIcon size={16} color="currentColor" />
@@ -62,7 +87,13 @@ export default function HomeScreenClient({ cards, categories }: { cards: Card[];
 
       <p className={styles.heading}>{t.latestDreams}</p>
 
-      <DreamCardStack cards={cards} />
+      {viewMode === "stack" ? (
+        <DreamCardStack cards={cards} />
+      ) : (
+        <div className={styles.gridSection}>
+          <DreamGridView cards={gridCards} />
+        </div>
+      )}
 
       <div className={styles.byType}>
         <div className={styles.byTypeHeaderRow}>
