@@ -59,7 +59,7 @@ export default function HomeScreenClient({
             aria-pressed={viewMode === "stack"}
             onClick={() => setViewMode("stack")}
           >
-            <GlassEffect fill size={48} />
+            {viewMode === "stack" ? <span className={styles.selectedFill} /> : <GlassEffect fill size={48} />}
             <span className={styles.iconLayer}>
               <TableChartIcon size={16} color="currentColor" />
             </span>
@@ -71,7 +71,7 @@ export default function HomeScreenClient({
             aria-pressed={viewMode === "grid"}
             onClick={() => setViewMode("grid")}
           >
-            <GlassEffect fill size={48} />
+            {viewMode === "grid" ? <span className={styles.selectedFill} /> : <GlassEffect fill size={48} />}
             <span className={styles.iconLayer}>
               <LayoutGalleryIcon size={16} color="currentColor" />
             </span>
