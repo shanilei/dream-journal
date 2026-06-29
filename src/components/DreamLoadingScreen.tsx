@@ -6,18 +6,18 @@ import { SparkleIcon, MoonPhaseIcon } from "./Icons";
 
 const MOON_RING_COUNT = 28;
 const MOON_RING_RADIUS_PX = 64;
+const CHASE_DURATION_MS = 2400;
 const moonRingIcons = Array.from({ length: MOON_RING_COUNT }, (_, i) => {
   const angle = (i / MOON_RING_COUNT) * 2 * Math.PI - Math.PI / 2;
   return {
     phase: i / MOON_RING_COUNT,
     x: MOON_RING_RADIUS_PX * Math.cos(angle),
     y: MOON_RING_RADIUS_PX * Math.sin(angle),
+    delayMs: (i / MOON_RING_COUNT) * CHASE_DURATION_MS,
   };
 });
 
-// Grouped by stage (opening → analysing → reveal) so every dream still
-// follows the same three-beat arc, but the exact wording varies each time
-// instead of repeating the identical three lines on every single dream.
+// Three stages, random wording each time.
 const MESSAGE_STAGES: string[][] = [
   ["Thinking about you....", "Settling into your dream...", "Drifting into your memory..."],
   ["Start analysing your dream", "Mapping the symbols...", "Tracing the feeling..."],
@@ -50,7 +50,9 @@ export default function DreamLoadingScreen() {
               className={styles.moonRingIcon}
               style={{ transform: `translate(${icon.x}px, ${icon.y}px)` }}
             >
-              <MoonPhaseIcon phase={icon.phase} size={16} color="currentColor" />
+              <span className={styles.moonRingIconPulse} style={{ animationDelay: `${icon.delayMs}ms` }}>
+                <MoonPhaseIcon phase={icon.phase} size={16} color="currentColor" />
+              </span>
             </span>
           ))}
         </div>

@@ -27,12 +27,7 @@ export function CrescentMoonIcon({ size = 24, color = "#fff" }: { size?: number;
   );
 }
 
-/**
- * A single lunar-phase glyph. `phase` runs 0 -> 1 around a full cycle:
- * 0/1 = new moon (fully dark), 0.5 = full moon, with crescent/quarter/
- * gibbous in between — approximated by sliding a same-size shadow circle
- * across the moon disc rather than modeling real illumination geometry.
- */
+// phase 0/1 = new moon, 0.5 = full moon, with crescent/gibbous in between.
 export function MoonPhaseIcon({ phase, size = 24, color = "#fff" }: { phase: number; size?: number; color?: string }) {
   const maskId = useId();
   const r = 10;

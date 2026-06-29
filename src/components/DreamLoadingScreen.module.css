@@ -30,15 +30,13 @@
   justify-content: center;
 }
 
-/* A ring of lunar-phase glyphs standing in for the old dashed-ring +
-   glowing moon orb (Figma node 914:5687) — the whole ring rotates so any
-   fixed point on screen cycles through the phases as they pass by. */
+/* Ring of moon-phase glyphs, fixed in place. Each one pulses in turn so the
+   highlight chases around the circle instead of the ring itself spinning. */
 .moonRing {
   position: relative;
   width: 100%;
   height: 100%;
   color: #4f6df0;
-  animation: orbRotate 18s linear infinite;
 }
 
 :global([data-theme="dark"]) .moonRing {
@@ -51,6 +49,13 @@
   top: 50%;
   display: flex;
   margin: -8px 0 0 -8px;
+}
+
+.moonRingIconPulse {
+  display: flex;
+  opacity: 0.3;
+  transform: scale(0.85);
+  animation: moonChase 2.4s ease-in-out infinite;
 }
 
 .messages {
@@ -79,12 +84,16 @@
   white-space: nowrap;
 }
 
-@keyframes orbRotate {
-  from {
-    transform: rotate(0deg);
+@keyframes moonChase {
+  0%,
+  85%,
+  100% {
+    opacity: 0.3;
+    transform: scale(0.85);
   }
-  to {
-    transform: rotate(360deg);
+  8% {
+    opacity: 1;
+    transform: scale(1.25);
   }
 }
 
