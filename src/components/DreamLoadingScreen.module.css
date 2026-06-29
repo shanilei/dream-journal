@@ -23,72 +23,34 @@
 
 .orbWrap {
   position: relative;
-  width: 220px;
-  height: 220px;
+  width: 170px;
+  height: 170px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.orbGlow {
-  position: absolute;
-  width: 140px;
-  height: 140px;
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(60, 92, 240, 0.95) 0%,
-    rgba(60, 92, 240, 0.55) 40%,
-    rgba(60, 92, 240, 0) 75%
-  );
-  filter: blur(14px);
-  animation: orbPulse 2.6s ease-in-out infinite;
-}
-
-/* The moon disc itself, drawn on top of the glow halo. The shadow panel
-   inside it animates from covering exactly half (a clean half-moon split
-   straight through the center) to covering none of it (full moon), then
-   back — a continuous waxing/waning cycle while the dream is processed. */
-.moonWrap {
+/* A ring of lunar-phase glyphs standing in for the old dashed-ring +
+   glowing moon orb (Figma node 914:5687) — the whole ring rotates so any
+   fixed point on screen cycles through the phases as they pass by. */
+.moonRing {
   position: relative;
-  z-index: 1;
-  width: 130px;
-  height: 130px;
-  border-radius: 50%;
-  overflow: hidden;
-  background: radial-gradient(circle at 35% 30%, #fffef6 0%, #f3ecd8 45%, #d8cfa9 75%, #b7ad84 100%);
-  box-shadow: 0 0 40px 6px rgba(255, 248, 222, 0.5), inset 0 0 22px rgba(120, 110, 70, 0.25);
-}
-
-.moonShadow {
-  position: absolute;
-  inset: 0 0 0 auto;
-  right: 0;
-  width: 50%;
-  background: linear-gradient(to left, #161a2c 0%, #161a2c 70%, rgba(22, 26, 44, 0) 100%);
-  animation: moonPhase 3.4s ease-in-out infinite alternate;
-}
-
-@keyframes moonPhase {
-  0% {
-    width: 50%;
-  }
-  100% {
-    width: 0%;
-  }
-}
-
-.orbRing {
-  position: absolute;
-  inset: 0;
   width: 100%;
   height: 100%;
   color: #4f6df0;
   animation: orbRotate 18s linear infinite;
 }
 
-:global([data-theme="dark"]) .orbRing {
-  color: rgba(255, 255, 255, 0.6);
+:global([data-theme="dark"]) .moonRing {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.moonRingIcon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: flex;
+  margin: -8px 0 0 -8px;
 }
 
 .messages {
@@ -115,18 +77,6 @@
   font-size: 12px;
   color: inherit;
   white-space: nowrap;
-}
-
-@keyframes orbPulse {
-  0%,
-  100% {
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    transform: scale(1.12);
-    opacity: 1;
-  }
 }
 
 @keyframes orbRotate {

@@ -2,7 +2,18 @@
 
 import { useEffect, useState } from "react";
 import styles from "./DreamLoadingScreen.module.css";
-import { SparkleIcon } from "./Icons";
+import { SparkleIcon, MoonPhaseIcon } from "./Icons";
+
+const MOON_RING_COUNT = 28;
+const MOON_RING_RADIUS_PX = 64;
+const moonRingIcons = Array.from({ length: MOON_RING_COUNT }, (_, i) => {
+  const angle = (i / MOON_RING_COUNT) * 2 * Math.PI - Math.PI / 2;
+  return {
+    phase: i / MOON_RING_COUNT,
+    x: MOON_RING_RADIUS_PX * Math.cos(angle),
+    y: MOON_RING_RADIUS_PX * Math.sin(angle),
+  };
+});
 
 // Grouped by stage (opening → analysing → reveal) so every dream still
 // follows the same three-beat arc, but the exact wording varies each time
@@ -32,20 +43,16 @@ export default function DreamLoadingScreen() {
   return (
     <div className={styles.screen}>
       <div className={styles.orbWrap}>
-        <svg className={styles.orbRing} viewBox="0 0 220 220" fill="none">
-          <circle
-            cx="110"
-            cy="110"
-            r="100"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeDasharray="22 18"
-            strokeLinecap="round"
-          />
-        </svg>
-        <div className={styles.orbGlow} />
-        <div className={styles.moonWrap}>
-          <div className={styles.moonShadow} />
+        <div className={styles.moonRing}>
+          {moonRingIcons.map((icon, i) => (
+            <span
+              key={i}
+              className={styles.moonRingIcon}
+              style={{ transform: `translate(${icon.x}px, ${icon.y}px)` }}
+            >
+              <MoonPhaseIcon phase={icon.phase} size={16} color="currentColor" />
+            </span>
+          ))}
         </div>
       </div>
 

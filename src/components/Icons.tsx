@@ -27,6 +27,29 @@ export function CrescentMoonIcon({ size = 24, color = "#fff" }: { size?: number;
   );
 }
 
+/**
+ * A single lunar-phase glyph. `phase` runs 0 -> 1 around a full cycle:
+ * 0/1 = new moon (fully dark), 0.5 = full moon, with crescent/quarter/
+ * gibbous in between — approximated by sliding a same-size shadow circle
+ * across the moon disc rather than modeling real illumination geometry.
+ */
+export function MoonPhaseIcon({ phase, size = 24, color = "#fff" }: { phase: number; size?: number; color?: string }) {
+  const maskId = useId();
+  const r = 10;
+  const t = phase <= 0.5 ? phase / 0.5 : (1 - phase) / 0.5; // 0 at new moon, 1 at full moon
+  const offset = (1 - t) * r * 2;
+  const dir = phase <= 0.5 ? 1 : -1;
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <mask id={maskId}>
+        <rect width="24" height="24" fill="white" />
+        <circle cx={12 + dir * offset} cy="12" r={r} fill="black" />
+      </mask>
+      <circle cx="12" cy="12" r={r} fill={color} mask={`url(#${maskId})`} />
+    </svg>
+  );
+}
+
 export function AddAIIcon({ size = 24, color = "#fff" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
