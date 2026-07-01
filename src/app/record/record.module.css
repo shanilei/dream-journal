@@ -36,24 +36,6 @@
   color: var(--dark-text-primary);
 }
 
-.ambientGlow {
-  position: absolute;
-  left: 50%;
-  top: calc(30.77% + 35px);
-  width: 179px;
-  height: 179px;
-  transform: translate(-50%, 0) scale(1.8);
-  border-radius: 50%;
-  background: radial-gradient(
-    circle,
-    rgba(var(--dark-glow-blue-rgb), 0.55) 0%,
-    rgba(var(--dark-glow-blue-rgb), 0.25) 45%,
-    rgba(var(--dark-glow-blue-rgb), 0) 75%
-  );
-  filter: blur(20px);
-  pointer-events: none;
-}
-
 .recordButton {
   position: absolute;
   left: 50%;
@@ -66,6 +48,27 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+}
+
+.liveTranscript {
+  position: absolute;
+  left: 50%;
+  top: calc(53.85% + 4px);
+  transform: translateX(-50%);
+  width: min(320px, 82vw);
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  color: rgba(0, 6, 36, 0.65);
+  text-align: center;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+}
+
+:global([data-theme="dark"]) .liveTranscript {
+  color: rgba(255, 255, 255, 0.55);
 }
 
 .typeFallback {

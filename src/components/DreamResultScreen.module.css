@@ -402,26 +402,25 @@
 }
 
 @media print {
-  .screen {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-    background: #fff;
-    padding-bottom: 0;
+  /* Hide everything on the page */
+  body * {
+    visibility: hidden !important;
   }
 
-  .topBar,
-  .titleBlock,
-  .block,
-  .printModalOverlay {
-    display: none;
-  }
-
-  .content {
-    padding: 0;
-  }
-
-  .imageCard {
-    animation: none;
+  /* Show only the illustration, stretched to fill the printed page */
+  .image,
+  .imageClear {
+    visibility: visible !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    object-fit: contain !important;
+    border-radius: 0 !important;
+    opacity: 1 !important;
+    filter: none !important;
+    animation: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
   }
 }

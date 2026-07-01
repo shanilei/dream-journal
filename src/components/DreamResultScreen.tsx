@@ -130,7 +130,7 @@ export default function DreamResultScreen({
 
   function handlePrint() {
     setShowPrintModal(false);
-    window.print();
+    setTimeout(() => window.print(), 50);
   }
 
   return (

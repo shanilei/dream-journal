@@ -71,7 +71,8 @@ p {
 }
 
 @media print {
+  html,
   body {
-    background: #fff;
+    background: #fff !important;
   }
 }

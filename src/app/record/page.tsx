@@ -34,8 +34,10 @@ export default function RecordPage() {
   const router = useRouter();
   const [status, setStatus] = useState<Status>("idle");
   const [result, setResult] = useState<DreamResult | null>(null);
+  const [liveTranscript, setLiveTranscript] = useState("");
 
   async function handleRecordingComplete(audio: Blob) {
+    setLiveTranscript("");
     setStatus("loading");
     console.log("recorded audio blob:", audio.type, audio.size, "bytes");
     try {
@@ -99,8 +101,6 @@ export default function RecordPage() {
           : "Tap to record the dream"}
       </p>
 
-      <div className={styles.ambientGlow} />
-
       <button
         type="button"
         className={styles.recordButton}
@@ -112,8 +112,13 @@ export default function RecordPage() {
           isRecording={isRecording}
           onPermissionDenied={() => setStatus("idle")}
           onRecordingComplete={handleRecordingComplete}
+          onTranscriptUpdate={setLiveTranscript}
         />
       </button>
+
+      {isRecording && liveTranscript && (
+        <p className={styles.liveTranscript}>{liveTranscript}</p>
+      )}
 
       <div className={styles.typeFallback}>
         <span className={styles.typeFallbackOr}>OR</span>
