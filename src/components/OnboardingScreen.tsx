@@ -20,10 +20,18 @@ export default function OnboardingScreen() {
 
   return (
     <div className={styles.screen}>
+      {/* Glow stack — bottom to top: navy → blue-deep → purple */}
+      <div className={styles.glowNavy} />
+      <div className={styles.glowBlue} />
+      <div className={styles.glowPurple} />
+
+      {/* Starfield overlay */}
+      <div className={styles.starfield} />
+
       <p className={styles.headline}>
-        A personal journal for <span className={styles.accent1}>dreams</span>
+        A personal journal for <span className={styles.accent}>dreams</span>
         <br />
-        memories and <span className={styles.accent2}>reflections</span>
+        memories and <span className={styles.accent}>reflections</span>
       </p>
 
       <div className={styles.footer}>
@@ -35,9 +43,18 @@ export default function OnboardingScreen() {
 
         <div className={styles.cta}>
           <span className={styles.ctaLabel}>Get started</span>
-          <button type="button" className={styles.ctaButton} onClick={handleGetStarted} aria-label="Get started">
-            <span className={styles.ctaIcon}>
-              <ArrowRightIcon size={24} color="#5244f3" />
+          <button
+            type="button"
+            className={styles.ctaOuter}
+            onClick={handleGetStarted}
+            aria-label="Get started"
+          >
+            <span className={styles.ctaMid}>
+              <span className={styles.ctaInner}>
+                <span className={styles.ctaIcon}>
+                  <ArrowRightIcon size={24} color="var(--accent-primary)" />
+                </span>
+              </span>
             </span>
           </button>
         </div>

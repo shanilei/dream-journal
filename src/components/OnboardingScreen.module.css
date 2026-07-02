@@ -11,32 +11,81 @@
   justify-content: flex-end;
   gap: 40px;
   padding: 0 24px 48px;
-  background: #090a13 url("/images/onboarding/starfield.png") center top / cover no-repeat;
+  background: var(--bg-base);
 }
 
+/* Starfield — mix-blend-mode: plus-lighter over the glow stack */
+.starfield {
+  position: absolute;
+  inset: 0;
+  background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
+  mix-blend-mode: plus-lighter;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Glow stack — 3 blurred ellipses stacked at ~(39, 253) */
+.glowNavy,
+.glowBlue,
+.glowPurple {
+  position: absolute;
+  width: var(--glow-size);
+  height: var(--glow-size);
+  border-radius: 50%;
+  filter: blur(var(--glow-blur));
+  left: 39px;
+  top: 253px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glowNavy {
+  background: var(--glow-navy);
+  opacity: 1;
+}
+
+.glowBlue {
+  background: var(--glow-blue-deep);
+  opacity: 0.25;
+}
+
+.glowPurple {
+  background: var(--glow-purple);
+  opacity: 0.2;
+}
+
+/* Headline */
 .headline {
+  position: relative;
+  z-index: 1;
   margin: 0;
-  font-size: 44px;
-  font-weight: 500;
-  line-height: 1.15;
-  color: #fff;
+  max-width: 304px;
+  font-family: var(--font-family);
+  font-size: var(--heading-size);
+  font-weight: var(--heading-weight);
+  line-height: var(--heading-line-height);
+  color: var(--text-primary);
 }
 
-.accent1 {
-  color: #5244f3;
+/* Gradient text for "dreams" and "reflections" */
+.accent {
+  background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.accent2 {
-  color: #6871ff;
-}
-
+/* Footer row */
 .footer {
+  position: relative;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
 }
 
+/* Progress dots */
 .dots {
   display: flex;
   align-items: center;
@@ -47,17 +96,18 @@
 .dot {
   width: 8px;
   height: 8px;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.5);
+  border-radius: var(--radius-dot);
+  background: var(--text-inactive);
 }
 
 .dotActive {
   width: 40px;
   height: 8px;
-  border-radius: 4px;
-  background: #fff;
+  border-radius: var(--radius-dot);
+  background: var(--text-primary);
 }
 
+/* CTA label */
 .cta {
   display: flex;
   align-items: center;
@@ -65,27 +115,47 @@
 }
 
 .ctaLabel {
-  font-size: 18px;
-  font-weight: 600;
-  color: #fff;
+  font-family: var(--font-family);
+  font-size: var(--button-text-size);
+  font-weight: var(--button-text-weight);
+  line-height: var(--button-text-line-height);
+  color: var(--text-primary);
   white-space: nowrap;
 }
 
-.ctaButton {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  flex-shrink: 0;
-  border: none;
+/* 3-layer button: outer 112 → mid 88 → inner 64 */
+.ctaOuter {
+  width: 112px;
+  height: 112px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--glass-white-15);
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
   cursor: pointer;
-  box-shadow:
-    0 0 0 12px rgba(255, 255, 255, 0.08),
-    0 0 0 24px rgba(255, 255, 255, 0.04);
+  border: none;
+  padding: 0;
+}
+
+.ctaMid {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--glass-white-15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ctaInner {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ctaIcon {

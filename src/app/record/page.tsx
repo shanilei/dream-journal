@@ -93,6 +93,11 @@ export default function RecordPage() {
 
   return (
     <div className={styles.screen}>
+      <div className={styles.glowNavy} />
+      <div className={styles.glowBlue} />
+      <div className={styles.glowPurple} />
+      <div className={styles.starfield} />
+
       <p className={styles.prompt}>
         {status === "error"
           ? "Something went wrong — tap to try again"
@@ -101,6 +106,14 @@ export default function RecordPage() {
           : "Tap to record the dream"}
       </p>
 
+      {/* VoiceRecordCircle handles all recording/speech logic invisibly */}
+      <VoiceRecordCircle
+        isRecording={isRecording}
+        onPermissionDenied={() => setStatus("idle")}
+        onRecordingComplete={handleRecordingComplete}
+        onTranscriptUpdate={setLiveTranscript}
+      />
+
       <button
         type="button"
         className={styles.recordButton}
@@ -108,11 +121,11 @@ export default function RecordPage() {
         aria-pressed={isRecording}
         aria-label="Record dream"
       >
-        <VoiceRecordCircle
-          isRecording={isRecording}
-          onPermissionDenied={() => setStatus("idle")}
-          onRecordingComplete={handleRecordingComplete}
-          onTranscriptUpdate={setLiveTranscript}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/orb-anim.gif"
+          alt=""
+          className={styles.orbGif}
         />
       </button>
 

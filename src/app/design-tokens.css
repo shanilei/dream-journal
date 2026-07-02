@@ -1,0 +1,82 @@
+/* ============================================
+   DREAM JOURNAL — DESIGN TOKENS
+   Source of truth, extracted directly from Figma CSS.
+   Claude Code must use these variables — never invent
+   new hex values or approximate colors.
+   ============================================ */
+
+:root {
+  /* ---- Base ---- */
+  --bg-base: #090A13;               /* app background, top/bottom of screen */
+
+  /* ---- Glow layers (radial blurred ellipses behind content) ---- */
+  --glow-purple: #6871FF;           /* opacity 0.2, blur 100px */
+  --glow-blue-deep: #000CC5;        /* opacity 0.25, blur 100px */
+  --glow-navy: #0A0E51;             /* opacity 1, blur 100px */
+  --glow-size: 302px;
+  --glow-blur: 100px;
+
+  /* ---- Accent / brand ---- */
+  --accent-primary: #5244F3;        /* icon strokes, gradient text start */
+  --accent-secondary: #6871FF;      /* gradient text end */
+
+  /* ---- Text ---- */
+  --text-primary: #FFFFFF;
+  --text-inactive: rgba(255, 255, 255, 0.5); /* inactive progress dots */
+
+  /* ---- Glass / overlay ---- */
+  --glass-white-15: rgba(255, 255, 255, 0.15); /* button outer rings */
+
+  /* ---- Typography ---- */
+  --font-family: 'Urbanist', sans-serif;
+
+  --heading-weight: 500;
+  --heading-size: 52px;
+  --heading-line-height: 55px;
+
+  --button-text-weight: 600;
+  --button-text-size: 18px;
+  --button-text-line-height: 120%;
+
+  /* ---- Layout (mobile frame) ---- */
+  --frame-width: 393px;
+  --frame-height: 852px;
+
+  /* ---- Radii ---- */
+  --radius-pill: 32px;   /* main round button (64px circle) */
+  --radius-dot: 4px;     /* progress bar segments */
+}
+
+/* ============================================
+   REFERENCE COMPONENT SHAPES (from Figma spec)
+   Not meant to be used as literal classes —
+   Claude Code should reproduce this structure.
+   ============================================ */
+
+/*
+BACKGROUND STACK (bottom to top):
+1. --bg-base solid fill, full frame
+2. Ellipse (glow-navy)   302x302, blur 100px, opacity 1,   pos ~(39,253)
+3. Ellipse (glow-blue-deep) 302x302, blur 100px, opacity .25, pos ~(39,253)
+4. Ellipse (glow-purple) 302x302, blur 100px, opacity .2,  pos ~(39,253)
+5. Starfield image, mix-blend-mode: plus-lighter, covers full frame (slightly offset/oversized)
+
+HEADING TEXT:
+- font: Urbanist, weight 500, 52px / 55px line-height
+- color: #FFFFFF for plain words
+- "dreams" / "reflections" use gradient text: linear-gradient(--accent-primary → --accent-secondary)
+- container: 304px wide, auto-layout column-ish, positioned ~top:350px
+
+PROGRESS DOTS (bottom-left, top:760px):
+- 2 inactive dots: 8x8px, rgba(255,255,255,0.5), radius 4px
+- 1 active bar: 40x8px, #FFFFFF, radius 4px
+- gap: 8px
+
+GET STARTED BUTTON (bottom-right, top:708px):
+- Label: "Get started", Urbanist 600, 18px/120%, white
+- Circle button, layered:
+  - outer ring: 112x112, rgba(255,255,255,0.15)
+  - mid ring:   88x88,  rgba(255,255,255,0.15)
+  - inner circle: 64x64, #FFFFFF, radius 32px (fully round)
+  - arrow icon centered, 24x24, stroke #5244F3, 1.5px, mirrored (RTL-aware: matrix(-1,0,0,1,0,0))
+*/

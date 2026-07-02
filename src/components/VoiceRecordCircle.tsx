@@ -116,7 +116,5 @@ export default function VoiceRecordCircle({ isRecording, onPermissionDenied, onR
     };
   }, [isRecording]);
 
-  return (
-    <div className={isRecording ? `${styles.orb} ${styles.recording}` : styles.orb} />
-  );
+  return null;
 }

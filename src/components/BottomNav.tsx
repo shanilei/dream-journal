@@ -1,6 +1,5 @@
 import Link from "next/link";
 import styles from "./BottomNav.module.css";
-import GlassEffect from "./GlassEffect";
 import { AddAIIcon, CalendarIcon, UserIcon } from "./Icons";
 
 type NavKey = "record" | "user" | "dreams";
@@ -26,7 +25,6 @@ export default function BottomNav({
             href={item.href}
             className={`${styles.circle} ${isActive ? styles.active : ""}`}
           >
-            {!isActive && <GlassEffect fill size={67} />}
             <span className={styles.iconLayer}>{item.icon(isActive ? "#000624" : "#fff")}</span>
           </Link>
         );

@@ -1,76 +1,30 @@
+/* Holographic iridescent sphere — white top, sky-blue mid, warm amber bottom */
 .orb {
   position: relative;
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: radial-gradient(
-    circle at 42% 36%,
-    #a0aaf8 0%,
-    #7b87f4 12%,
-    #5b63e8 30%,
-    #3a3da8 56%,
-    #1a1b5a 80%,
-    #06061e 100%
-  );
-  box-shadow:
-    0 0 48px 22px rgba(91, 99, 232, 0.55),
-    0 0 90px 45px rgba(70, 78, 200, 0.32),
-    0 0 140px 70px rgba(50, 55, 170, 0.16);
-  transition: transform 0.35s ease, box-shadow 0.35s ease;
-}
-
-.orb::before {
-  content: "";
-  position: absolute;
-  top: 12%;
-  left: 16%;
-  width: 36%;
-  height: 26%;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(255, 255, 255, 0.42) 0%,
-    rgba(255, 255, 255, 0.14) 55%,
-    transparent 100%
-  );
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.55) 14%, rgba(255, 255, 255, 0) 40%),
+    radial-gradient(circle at 24% 38%, #8DCEE8 0%, rgba(141, 206, 232, 0) 50%),
+    radial-gradient(circle at 46% 50%, #5A9ED4 0%, rgba(90, 158, 212, 0) 52%),
+    radial-gradient(circle at 74% 60%, #D4A040 0%, rgba(212, 160, 64, 0) 44%),
+    radial-gradient(circle at 58% 76%, #C88030 0%, rgba(200, 128, 48, 0) 40%),
+    radial-gradient(circle at 22% 66%, #4A8EC2 0%, rgba(74, 142, 194, 0) 42%),
+    #72AED8;
   filter: blur(3px);
-  pointer-events: none;
-}
-
-.orb::after {
-  content: "";
-  position: absolute;
-  bottom: 7%;
-  right: 8%;
-  width: 48%;
-  height: 42%;
-  border-radius: 50%;
-  background: radial-gradient(
-    ellipse at center,
-    rgba(0, 0, 12, 0.45) 0%,
-    transparent 70%
-  );
-  filter: blur(8px);
-  pointer-events: none;
+  box-shadow:
+    0 0 55px 28px rgba(100, 150, 220, 0.4),
+    0 0 110px 55px rgba(80, 120, 200, 0.22),
+    0 0 180px 80px rgba(60, 90, 180, 0.12);
+  transition: transform 0.35s ease;
 }
 
 .recording {
-  animation: orb-pulse 2.2s ease-in-out infinite;
+  animation: orb-breathe 2.4s ease-in-out infinite;
 }
 
-@keyframes orb-pulse {
-  0%, 100% {
-    transform: scale(1);
-    box-shadow:
-      0 0 48px 22px rgba(91, 99, 232, 0.55),
-      0 0 90px 45px rgba(70, 78, 200, 0.32),
-      0 0 140px 70px rgba(50, 55, 170, 0.16);
-  }
-  50% {
-    transform: scale(1.06);
-    box-shadow:
-      0 0 65px 32px rgba(110, 118, 245, 0.7),
-      0 0 120px 60px rgba(90, 98, 220, 0.42),
-      0 0 180px 90px rgba(70, 78, 200, 0.22);
-  }
+@keyframes orb-breathe {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.05); }
 }

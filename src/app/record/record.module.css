@@ -6,97 +6,116 @@
   height: 100dvh;
   margin: 0 auto;
   overflow: hidden;
-  background: linear-gradient(180deg, #eaf3ff 0%, #c9d6f5 100%);
+  background: var(--bg-base);
 }
 
-:global([data-theme="dark"]) .screen {
-  background: radial-gradient(
-    circle at 50% 40%,
-    var(--dark-bg-highlight) 0%,
-    var(--dark-bg) 45%,
-    var(--dark-bg-deep) 100%
-  );
+/* Starfield — reduced opacity for subtler sparkle */
+.starfield {
+  position: absolute;
+  inset: 0;
+  background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
+  mix-blend-mode: plus-lighter;
+  opacity: 0.35;
+  pointer-events: none;
+  z-index: 0;
 }
+
+/* Glow stack behind the sphere */
+.glowNavy,
+.glowBlue,
+.glowPurple {
+  position: absolute;
+  width: var(--glow-size);
+  height: var(--glow-size);
+  border-radius: 50%;
+  filter: blur(var(--glow-blur));
+  left: 50%;
+  top: 28%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glowNavy  { background: var(--glow-navy);      opacity: 1;    }
+.glowBlue  { background: var(--glow-blue-deep);  opacity: 0.25; }
+.glowPurple{ background: var(--glow-purple);     opacity: 0.2;  }
 
 .prompt {
   position: absolute;
   left: 50%;
   top: calc(23.08% - 14px);
   transform: translateX(-50%);
-  width: 230px;
+  width: 260px;
   margin: 0;
-  font-size: 30px;
+  font-size: 28px;
   font-weight: 400;
-  line-height: 38px;
-  color: #000624;
+  line-height: 36px;
+  color: var(--text-primary);
   text-align: center;
-}
-
-:global([data-theme="dark"]) .prompt {
-  color: var(--dark-text-primary);
+  z-index: 1;
 }
 
 .recordButton {
   position: absolute;
   left: 50%;
-  top: calc(30.77% + 35px);
+  top: calc(30.77% + 20px);
   transform: translateX(-50%);
-  width: 179px;
-  height: 179px;
-  border-radius: 50%;
+  width: 260px;
+  height: 260px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  z-index: 1;
+  background: none;
+  border-radius: 0;
+  mix-blend-mode: screen;
+}
+
+.orbGif {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
 }
 
 .liveTranscript {
   position: absolute;
   left: 50%;
-  top: calc(53.85% + 4px);
+  top: calc(30.77% + 260px);
   transform: translateX(-50%);
   width: min(320px, 82vw);
   margin: 0;
   font-size: 14px;
   line-height: 1.55;
-  color: rgba(0, 6, 36, 0.65);
+  color: rgba(255, 255, 255, 0.6);
   text-align: center;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 4;
   -webkit-box-orient: vertical;
-}
-
-:global([data-theme="dark"]) .liveTranscript {
-  color: rgba(255, 255, 255, 0.55);
+  z-index: 1;
 }
 
 .typeFallback {
   position: absolute;
   left: 50%;
-  top: calc(53.85% + 57px);
+  top: calc(30.77% + 305px);
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 2px;
+  z-index: 1;
 }
 
 .typeFallbackOr {
   font-size: 12px;
-  color: rgba(0, 6, 36, 0.5);
-}
-
-:global([data-theme="dark"]) .typeFallbackOr {
-  color: var(--dark-text-secondary);
+  color: rgba(255, 255, 255, 0.4);
 }
 
 .typeFallbackLink {
   font-size: 12px;
-  color: #000624;
+  color: var(--text-primary);
   text-decoration: underline;
-}
-
-:global([data-theme="dark"]) .typeFallbackLink {
-  color: var(--dark-text-primary);
 }

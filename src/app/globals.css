@@ -1,3 +1,5 @@
+@import "./design-tokens.css";
+
 :root {
   /* Dark-mode tokens — shared rules for every screen converted to the dark theme */
   --dark-bg-highlight: #181f52;
