@@ -15,7 +15,7 @@ export default function OnboardingScreen() {
     } catch {
       // private browsing or storage disabled — just continue
     }
-    router.push("/");
+    router.push("/record");
   }
 
   return (

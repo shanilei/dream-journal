@@ -12,7 +12,7 @@ export default function BottomNav({
   const items: { key: NavKey; href: string; icon: (color: string) => React.ReactNode }[] = [
     { key: "user", href: "/user", icon: (c) => <UserIcon color={c} size={22} /> },
     { key: "record", href: "/record", icon: (c) => <AddAIIcon color={c} size={26} /> },
-    { key: "dreams", href: "/", icon: (c) => <CalendarIcon color={c} size={22} /> },
+    { key: "dreams", href: "/gallery", icon: (c) => <CalendarIcon color={c} size={22} /> },
   ];
 
   return (

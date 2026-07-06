@@ -49,7 +49,7 @@ export default function DreamsByTypeScreen({ mood, dreams }: { mood: string; dre
 
       {/* Header */}
       <div className={styles.header}>
-        <Link href="/" className={styles.iconBtn} aria-label="Back">
+        <Link href="/gallery" className={styles.iconBtn} aria-label="Back">
           <ArrowLeftIcon size={16} color="currentColor" />
         </Link>
         <p className={styles.title}>{translateMood(mood, lang)}</p>
