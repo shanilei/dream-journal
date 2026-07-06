@@ -462,14 +462,53 @@
     padding: 0 !important;
   }
 
-  body * {
-    visibility: hidden !important;
+  /* Hide only what shouldn't print — no visibility trick */
+  .topBar,
+  .topBarRight,
+  .titleBlock,
+  .block,
+  .collapsibleBlock,
+  .symbolsRow,
+  .printModalOverlay,
+  .imageClear {
+    display: none !important;
   }
 
-  /* Each layer independently fills the page */
-  .image {
-    visibility: visible !important;
+  /* Strip the screen wrapper */
+  .screen {
+    background: white !important;
+    overflow: visible !important;
+    padding: 0 !important;
+    height: auto !important;
+    min-height: unset !important;
+  }
+
+  .content {
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
+  /* Card fills the page */
+  .imageCard,
+  .imageCardNoBorder {
     position: fixed !important;
+    inset: 0 !important;
+    background: transparent !important;
+    padding: 0 !important;
+    border: none !important;
+    animation: none !important;
+  }
+
+  /* Wrap fills card */
+  .imageWrap {
+    position: absolute !important;
+    inset: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  /* Image fills wrap */
+  .image {
+    position: absolute !important;
     inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
@@ -477,37 +516,16 @@
     object-fit: cover !important;
     border-radius: 0 !important;
     animation: none !important;
-    z-index: 1 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  .imageClear {
-    display: none !important;
-  }
-
+  /* Scrim and caption always on */
   .imageScrimDark,
-  .imageScrimLight {
-    visibility: visible !important;
-    position: fixed !important;
-    inset: 0 !important;
-    border-radius: 0 !important;
-    opacity: 1 !important;
-    z-index: 2 !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  .captionOverlay,
-  .captionOverlay * {
-    visibility: visible !important;
-  }
-
+  .imageScrimLight,
   .captionOverlay {
-    position: fixed !important;
-    inset: 0 !important;
     opacity: 1 !important;
-    z-index: 3 !important;
+    border-radius: 0 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
