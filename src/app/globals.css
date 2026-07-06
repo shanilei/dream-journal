@@ -60,8 +60,19 @@ body {
   padding: 0;
 }
 
+/* Switch the UI font to Ploni when the app is in Hebrew mode */
+:root {
+  --font-ui: var(--font-urbanist);
+  --font-label: var(--font-alumni-sans);
+}
+
+[lang="he"] {
+  --font-ui: var(--font-ploni);
+  --font-label: var(--font-ploni);
+}
+
 body {
-  font-family: var(--font-urbanist), -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: var(--font-ui), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   color: #333;
   background: #090a13;

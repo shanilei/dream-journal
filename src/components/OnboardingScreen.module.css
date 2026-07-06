@@ -60,7 +60,7 @@
   z-index: 1;
   margin: 0;
   max-width: 304px;
-  font-family: var(--font-family);
+  font-family: var(--font-ui);
   font-size: var(--heading-size);
   font-weight: var(--heading-weight);
   line-height: var(--heading-line-height);
@@ -115,7 +115,7 @@
 }
 
 .ctaLabel {
-  font-family: var(--font-family);
+  font-family: var(--font-ui);
   font-size: var(--button-text-size);
   font-weight: var(--button-text-weight);
   line-height: var(--button-text-line-height);
