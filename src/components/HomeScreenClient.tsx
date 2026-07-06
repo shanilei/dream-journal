@@ -322,13 +322,13 @@ export default function HomeScreenClient({
 }) {
   const { lang, t } = useLanguage();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
-  const [filter, setFilter] = useState<FilterMode>("type");
+  const [filter, setFilter] = useState<FilterMode>("all");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
 
   const filters: { key: FilterMode; label: string }[] = [
     { key: "all",      label: t.filterAll },
-    { key: "type",     label: t.filterType },
     { key: "date",     label: t.filterDate },
+    { key: "type",     label: t.filterType },
     { key: "emotion",  label: t.filterEmotion },
     { key: "favorite", label: t.filterFavorite },
   ];
