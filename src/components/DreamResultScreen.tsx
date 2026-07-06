@@ -153,6 +153,7 @@ export default function DreamResultScreen({
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [copied, setCopied] = useState(false);
   const isHebrew = /[֐-׿]/.test(dreamText || summaryText || "");
   const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
   const captionLines = captionText ? captionText.split("\n") : [];
@@ -189,6 +190,30 @@ export default function DreamResultScreen({
   useEffect(() => {
     if (imgRef.current?.complete) sampleBrightness();
   }, [imageUrl]);
+
+  async function handleShare() {
+    const url = id ? `${window.location.origin}/dream/${id}` : window.location.href;
+    const shareData = {
+      title: dreamTitle,
+      text: interpretationText || summaryText,
+      url,
+    };
+    if (typeof navigator.share === "function" && navigator.canShare?.(shareData)) {
+      try {
+        await navigator.share(shareData);
+      } catch {
+        // user dismissed — do nothing
+      }
+    } else {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2500);
+      } catch {
+        // clipboard unavailable
+      }
+    }
+  }
 
   async function handlePrint() {
     setShowPrintModal(false);
@@ -280,7 +305,7 @@ html,body{width:100%;height:100%;overflow:hidden}
           </span>
         </button>
         <div className={styles.topBarRight}>
-          <button type="button" className={styles.iconButton} aria-label={t.share}>
+          <button type="button" className={styles.iconButton} aria-label={t.share} onClick={handleShare}>
             <ShareIcon size={16} color="currentColor" />
           </button>
           <button
@@ -402,6 +427,10 @@ html,body{width:100%;height:100%;overflow:hidden}
       </div>
 
       <BottomNav active="dreams" />
+
+      {copied && (
+        <div className={styles.toast}>{t.linkCopied}</div>
+      )}
 
       {showPrintModal && (
         <div className={styles.printModalOverlay} onClick={() => setShowPrintModal(false)}>

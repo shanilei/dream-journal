@@ -70,6 +70,7 @@ body {
 a {
   text-decoration: none;
   color: inherit;
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 button {
@@ -78,10 +79,38 @@ button {
   background: none;
   padding: 0;
   cursor: pointer;
+  transition: opacity 0.18s ease, transform 0.18s ease, background 0.18s ease;
+}
+
+a:hover,
+button:hover {
+  opacity: 1;
+  filter: brightness(1.15) drop-shadow(0 0 6px rgba(138, 120, 255, 0.45));
+}
+
+a:active,
+button:active {
+  opacity: 0.85;
+  filter: brightness(1.05) drop-shadow(0 0 4px rgba(138, 120, 255, 0.3));
 }
 
 p {
   margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6, p, li, span, label {
+  text-wrap: pretty;
+}
+
+@keyframes screenIn {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @media print {

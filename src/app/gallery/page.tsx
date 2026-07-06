@@ -15,6 +15,8 @@ export default async function GalleryPage() {
     name: dream.name,
     createdAt: dream.createdAt,
     summary: dream.summaryText,
+    symbols: dream.symbols,
+    keywords: dream.keywords,
   });
 
   const cards = dreams.slice(0, 3).map(toCard);

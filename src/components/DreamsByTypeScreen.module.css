@@ -1,5 +1,6 @@
 /* ── Background ── */
 .screen {
+  animation: screenIn 0.42s ease-out both;
   position: relative;
   width: 100%;
   max-width: var(--shell-max-width);

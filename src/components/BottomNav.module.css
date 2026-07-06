@@ -26,6 +26,7 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.15s ease, opacity 1s ease;
 }
 
 .circle.active {
@@ -33,6 +34,16 @@
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.circle:active {
+  animation: navTap 0.22s ease;
+}
+
+@keyframes navTap {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
 }
 
 .iconLayer {

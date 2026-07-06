@@ -30,6 +30,7 @@ export const translations = {
     recentDream: "Recent dream",
     moreCollection: "More of your collection",
     noFavorites: "No favorites yet — tap the heart on any dream.",
+    searchNoResults: "No dreams found for that search.",
     comingSoon: "Coming soon",
     dreamsCount: "Dreams",
     dreamTitleSuffix: "dream",
@@ -49,6 +50,7 @@ export const translations = {
     print: "Print",
     back: "Back",
     share: "Share",
+    linkCopied: "Link copied!",
   },
   he: {
     userTitle: "חלומות המשתמש",
@@ -79,6 +81,7 @@ export const translations = {
     recentDream: "חלום אחרון",
     moreCollection: "עוד מהאוסף שלך",
     noFavorites: "עדיין אין מועדפים — לחץ על הלב בכל חלום.",
+    searchNoResults: "לא נמצאו חלומות לחיפוש זה.",
     comingSoon: "בקרוב",
     dreamsCount: "חלומות",
     dreamTitleSuffix: "חלום",
@@ -98,6 +101,7 @@ export const translations = {
     print: "הדפס",
     back: "חזור",
     share: "שתף",
+    linkCopied: "הקישור הועתק!",
   },
 } as const;
 

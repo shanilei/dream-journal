@@ -1,4 +1,5 @@
 .screen {
+  animation: screenIn 0.42s ease-out both;
   position: relative;
   width: 100%;
   max-width: var(--shell-max-width);
@@ -579,6 +580,31 @@
 @page {
   margin: 0;
   size: auto;
+}
+
+.toast {
+  position: fixed;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 99px;
+  white-space: nowrap;
+  z-index: 100;
+  pointer-events: none;
+  animation: toastIn 0.2s ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(6px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 @media print {

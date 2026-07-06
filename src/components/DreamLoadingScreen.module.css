@@ -1,4 +1,5 @@
 .screen {
+  animation: screenIn 0.42s ease-out both;
   position: relative;
   width: 100%;
   max-width: var(--shell-max-width);
@@ -96,6 +97,50 @@
 }
 
 .messageTextHe {
+  font-family: var(--font-ploni), serif;
+}
+
+.noteBar {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 0 24px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+:global([data-theme="dark"]) .noteBar {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.noteBarHe {
+  direction: rtl;
+}
+
+.noteLabel {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.noteBarHe .noteLabel {
+  font-family: var(--font-ploni), serif;
+}
+
+.noteText {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+}
+
+.noteBarHe .noteText {
   font-family: var(--font-ploni), serif;
 }
 

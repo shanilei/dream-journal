@@ -50,6 +50,11 @@ export default function DreamLoadingScreen() {
     return () => clearTimeout(timer);
   }, [visibleCount, messages.length]);
 
+  const noteText = isHe
+    ? "פרשנות זו מיועדת כהצעה בלבד ונוצרת בחלקה באמצעות AI."
+    : "This interpretation is intended as a suggestion only and is partially generated using AI.";
+  const noteLabel = isHe ? "הערה:" : "Note:";
+
   return (
     <div className={styles.screen}>
       <div className={styles.orbWrap}>
@@ -84,6 +89,11 @@ export default function DreamLoadingScreen() {
             )}
           </div>
         ))}
+      </div>
+
+      <div className={`${styles.noteBar} ${isHe ? styles.noteBarHe : ""}`}>
+        <span className={styles.noteLabel}>{noteLabel}</span>
+        <p className={styles.noteText}>{noteText}</p>
       </div>
     </div>
   );

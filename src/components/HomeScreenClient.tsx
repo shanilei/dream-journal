@@ -16,7 +16,21 @@ type Card = {
   name?: string;
   createdAt: string;
   summary?: string;
+  symbols?: string[];
+  keywords?: string[];
 };
+
+function matchesSearch(card: Card, query: string): boolean {
+  const q = query.toLowerCase().trim();
+  if (!q) return true;
+  return !!(
+    card.name?.toLowerCase().includes(q) ||
+    card.summary?.toLowerCase().includes(q) ||
+    card.mood.toLowerCase().includes(q) ||
+    card.symbols?.some((s) => s.toLowerCase().includes(q)) ||
+    card.keywords?.some((k) => k.toLowerCase().includes(q))
+  );
+}
 
 type Category = {
   label: string;
@@ -303,6 +317,10 @@ export default function HomeScreenClient({
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [filter, setFilter] = useState<FilterMode>("all");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const isSearching = searchQuery.trim().length > 0;
+  const searchResults = isSearching ? gridCards.filter((c) => matchesSearch(c, searchQuery)) : [];
 
   const filters: { key: FilterMode; label: string }[] = [
     { key: "all",      label: t.filterAll },
@@ -397,11 +415,19 @@ export default function HomeScreenClient({
         {/* Search */}
         <div className={styles.searchBar}>
           <SearchIcon />
-          <input className={styles.searchInput} type="search" dir="auto" placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder} />
+          <input
+            className={styles.searchInput}
+            type="search"
+            dir="auto"
+            placeholder={t.searchPlaceholder}
+            aria-label={t.searchPlaceholder}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
 
-        {/* Filter pills — hidden in list view */}
-        {viewMode === "grid" && (
+        {/* Filter pills — hidden while searching */}
+        {!isSearching && (
           <div className={styles.filterRow}>
             {filters.map((f) => (
               <button
@@ -418,7 +444,7 @@ export default function HomeScreenClient({
         )}
 
         {/* ── LIST VIEW ── */}
-        {viewMode === "list" && (
+        {!isSearching && viewMode === "list" && (
           <div className={styles.listView}>
             <p className={styles.sectionLabel}>{t.recentDream}</p>
             {categories.map((cat) => (
@@ -441,7 +467,7 @@ export default function HomeScreenClient({
       </div>
 
       {/* ── GRID + TYPE: Stacked carousel (outside wrapper, bleeds to edges) ── */}
-      {viewMode === "grid" && filter === "type" && (
+      {!isSearching && viewMode === "grid" && filter === "type" && (
         <TypeCarousel
           categories={categories}
           cardsByMood={cardsByMood}
@@ -450,13 +476,26 @@ export default function HomeScreenClient({
       )}
 
       {/* ── GRID + DATE: Calendar view ── */}
-      {viewMode === "grid" && filter === "date" && (
+      {!isSearching && viewMode === "grid" && filter === "date" && (
         <CalendarView gridCards={gridCards} />
       )}
 
       <div className={styles.contentWrapper}>
+        {/* ── SEARCH RESULTS ── */}
+        {isSearching && (
+          <div className={styles.collectionGrid} style={{ paddingTop: 36 }}>
+            {searchResults.length === 0 ? (
+              <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.searchNoResults}</p>
+            ) : (
+              searchResults.map((card) =>
+                renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading)
+              )
+            )}
+          </div>
+        )}
+
         {/* ── GRID + FAVORITE ── */}
-        {viewMode === "grid" && filter === "favorite" && (
+        {!isSearching && viewMode === "grid" && filter === "favorite" && (
           <div className={styles.collectionGrid} style={{ paddingTop: 8 }}>
             {favoriteCards.length === 0 ? (
               <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.noFavorites}</p>
@@ -469,7 +508,7 @@ export default function HomeScreenClient({
         )}
 
         {/* ── GRID + ALL (default) ── */}
-        {viewMode === "grid" && (filter === "all" || filter === "emotion") && (
+        {!isSearching && viewMode === "grid" && (filter === "all" || filter === "emotion") && (
           <>
             {recentDream && (
               <>
