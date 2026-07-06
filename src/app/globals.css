@@ -1,5 +1,17 @@
 @import "./design-tokens.css";
 
+/* ── Stanga AAA (Hebrew caption font) ─────────────────────────────────────
+   Drop the font file into public/fonts/ and update the src below.
+   Until then, Hebrew captions fall back to the system Hebrew stack.       */
+@font-face {
+  font-family: 'Stanga AAA';
+  src: url('/fonts/StangaAAA.woff2') format('woff2'),
+       url('/fonts/StangaAAA.woff')  format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Dark-mode tokens — shared rules for every screen converted to the dark theme */
   --dark-bg-highlight: #181f52;

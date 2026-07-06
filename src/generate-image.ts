@@ -112,11 +112,11 @@ const LUCID_SYSTEM_COLORS: Record<ProfileKey, string> = {
 
 // רקע שטוח וצבעוני לכל מצב-רוח, לפי "SURREAL MINIMALIST & ANALOG DREAMSCAPE" — תואם לתמונות הרפרנס שהמשתמש שלח
 const SURREAL_MINIMALIST_COLORS: Record<ProfileKey, string> = {
-  sweet: "a warm sunset gradient of glowing pink and orange, soft golden light",
-  confused: "a flat, deep midnight blue, almost black at its edges",
-  fear: "a flat, intensely saturated crimson red",
-  sad: "a flat, muted slate-blue grey, like an overcast sky",
-  angry: "a flat, scorched burnt-orange red, like hot embers",
+  sweet: "a rich amber and rose-gold gradient sky, or a warm ochre environment dense with golden light and soft botanical detail",
+  confused: "a deep forest-teal environment layered with dusty violet atmosphere, or a dense indigo-to-moss-green gradient",
+  fear: "a heavily textured dark olive and charcoal environment, or a dramatic deep-teal-to-near-black atmospheric gradient with flickers of cold jade green",
+  sad: "a muted dusty-mauve and slate-indigo landscape, or a dense fog-grey environment with faint lavender undertones and dim diffused light",
+  angry: "a scorched burnt-sienna and deep rust environment, or a richly saturated blood-orange atmospheric gradient with dark charcoal edges",
 };
 
 // מילות מפתח לזיהוי רגש דומיננטי → פרופיל
@@ -180,7 +180,15 @@ function buildPrompt(analysis: DreamAnalysis, profile: ProfileKey, styleText: st
       : styleName === "lucid-system"
       ? `Identify the Anchor, the Emotional Field, and the Intrusion for this specific dream — these elements and themes are emotional raw material only, never a literal object, scene, or recognizable equipment to draw: ${elements || "the dream's symbols"}. Anchor (the emotional center): build it from several overlapping layered fragments and patches that together suggest a feeling — never a single clean shape, and never a literal illustration of any specific symbol listed above (e.g. no medical equipment, no literal hospital or military iconography, no crosses, no vehicles, no architecture). Emotional Field (secondary shapes spreading the atmosphere): drawn from ${analysis.themes?.join(", ") || "the dream's emotional atmosphere"}. Intrusion (the force that disrupts, transforms, threatens, attracts, divides, or overwhelms the Anchor): infer it from the tension between the Anchor and the dream's themes. Choose ONE dominant shape family (circles and rounded forms; particles and repetition; arches and portals; waves and flowing forms; fractures and shards; or clouds and soft masses) that best fits this dream, and let it drive most of the image.`
       : styleName === "surreal-minimalist"
-      ? `Identify up to the 3 most central, dream-defining elements from these dream symbols/locations: ${elements || analysis.themes?.join(", ") || "the dream's central image"}. Render each one literally and sharply, with real visual detail and texture — recognizable on close inspection, not vague or simplified. Then weave them together into ONE single, unexpected composition: let them overlap, nest inside one another, or merge at a shared edge, rather than floating as separate scattered objects — the result should read as one coherent surreal form, interesting and a little hard to fully untangle at first glance, even though every individual piece is sharp and accurate. Place this combined form in a magical-realism context — dramatically scaled up or down, or set somewhere it would not normally belong — against the flat color-blocked backdrop. Render this as a clean, sharp, accurate photograph — a separate processing step adds a subtle motion-blur pass afterward, so your job is just the sharp photo itself. You may, optionally, layer in abstract motion blur, a frosted-glass surface, or Orton-effect glow wherever they genuinely fit this dream. The rest of the combined form and the backdrop stay pin-sharp; do not apply any blanket lens blur, bokeh, or soft focus across the whole image.`
+      ? `ABSOLUTELY NO TEXT anywhere in the image — no letters, words, numbers, labels, or symbols of any kind. NO glass panels, glass frames, frosted windows, or any rectangular overlay that creates a picture-within-a-picture — the image must be a single unified scene.
+
+STRICT ELEMENT RULE — MOST IMPORTANT: Use ONLY the elements listed below. Do NOT infer, add, or substitute thematically related objects. If the dream contains a sea but no boat, draw no boat. If it contains a figure but no tree, draw no tree. If it contains a mask but no costume, draw no costume. The list is exhaustive — nothing outside it belongs in the image. Elements: ${elements || analysis.themes?.join(", ") || "the dream's central image"}.
+
+Render each listed element literally and sharply — recognizable on close inspection. Surrealism comes from their combination and context, not from adding new props.
+
+COMPOSITION — NO FLOATING OBJECTS IN VOID: Every subject must exist within a real environment. Ground figures in water, place objects on surfaces, embed forms in atmosphere, let elements interact with their surroundings. Choose one of these composition strategies: (A) a large figure or form looming close to camera, nearly filling the frame, with the environment pressing in around it; (B) a wide environmental scene — water, sky, landscape — with the subject placed unexpectedly small at one corner; (C) two or more elements from the list in direct spatial tension — overlapping, facing each other, one casting a shadow on the other. Never: a single isolated object centered on a flat colored void.
+
+Combine the elements in a surreal magical-realism context — impossible scale, wrong environment, or unexpected juxtaposition. Render this as a clean, sharp photograph — a motion-blur pass is added afterward. You may optionally use abstract directional blur on one specific element, or Orton-effect glow from bright areas. Never apply blanket lens blur or soft focus across the whole image.`
       : ABSTRACT_STYLES.has(styleName)
       ? `Do NOT render any of these as literal recognizable objects or figures: ${elements || "the dream's symbols"}. Let them influence ONLY the weight, density, and rhythm of the abstract shapes/patches — denser and heavier for tension, lighter and looser for ease. The sensation to evoke: ${analysis.themes?.join(", ") || "dreamlike energy"}. Every shape stays an abstract patch or mass, never a named thing.`
       : `Incorporate these specific dream elements as glowing, symbolic, dreamlike forms within the composition — each rendered with its own color glow stroke, layered and overlapping at different scales and blur depths: ${elements || "(none specified)"}.`;
@@ -267,6 +275,8 @@ export async function generateImage(
       ? "person, people, human, human figure, face, faces, eyes, body, bodies, silhouette, profile silhouette, head silhouette, portrait, character, double exposure, multiple exposure, person walking, person standing, figure on stairs, staircase, person on a cliff, complete object, realistic scene, landscape, mountain, moon, map, architecture, building, fantasy illustration, glossy render, CGI, 3d render, photorealistic photograph, photorealism, cartoon, typography, letters, numbers, text, words, writing, logo, watermark, signature"
       : styleName === "lucid-system"
       ? "person, people, human, human figure, face, faces, eyes, body, bodies, silhouette, portrait, character, realistic people, photorealistic photograph, cinematic realism, detailed environment, realistic room, realistic landscape, glossy render, CGI, 3d render, cartoon, typography, letters, numbers, text, words, writing, logo, watermark, signature"
+      : styleName === "surreal-minimalist"
+      ? "text, letters, words, numbers, writing, typography, labels, captions, watermark, signature, logo, centered composition, centered subject, floating object in void, plain white background, plain red background, plain gray background, plain light blue background, illustration, painting, 3d render, cartoon, anime"
       : undefined;
 
     const form = new FormData();

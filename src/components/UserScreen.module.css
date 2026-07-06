@@ -1,3 +1,8 @@
+@keyframes gradientFade {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
 .screen {
   position: relative;
   width: 100%;
@@ -5,41 +10,57 @@
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
-  background: #090a13;
+  background: #050A1A;
   overflow-x: hidden;
   overflow-y: auto;
   padding-bottom: 140px;
+}
+
+.screen::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(168.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
+  animation: gradientFade 12s ease-in-out infinite;
+  pointer-events: none;
 }
 
 .glow1,
 .glow2,
 .glow3 {
   position: absolute;
-  width: 280px;
-  height: 280px;
   border-radius: 50%;
-  filter: blur(60px);
-  opacity: 0.6;
   pointer-events: none;
 }
 
 .glow1 {
-  top: -120px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: radial-gradient(circle, rgba(var(--dark-glow-blue-rgb), 1) 0%, transparent 70%);
+  width: 260px;
+  height: 260px;
+  top: -60px;
+  right: -80px;
+  background: #3B82F6;
+  opacity: 0.18;
+  filter: blur(45px);
 }
 
 .glow2 {
-  top: 220px;
-  right: -80px;
-  background: radial-gradient(circle, rgba(var(--dark-glow-purple-rgb), 1) 0%, transparent 70%);
+  width: 200px;
+  height: 200px;
+  top: 120px;
+  left: -40px;
+  background: #8B5CF6;
+  opacity: 0.14;
+  filter: blur(40px);
 }
 
 .glow3 {
-  top: 440px;
-  left: -120px;
-  background: radial-gradient(circle, rgba(var(--dark-glow-pink-rgb), 1) 0%, transparent 70%);
+  width: 180px;
+  height: 180px;
+  top: 420px;
+  right: -40px;
+  background: #06B6D4;
+  opacity: 0.10;
+  filter: blur(35px);
 }
 
 .content {

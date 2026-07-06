@@ -5,8 +5,11 @@ SURREAL MINIMALIST & ANALOG DREAMSCAPE STYLE SYSTEM
 
 Create a striking, polished surreal photograph — never a vague atmospheric blur, never an illustration or collage. Treat the dream's central image as a literal, sharply-rendered surreal scene staged against a bold, flat, color-blocked backdrop.
 
+NO TEXT RULE — ABSOLUTE:
+No text, letters, words, numbers, labels, captions, watermarks, symbols, or typographic elements of any kind anywhere in the image. Not on objects, not in the background, not as texture. Visual content only.
+
 COMPOSITION:
-Vertical format. Build the image around ONE combined subject — formed by weaving together up to three of the dream's most central elements into a single unexpected form — placed within a vast, mostly-empty backdrop — sky, void, or flat horizon occupying most of the frame. Favor a low camera angle looking up, or a composition that makes the subject read as small, lonely, or monumental against the surrounding space. The combined subject itself may be intricate and layered — what must stay empty and uncluttered is the space AROUND it. Avoid scattering separate, unrelated objects across the frame or evenly distributing many small elements.
+Vertical format. Do NOT always center the subject — actively seek off-center, asymmetric compositions. Options: a large figure placed at one side of the frame with numerous smaller elements filling the rest of the space; a monumental form occupying a lower corner while the backdrop dominates above; or a wide expansive environment with the subject small and solitary at an unexpected position. The subject may be ONE combined form OR a dominant large figure surrounded by many secondary elements — scattered, layered, and filling the frame with detail. Avoid a plain, centered single object floating in an empty void as the default. Surprise the viewer with the placement.
 
 MAGICAL REALISM RULE:
 Render the dream's central symbols or objects literally and recognizably — each one detailed enough to be identified on close inspection — but combine them and place them in an impossible or surreal context — an everyday object scaled dramatically up or down, an interior object sitting outdoors, an ordinary landscape with one reality-bending anomaly (an impossible drop-off, an opening that frames something it shouldn't, a scale mismatch). The surrealism comes from context, combination, and scale, not from distorting or abstracting the objects themselves.
@@ -14,24 +17,24 @@ Render the dream's central symbols or objects literally and recognizably — eac
 FOCUS RULE — A SHARP, ACCURATE PHOTOGRAPH:
 The base photograph is sharp and in focus. The combined subject and the environment are real, in-focus photographic detail — never start from a vague, hazy, or generally soft image. Never apply lens blur, bokeh, defocus, or a flat uniform soft-focus across the whole frame — that reads as a focus mistake, not a style. (A subtle motion-blur pass is applied afterward as a separate processing step — your job here is just to render this as a clean, sharp, accurate photograph.)
 
-Optionally, you may use one or more of these three techniques wherever they genuinely fit the dream:
+Optionally, you may use one or both of these techniques where they genuinely fit:
 
-1. ABSTRACT MOTION BLUR: a directional or swirling smear applied to one specific element for energy and motion (e.g. a spinning figure blurred into an arc around its own axis), clearly distinct from the sharp, still parts of the scene — never a flat filter dragged over a static pose.
+1. ABSTRACT MOTION BLUR: a directional or swirling smear applied to ONE specific element for energy and motion (e.g. a spinning form blurred into an arc), clearly distinct from the sharp, still parts of the scene — never a flat filter across the whole image.
 
-2. FROSTED GLASS EFFECT: part of the scene is genuinely visible through a real, semi-transparent frosted or textured glass surface — recognizable but softened and diffused, like looking through a frosted window or shower glass. This is a physical surface in the scene with real edges, applied to only part of the frame, never the entire image.
+2. GLOW / LIGHT BLOOM (ORTON EFFECT): a warm, soft glow bleeding outward from bright areas — the underlying detail stays readable through it, not erased by it.
 
-3. GLOW / LIGHT BLOOM (ORTON EFFECT): a warm, soft glow bleeds outward from bright areas, as if a slightly overexposed, glowing soft layer were blended over the sharp photograph beneath it — the underlying detail and sharpness should still read clearly through the glow, not be erased by it.
+DO NOT render any glass panel, glass frame, glass window, frosted surface, or any rectangular or framed overlay that makes the image look like a picture-within-a-picture. No frames, no panels, no nested compositions. The image is a single unified scene.
 
-Use any, all, or none of these three — but always keep the base photograph sharp underneath everything.
+Use either, both, or neither — but always keep the base photograph sharp underneath.
 
 COLOR RULES:
-Use a flat, boldly color-blocked backdrop — an unbroken or near-unbroken expanse of one dominant saturated hue, never a busy or naturalistic sky. The dream's own subject/foreground colors should contrast cleanly against this backdrop, never blend into it. No rainbow palettes, no muddy in-between tones — every color must read as deliberate and graphic.
+Go beyond red, white, gray, and light blue — these are forbidden as the primary palette. Actively seek rich, unexpected color combinations: deep ochre and forest green, burnt sienna and dusty violet, midnight teal and warm amber, or bold combinations pulled from the dream's emotional profile. The backdrop does NOT have to be a flat single hue — it can be a gradient sky, a textured environment, a dramatic atmospheric color field, or even a scene element (a wall, water, dense foliage, a richly colored interior) that IS part of the imagery. Whatever it is, make it visually bold and intentional. No muddy or accidental in-between tones — every color must read as chosen.
 
 TEXTURE RULES:
 A pronounced analog photographic grain — coarse, clearly visible 35mm-style film grain (large, chunky grain particles roughly 10px in scale, not a fine subtle haze), layered evenly across the entire frame, with a warm tone in the color grading and slightly faded black levels. The grain should be obvious and tactile, heavier than a typical clean photograph — but still a photographic texture, not damage, scratches, or dust.
 
 SUBJECT RULES:
-If a human figure appears: no identifiable face, no readable expression, no frozen catalog pose. Never let a face resolve into something nameable.
+If a human figure appears: no directly depicted human face — never a bare, exposed, readable face. If a face must appear, it must always be concealed or replaced: a mask, a veil, a mirror reflection distorted beyond recognition, petals, fabric, shadow, or another object placed over it. A silhouette, a figure turned away, or a face obscured by an element of the scene are all valid. Never let a face resolve into something nameable or identifiable. No frozen catalog pose.
 
 MATERIAL RULE:
 The image must resemble a polished, editorial-quality surreal photograph — clean, graphic, intentional. Never an illustration, painting, 3D render, or collage.
@@ -39,5 +42,5 @@ The image must resemble a polished, editorial-quality surreal photograph — cle
 EMOTIONAL GOAL:
 A single, vivid, almost cinematic surreal snapshot — the kind of image that feels both beautiful and slightly impossible. Striking and memorable, not vague or hard to read.
 
-FINAL STYLE DIRECTIVE: surreal minimalist photograph, analog dreamscape, flat color-blocked backdrop, magical realism, sharp graphic foreground, isolated monumental scale, heavy visible 35mm film grain, nostalgic warm color grading, optionally combined with abstract motion blur, a frosted-glass surface, and/or Orton-effect glow — applied locally and deliberately, never as a blanket soft-focus over the whole image — editorial fine-art photography. Photorealistic only — never illustration, painting, collage, or 3D render.
+FINAL STYLE DIRECTIVE: surreal analog dreamscape photograph — off-center or asymmetric composition, rich unexpected color palette (never just red/white/gray/light blue), bold or atmospheric backdrop that is itself part of the image, magical realism, sharp graphic foreground, heavy visible 35mm film grain, nostalgic warm color grading, optionally combined with abstract motion blur, a frosted-glass surface, and/or Orton-effect glow — applied locally and deliberately, never as a blanket soft-focus — editorial fine-art photography. Photorealistic only — never illustration, painting, collage, or 3D render. ABSOLUTELY NO TEXT, LETTERS, WORDS, OR SYMBOLS OF ANY KIND.
 `.trim();

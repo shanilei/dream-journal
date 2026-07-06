@@ -9,24 +9,43 @@ import { usePhotoBorder } from "./PhotoBorderProvider";
 import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translations";
 
 const CAPTION_MAX_WORDS = 7;
-const CAPTION_WORDS_PER_LINE = 4;
-
 function capitalizeFirst(text: string): string {
   return text.length ? text[0].toUpperCase() + text.slice(1) : text;
 }
 
+const CAPTION_WORDS_PER_LINE = 4;
+
 function getCaptionWords(text: string, maxWords: number): string {
   const words = text
-    .replace(/[.,!?]/g, "")
+    .replace(/[.,!?\-–—]/g, '')
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, maxWords);
 
   const lines: string[] = [];
   for (let i = 0; i < words.length; i += CAPTION_WORDS_PER_LINE) {
-    lines.push(words.slice(i, i + CAPTION_WORDS_PER_LINE).join(" "));
+    lines.push(words.slice(i, i + CAPTION_WORDS_PER_LINE).join(' '));
   }
-  return capitalizeFirst(lines.join("\n"));
+
+  // Prevent orphaned single word on the last line.
+  if (lines.length >= 2) {
+    const lastWords = lines[lines.length - 1].split(' ');
+    if (lastWords.length === 1) {
+      // Steal one word from the previous line so last line has 2 words.
+      const prevWords = lines[lines.length - 2].split(' ');
+      const stolen = prevWords.pop()!;
+      lines[lines.length - 2] = prevWords.join(' ');
+      lines[lines.length - 1] = stolen + ' ' + lastWords[0];
+    } else {
+      // Tie the last two words so the final word can never wrap alone.
+      lastWords[lastWords.length - 2] =
+        lastWords[lastWords.length - 2] + ' ' + lastWords[lastWords.length - 1];
+      lastWords.pop();
+      lines[lines.length - 1] = lastWords.join(' ');
+    }
+  }
+
+  return capitalizeFirst(lines.join('\n'));
 }
 
 type CaptionLayout = "center" | "bottom";
@@ -52,6 +71,7 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
     <div className={styles.collapsibleBlock}>
       <p
         ref={textRef}
+        dir="auto"
         className={`${styles.bodyText} ${expanded ? "" : styles.bodyTextClamped} ${
           dark ? styles.bodyTextDark : ""
         }`}
@@ -94,10 +114,13 @@ export default function DreamResultScreen({
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const isHebrew = /[֐-׿]/.test(dreamText || summaryText || "");
   const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
+  const captionLines = captionText ? captionText.split("\n") : [];
   const captionLayout = pickCaptionLayout(imageUrl);
-  const dateLabel = formatDreamDate(createdAt, lang);
-  const timeLabel = formatDreamTime(createdAt, lang);
+  const dateLang = isHebrew ? "he" : lang;
+  const dateLabel = formatDreamDate(createdAt, dateLang);
+  const timeLabel = formatDreamTime(createdAt, dateLang);
   const dreamTitle = lang === "he" ? `${t.dreamTitleSuffix} ${dateLabel}` : `${dateLabel} ${t.dreamTitleSuffix}`;
 
   function sampleBrightness() {
@@ -192,41 +215,29 @@ export default function DreamResultScreen({
               <div
                 className={`${styles.captionOverlay} ${
                   captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
-                } ${revealed ? styles.imageOverlayHidden : ""}`}
+                } ${isHebrew ? styles.captionOverlayRtl : ""} ${revealed ? styles.imageOverlayHidden : ""}`}
               >
-                {captionText && (
-                  <p className={`${styles.captionText} ${textColor === "black" ? styles.captionTextDark : ""}`}>
-                    {captionText}
+                {captionLines.length > 0 && (
+                  <p className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}>
+                    {captionLines.map((line, i) => (
+                      <span
+                        key={i}
+                        className={i === captionLines.length - 1 ? styles.captionLineLast : styles.captionLine}
+                      >
+                        {line}
+                      </span>
+                    ))}
                   </p>
                 )}
-                <div className={styles.captionMetaGroup}>
-                  {captionText && dateLabel && (
-                    <div
-                      className={`${styles.captionDivider} ${
-                        textColor === "black" ? styles.captionDividerDark : ""
-                      }`}
-                    />
-                  )}
-                  <div className={styles.captionMeta}>
-                    <span
-                      dir="ltr"
-                      className={`${styles.captionMetaDate} ${
-                        textColor === "black" ? styles.captionMetaDark : ""
-                      }`}
-                    >
-                      {dateLabel}
+                <div className={styles.captionMeta}>
+                  <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                    {dateLabel}
+                  </span>
+                  {timeLabel && (
+                    <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                      {timeLabel}
                     </span>
-                    {timeLabel && (
-                      <span
-                        dir="ltr"
-                        className={`${styles.captionMetaTime} ${
-                          textColor === "black" ? styles.captionMetaDark : ""
-                        }`}
-                      >
-                        {timeLabel}
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
             )}

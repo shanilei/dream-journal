@@ -21,6 +21,15 @@ export const translations = {
     filterAll: "All",
     filterLatest: "Latest",
     filterAnalysis: "Analysis",
+    filterType: "Type",
+    filterDate: "Date",
+    filterEmotion: "Emotion",
+    filterFavorite: "Favorite",
+    gallery: "Gallery",
+    searchPlaceholder: "Search",
+    recentDream: "Recent dream",
+    moreCollection: "More of your collection",
+    noFavorites: "No favorites yet — tap the heart on any dream.",
     comingSoon: "Coming soon",
     dreamsCount: "Dreams",
     dreamTitleSuffix: "dream",
@@ -55,6 +64,15 @@ export const translations = {
     filterAll: "הכול",
     filterLatest: "אחרונים",
     filterAnalysis: "ניתוח",
+    filterType: "סוג",
+    filterDate: "תאריך",
+    filterEmotion: "רגש",
+    filterFavorite: "מועדפים",
+    gallery: "גלריה",
+    searchPlaceholder: "חיפוש",
+    recentDream: "חלום אחרון",
+    moreCollection: "עוד מהאוסף שלך",
+    noFavorites: "עדיין אין מועדפים — לחץ על הלב בכל חלום.",
     comingSoon: "בקרוב",
     dreamsCount: "חלומות",
     dreamTitleSuffix: "חלום",
@@ -98,8 +116,20 @@ function localeFor(lang: Lang): string {
   return lang === "he" ? "he-IL" : "en-US";
 }
 
+export function langFromText(text: string | undefined, fallback: Lang): Lang {
+  return text && /[֐-׿]/.test(text) ? "he" : fallback;
+}
+
 export function formatDreamDate(iso: string, lang: Lang): string {
-  return new Date(iso).toLocaleDateString(localeFor(lang), { month: "short", day: "numeric" });
+  const date = new Date(iso);
+  if (lang === "he") {
+    // Return logical "day month" (e.g. "4 יולי").
+    // The captionMeta element carries direction:rtl, so bidi renders this visually as "יולי 4" (month first).
+    const day   = date.toLocaleDateString("he-IL", { day: "numeric" });
+    const month = date.toLocaleDateString("he-IL", { month: "long" });
+    return `${day} ${month}`;
+  }
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
 export function formatDreamTime(iso: string, lang: Lang): string {

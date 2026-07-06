@@ -1,208 +1,592 @@
+/* ===================== GRADIENT FADE ===================== */
+@keyframes gradientFade {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+/* ===================== SCREEN ===================== */
 .screen {
   position: relative;
   width: 100%;
   max-width: var(--shell-max-width);
-  height: 100vh;
-  height: 100dvh;
+  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
-  overflow: hidden;
-  background: linear-gradient(
-    to bottom,
-    rgba(234, 243, 255, 0.7),
-    rgba(86, 129, 240, 0.7)
-  );
-  padding-bottom: 140px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #050A1A;
+  padding-bottom: 120px;
 }
 
-:global([data-theme="dark"]) .screen {
-  background: radial-gradient(circle at 0% 25%, rgba(86, 129, 240, 0.35), transparent 40%),
-    radial-gradient(circle at 60% 5%, rgba(138, 92, 246, 0.3), transparent 40%),
-    radial-gradient(circle at 100% 25%, rgba(86, 129, 240, 0.3), transparent 40%),
-    var(--dark-bg-deep);
+/* Gradient lives on ::before so content always renders on top */
+.screen::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
+  animation: gradientFade 12s ease-in-out infinite;
+  pointer-events: none;
 }
 
-.toolbar {
+/* ===================== NEBULA BLOBS ===================== */
+.nebula {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.nebulaBlue {
+  width: 260px; height: 260px;
+  left: -80px; top: -60px;
+  background: #3B82F6;
+  opacity: 0.18;
+  filter: blur(45px);
+}
+.nebulaPurple {
+  width: 200px; height: 200px;
+  left: 220px; top: 120px;
+  background: #8B5CF6;
+  opacity: 0.14;
+  filter: blur(40px);
+}
+.nebulaCyan {
+  width: 180px; height: 180px;
+  left: -40px; top: 420px;
+  background: #06B6D4;
+  opacity: 0.10;
+  filter: blur(35px);
+}
+
+/* ===================== STARS ===================== */
+.star {
   position: absolute;
-  left: 31px;
-  right: 31px;
-  top: calc(7.69% - 13px);
+  background: #FFFFFF;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ===================== SINGLE CONTENT WRAPPER ===================== */
+/* Fix #1 + #2: all content inside one wrapper with consistent 20px side padding.
+   No individual horizontal margins/paddings on children. */
+.contentWrapper {
+  position: relative;
+  z-index: 1;
+  padding: 0 20px;
+}
+
+/* ===================== HEADER ===================== */
+.header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-top: 42px;
+  padding-bottom: 0;
+  height: 90px;
 }
 
-.toolbarGroup {
+.galleryTitle {
+  margin: 0;
+  font-size: 40px;
+  font-weight: 500;
+  line-height: 44px;
+  letter-spacing: -0.5px;
+  color: #FFFFFF;
+}
+
+.headerBtns {
   display: flex;
-  align-items: center;
   gap: 6px;
 }
 
-.pillBtn {
-  position: relative;
+.headerBtn {
   width: 48px;
   height: 48px;
   border-radius: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #000;
+  cursor: pointer;
+  color: #FFFFFF;
 }
 
-:global([data-theme="dark"]) .pillBtn {
-  color: var(--dark-text-primary);
+.headerBtnActive {
+  background: #FFFFFF;
+  color: #000000;
 }
 
-/* Selected state from Figma (node 902:5198): a solid white pill behind the
-   icon, with the icon itself forced dark so it reads against the white
-   regardless of light/dark theme — replaces the translucent glass fill. */
-.selectedFill {
+/* ===================== SEARCH BAR ===================== */
+.searchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 40px;
+  padding: 8px 16px;
+  height: 40px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.1) 100%);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 99px;
+  border: none;
+  box-shadow: 0px 1px 0px rgba(0,0,0,0.05), 0px 4px 4px rgba(0,0,0,0.05), 0px 10px 10px rgba(0,0,0,0.1);
+  box-sizing: border-box;
+  color: #FFFFFF;
+}
+
+.searchInput {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  font-family: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #FFFFFF;
+}
+
+.searchInput::placeholder {
+  font-family: inherit;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* ===================== FILTER PILLS ===================== */
+.filterRow {
+  display: flex;
+  gap: 10px;
+  padding-top: 8px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+
+.filterPill {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  height: 32px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.068);
+  backdrop-filter: blur(10.28px);
+  -webkit-backdrop-filter: blur(10.28px);
+  box-shadow: -11.15px -10.39px 48px -12px rgba(0,0,0,0.15),
+              -1.86px -1.73px 12px -8px rgba(0,0,0,0.15),
+              inset 2.29px 2.13px 9.84px rgba(255,255,255,0.126),
+              inset 1.36px 1.26px 4.92px rgba(255,255,255,0.126);
+  border: none;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #FFFFFF;
+  cursor: pointer;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+
+.filterPillActive {
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ===================== SECTION LABELS ===================== */
+.sectionLabel {
+  margin: 27px 0 10px;
+  padding: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #FFFFFF;
+}
+
+/* ===================== SHARED CARD STRUCTURE ===================== */
+
+/* Outer card shell */
+.heroCard,
+.gridCard {
+  border-radius: 20px;
+  background: #D9D9D9;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  text-decoration: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.heroCard {
+  margin: 0;
+}
+
+/* Image container — heart sits top-right via absolute positioning */
+.heroImgWrap,
+.gridImgWrap {
+  position: relative;
+  width: 100%;
+  height: 130px;
+  border-radius: 10px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.heroImg,
+.gridImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Heart — top: 8px, right: 8px */
+.heartBtn,
+.gridHeartBtn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: rgba(255,255,255,0.85);
+  line-height: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Text body — gap: 4px between heading and subheading */
+.heroBody,
+.gridBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cardHeading,
+.gridCardHeading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #000000;
+}
+
+.cardSubheading,
+.gridCardSubheading {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #2B2B2B;
+}
+
+/* ===================== COLLECTION GRID ===================== */
+.collectionGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+/* ===================== TYPE CAROUSEL ===================== */
+
+/* Outer container — clips to screen edges */
+.typeCarousel {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  /* 36 label-top + 24 label-h + 24 gap + 340 cards = 424 — leaving room for nav */
+  height: 480px;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+}
+
+.typeLabel {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #FFFFFF;
+  text-align: center;
+  white-space: nowrap;
+  position: relative;
+  z-index: 5;
+}
+
+/* Stack container — fixed card dimensions matching Figma */
+.typeStack {
+  position: relative;
+  width: 174px;
+  height: 390px;
+  flex-shrink: 0;
+}
+
+/* Shared base for all 3 stack cards */
+.typeFront,
+.typeBackLeft,
+.typeBackRight {
   position: absolute;
   inset: 0;
-  border-radius: 30px;
-  background: #fff;
+  background: #D9D9D9;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 10px;
+  text-decoration: none;
 }
 
-.pillBtnActive,
-:global([data-theme="dark"]) .pillBtnActive {
-  color: #000624;
+/* Front card — straight, highest z-index, tappable */
+.typeFront {
+  z-index: 3;
+  transform: none;
 }
 
-.iconLayer {
+/* Back-left card — rotated -5.24deg as per Figma */
+.typeBackLeft {
+  z-index: 2;
+  transform: rotate(-5.24deg) translate(-14px, 6px);
+  transform-origin: center bottom;
+}
+
+/* Back-right card — rotated +1.37deg as per Figma */
+.typeBackRight {
+  z-index: 1;
+  transform: rotate(1.37deg) translate(12px, 4px);
+  transform-origin: center bottom;
+}
+
+.typeCardImg {
+  width: 100%;
+  flex: 1;
+  object-fit: cover;
+  border-radius: 10px;
+  display: block;
+  min-height: 0;
+}
+
+.typeHeartBtn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: rgba(255,255,255,0.85);
+  z-index: 4;
+  line-height: 0;
+}
+
+.typeCardBody {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.typeCardHeading {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #000000;
+}
+
+.typeCardSub {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #2B2B2B;
+}
+
+/* ===================== LIST VIEW ===================== */
+.listView {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-bottom: 100px;
+}
+
+.listRow {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.1);
+  text-decoration: none;
+  position: relative;
+}
+
+.listRowCategory {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.6);
+  margin: 0;
+}
+
+.listRowCount {
+  font-size: 24px;
+  font-weight: 700;
+  color: #FFFFFF;
+  margin: 8px 0 0;
+}
+
+.listRowSub {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,0.5);
+  margin: 0;
+}
+
+.listRowArrow {
+  position: absolute;
+  top: 16px;
+  right: 18px;
+  color: rgba(255,255,255,0.6);
+  line-height: 0;
+}
+
+/* ===================== CALENDAR (Date filter) ===================== */
+
+.calScroll {
   position: relative;
   z-index: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  gap: 23px;
+  padding: 20px 0 120px;
+  /* own scroll container so we can set scrollTop directly */
+  height: calc(100dvh - 210px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
 }
 
-.gallerySection {
-  position: absolute;
-  left: 29px;
-  right: 29px;
-  top: calc(7.69% + 61px);
-  bottom: 130px;
+.calScroll::-webkit-scrollbar { display: none; }
+
+.calMonth {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center;
+  gap: 15px;
+  width: 352px;
 }
 
-.galleryContent {
+.calMonthName {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: #FFFFFF;
+  text-align: center;
+  margin: 0;
+}
+
+.calDayHeaders {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.calDayHeader {
   flex: 1;
-  overflow-y: auto;
+  font-size: 12px;
+  font-weight: 400;
+  color: #FFFFFF;
+  text-align: center;
+  line-height: 20px;
 }
 
+.calWeek {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+}
+
+.calWeekFirst {
+  justify-content: flex-end;
+}
+
+/* Each day cell — 40×40px, border-radius 12px */
+.calCell {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  overflow: hidden;
+}
+
+.calCellEmpty {
+  background: #FFFFFF;
+}
+
+.calCellSelected {
+  background: #8571FF;
+}
+
+.calCellNum {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.calCellNumDark {
+  color: #090A0A;
+}
+
+.calCellNumLight {
+  color: #FFFFFF;
+}
+
+.calCellImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.calDivider {
+  width: 375px;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.15);
+  margin-bottom: 16px;
+}
+
+/* ===================== MISC ===================== */
 .comingSoon {
   margin: 40px 0 0;
   text-align: center;
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255,255,255,0.6);
 }
 
-.heading {
-  position: absolute;
-  left: calc(12.5% - 17px);
-  top: calc(15.38% + 3px);
-  margin: 0;
-  font-size: 24px;
-  font-weight: 600;
-  color: #000624;
-}
-
-:global([data-theme="dark"]) .heading {
-  color: var(--dark-text-primary);
-}
-
-.byType {
-  position: absolute;
-  left: 29px;
-  right: 29px;
-  top: calc(61.54% + 21px);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.byTypeHeaderRow {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-}
-
-.byTypeHeading {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
-  color: #000624;
-}
-
-:global([data-theme="dark"]) .byTypeHeading {
-  color: var(--dark-text-primary);
-}
-
-.seeAll {
-  font-size: 12px;
-  color: #71717a;
-  text-decoration: underline;
-}
-
-:global([data-theme="dark"]) .seeAll {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-.categoryRow {
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-}
-
-.categoryCard {
-  flex-shrink: 0;
-  width: 104px;
-  height: 105px;
-  border-radius: 10px;
-  background: #000;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 0 11px 9px;
-  color: #fff;
-  overflow: hidden;
-}
-
-/* Sweet — warm red/pink glow */
-.categoryCardSweet {
-  background: radial-gradient(at 65% 68%, #c64652 0%, #5c1f26 35%, #14070a 70%, #000 100%);
-}
-
-/* Fear — dark green/teal glow */
-.categoryCardFear {
-  background: radial-gradient(at 65% 68%, #4a8e6a 0%, #1f4a37 35%, #07120d 70%, #000 100%);
-}
-
-/* Confused — teal fading into indigo glow */
-.categoryCardConfused {
-  background: radial-gradient(at 60% 55%, #1c9cc0 0%, #2a49b5 45%, #0a1130 75%, #000 100%);
-}
-
-/* Sad — muted slate-blue grey glow */
-.categoryCardSad {
-  background: radial-gradient(at 60% 55%, #5b6b8c 0%, #2b3550 45%, #0a0d18 75%, #000 100%);
-}
-
-/* Angry — hot scorched red/orange glow */
-.categoryCardAngry {
-  background: radial-gradient(at 65% 68%, #e0492f 0%, #7a1f0f 35%, #1a0704 70%, #000 100%);
-}
-
-.categoryLabel {
-  font-size: 12px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.categoryCount {
-  font-size: 12px;
-  font-weight: 400;
-  margin: 0;
+@media print {
+  .screen { display: none; }
 }
