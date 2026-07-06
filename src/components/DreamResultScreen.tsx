@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
+import { ArrowLeftIcon, ShareIcon, PrinterIcon, HeartIcon } from "./Icons";
 import BottomNav from "./BottomNav";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
@@ -321,7 +321,12 @@ html,body{width:100%;height:100%;overflow:hidden}
         </div>
 
         <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
-          <p className={styles.title}>{dreamTitle}</p>
+          <div className={styles.titleRow} style={lang === "he" ? { flexDirection: "row-reverse" } : undefined}>
+            <p className={styles.title}>{dreamTitle}</p>
+            <button type="button" className={styles.titleHeartBtn} aria-label="Favourite">
+              <HeartIcon size={22} color="rgba(255,255,255,0.7)" />
+            </button>
+          </div>
           <div className={styles.metaRow} style={lang === "he" ? { justifyContent: "flex-end", width: "100%" } : undefined}>
             <span className={styles.moodPill}>{translateMood(mood, lang)}</span>
             <span className={styles.metaText}>{dateLabel}</span>
