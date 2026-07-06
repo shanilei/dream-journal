@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { Urbanist, Alumni_Sans, David_Libre } from "next/font/google";
+import { Urbanist, Alumni_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
@@ -34,10 +35,15 @@ const alumniSans = Alumni_Sans({
   variable: "--font-alumni-sans",
 });
 
-const davidLibre = David_Libre({
-  subsets: ["latin", "hebrew"],
-  weight: ["400", "700"],
-  variable: "--font-david-libre",
+const ploni = localFont({
+  src: [
+    { path: "../../font/ploni-light-aaa.otf", weight: "300" },
+    { path: "../../font/ploni-regular-aaa.otf", weight: "400" },
+    { path: "../../font/ploni-medium-aaa.otf", weight: "500" },
+    { path: "../../font/ploni-demibold-aaa.otf", weight: "600" },
+    { path: "../../font/ploni-bold-aaa.otf", weight: "700" },
+  ],
+  variable: "--font-ploni",
 });
 
 export const metadata: Metadata = {
@@ -58,7 +64,7 @@ export default function RootLayout({
           {LANG_INIT_SCRIPT}
         </Script>
       </head>
-      <body className={`${urbanist.variable} ${alumniSans.variable} ${davidLibre.variable}`}>
+      <body className={`${urbanist.variable} ${alumniSans.variable} ${ploni.variable}`}>
         <ThemeProvider>
           <LanguageProvider>
             <PhotoBorderProvider>{children}</PhotoBorderProvider>

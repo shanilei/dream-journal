@@ -208,7 +208,7 @@
 }
 
 .captionTextHe {
-  font-family: 'Stanga AAA', var(--font-david-libre), serif;
+  font-family: var(--font-ploni), serif;
   direction: rtl;
 }
 
@@ -267,7 +267,7 @@
 }
 
 .captionMetaDateHe {
-  font-family: 'Stanga AAA', var(--font-david-libre), serif;
+  font-family: var(--font-ploni), serif;
 }
 
 .captionMetaTime {

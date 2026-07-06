@@ -172,7 +172,7 @@ export default function DreamResultScreen({
       });
 
       const captionFont = isHebrew
-        ? `'David Libre', Arial, serif`
+        ? `'Ploni AAA', Arial, serif`
         : `'Alumni Sans', 'Helvetica Neue', Arial, sans-serif`;
       const scrimGradient =
         textColor === "white"
