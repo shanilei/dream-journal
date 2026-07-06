@@ -5,7 +5,6 @@ import DreamResultScreen from "./DreamResultScreen";
 
 export default function DreamDetailClient({
   id,
-  name,
   imageUrl,
   clearImageUrl,
   createdAt,
@@ -16,7 +15,6 @@ export default function DreamDetailClient({
   dreamText,
 }: {
   id: string;
-  name?: string;
   imageUrl: string;
   clearImageUrl?: string;
   createdAt: string;
@@ -31,7 +29,6 @@ export default function DreamDetailClient({
   return (
     <DreamResultScreen
       id={id}
-      name={name}
       imageUrl={imageUrl}
       clearImageUrl={clearImageUrl}
       createdAt={createdAt}

@@ -12,7 +12,6 @@ import { useLanguage } from "@/components/LanguageProvider";
 
 type DreamResult = {
   id: string;
-  name?: string;
   imageUrl: string;
   clearImageUrl?: string;
   createdAt: string;
@@ -70,12 +69,11 @@ export default function RecordPage() {
 
       setResult({
         id: data.id,
-        name: data.name,
         imageUrl: data.imageUrl,
         clearImageUrl: data.clearImageUrl,
         createdAt: new Date().toISOString(),
         mood: data.mood,
-        summaryText: data.summaryText || summarize(data.analysis.themes ?? []),
+        summaryText: summarize(data.analysis.themes ?? []),
         interpretationText: data.interpretationText,
         symbols: (data.analysis.symbols ?? []).slice(0, 3).map(shortSymbol),
         dreamText: text,

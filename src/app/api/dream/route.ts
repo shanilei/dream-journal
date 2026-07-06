@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     const clearImageUrl = clearPublicUrlData.publicUrl;
 
     const mood = MOOD_LABELS[pickProfile(analysis)];
-    const summaryText = interpretation.description || (analysis.themes?.length ? `${analysis.themes.slice(0, 2).join(". ")}.` : "");
+    const summaryText = analysis.themes?.length ? `${analysis.themes.slice(0, 2).join(". ")}.` : "";
     const symbols = (analysis.symbols ?? []).slice(0, 3).map(shortSymbol);
     const dreamId = randomUUID();
 
@@ -72,7 +72,6 @@ export async function POST(req: NextRequest) {
       imageUrl,
       clearImageUrl,
       mood,
-      name: interpretation.name,
       summaryText,
       symbols,
       imagePrompt: prompt,
@@ -83,12 +82,10 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       id: dreamId,
-      name: interpretation.name,
       analysis,
       mood,
       imageUrl,
       clearImageUrl,
-      summaryText,
       interpretationText: interpretation.interpretationText,
       keywords: interpretation.keywords,
     });

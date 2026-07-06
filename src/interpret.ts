@@ -25,14 +25,6 @@ const interpretationTool: Anthropic.Tool = {
   input_schema: {
     type: "object",
     properties: {
-      name: {
-        type: "string",
-        description: "שם החלום: 1–3 מילים בלבד, קליט ומיוחד — לא בנאלי. בשפה שבה כתוב החלום.",
-      },
-      description: {
-        type: "string",
-        description: "תיאור קצר של החלום במשפט אחד: מה קרה, מה הרגש, מה הייתה האווירה. בשפה שבה כתוב החלום.",
-      },
       interpretationText: {
         type: "string",
         description: "פרשנות כתובה, עד 100 מילים בדיוק, מנוסחת כהזמנה לרפלקציה ולא כאבחנה",
@@ -43,13 +35,11 @@ const interpretationTool: Anthropic.Tool = {
         description: "מילות המפתח שהפרשנות מתמקדת בהן, לזיהוי דפוסים חוזרים בעתיד",
       },
     },
-    required: ["name", "description", "interpretationText", "keywords"],
+    required: ["interpretationText", "keywords"],
   },
 };
 
 export interface DreamInterpretation {
-  name: string;
-  description: string;
   interpretationText: string;
   keywords: string[];
 }

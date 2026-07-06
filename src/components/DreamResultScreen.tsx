@@ -108,7 +108,6 @@ function saveFavorites(set: Set<string>) {
 
 export default function DreamResultScreen({
   id,
-  name,
   imageUrl,
   clearImageUrl,
   createdAt,
@@ -120,7 +119,6 @@ export default function DreamResultScreen({
   onBack,
 }: {
   id?: string;
-  name?: string;
   imageUrl: string;
   clearImageUrl?: string;
   createdAt: string;
@@ -160,7 +158,7 @@ export default function DreamResultScreen({
   const dateLang = isHebrew ? "he" : lang;
   const dateLabel = formatDreamDate(createdAt, dateLang);
   const timeLabel = formatDreamTime(createdAt, dateLang);
-  const dreamTitle = name || (lang === "he" ? `${t.dreamTitleSuffix} ${dateLabel}` : `${dateLabel} ${t.dreamTitleSuffix}`);
+  const dreamTitle = lang === "he" ? `${t.dreamTitleSuffix} ${dateLabel}` : `${dateLabel} ${t.dreamTitleSuffix}`;
 
   function sampleBrightness() {
     const img = imgRef.current;

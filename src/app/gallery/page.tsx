@@ -12,7 +12,6 @@ export default async function GalleryPage() {
     id: dream.id,
     image: dream.imageUrl,
     mood: dream.mood,
-    name: dream.name,
     createdAt: dream.createdAt,
     summary: dream.summaryText,
   });

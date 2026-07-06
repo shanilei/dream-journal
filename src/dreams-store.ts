@@ -6,7 +6,6 @@ export interface DreamEntry {
   imageUrl: string;
   clearImageUrl?: string;
   mood: string;
-  name?: string;
   summaryText: string;
   symbols: string[];
   imagePrompt?: string;
@@ -21,7 +20,6 @@ interface DreamRow {
   image_url: string;
   clear_image_url: string | null;
   mood: string;
-  name: string | null;
   summary_text: string;
   symbols: string[];
   image_prompt: string | null;
@@ -37,7 +35,6 @@ function fromRow(row: DreamRow): DreamEntry {
     imageUrl: row.image_url,
     clearImageUrl: row.clear_image_url ?? undefined,
     mood: row.mood,
-    name: row.name ?? undefined,
     summaryText: row.summary_text,
     symbols: row.symbols ?? [],
     imagePrompt: row.image_prompt ?? undefined,
@@ -54,7 +51,6 @@ export async function saveDream(entry: DreamEntry): Promise<void> {
     image_url: entry.imageUrl,
     clear_image_url: entry.clearImageUrl ?? null,
     mood: entry.mood,
-    name: entry.name ?? null,
     summary_text: entry.summaryText,
     symbols: entry.symbols,
     image_prompt: entry.imagePrompt ?? null,
