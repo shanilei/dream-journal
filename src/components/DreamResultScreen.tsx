@@ -310,7 +310,7 @@ html,body{width:100%;height:100%;overflow:hidden}
                     {dateLabel}
                   </span>
                   {timeLabel && (
-                    <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                    <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
                       {timeLabel}
                     </span>
                   )}

@@ -270,6 +270,13 @@
   font-family: var(--font-ploni), serif;
 }
 
+.captionMetaTimeHe {
+  font-family: var(--font-ploni), serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+
 .captionMetaTime {
   font-family: var(--font-alumni-sans), sans-serif;
   font-size: 11px;
@@ -458,12 +465,6 @@
   padding: 0 !important;
 }
 
-/* No scrim gradient or caption overlay on the image */
-:global([lang="he"]) .imageScrimDark,
-:global([lang="he"]) .imageScrimLight,
-:global([lang="he"]) .captionOverlay {
-  display: none !important;
-}
 
 /* Image: full rounded-24 corners (no card padding to push into) */
 :global([lang="he"]) .image,
