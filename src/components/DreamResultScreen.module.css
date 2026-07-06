@@ -487,9 +487,9 @@
   letter-spacing: -0.5px;
 }
 
-/* Meta row: right-to-left order */
+/* Meta row: right-aligned in Hebrew */
 :global([lang="he"]) .metaRow {
-  flex-direction: row-reverse;
+  justify-content: flex-end;
 }
 
 /* Date/time meta text: pill-style */
