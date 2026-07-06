@@ -131,7 +131,7 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   border-radius: 99px;
-  border: none;
+  border: 1px solid rgba(255,255,255,0.3);
   box-shadow: 0px 1px 0px rgba(0,0,0,0.05), 0px 4px 4px rgba(0,0,0,0.05), 0px 10px 10px rgba(0,0,0,0.1);
   box-sizing: border-box;
   color: #FFFFFF;
@@ -154,13 +154,21 @@
   color: rgba(255, 255, 255, 0.6);
 }
 
+:global([dir="rtl"]) .searchInput {
+  text-align: right;
+}
+
 /* ===================== FILTER PILLS ===================== */
 .filterRow {
   display: flex;
   gap: 10px;
-  padding-top: 8px;
-  margin-top: 8px;
-  overflow: hidden;
+  padding: 10px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filterRow::-webkit-scrollbar {
+  display: none;
 }
 
 
@@ -172,14 +180,14 @@
   padding: 6px 16px;
   height: 32px;
   border-radius: 99px;
-  background: rgba(255, 255, 255, 0.068);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(10.28px);
   -webkit-backdrop-filter: blur(10.28px);
   box-shadow: -11.15px -10.39px 48px -12px rgba(0,0,0,0.15),
               -1.86px -1.73px 12px -8px rgba(0,0,0,0.15),
-              inset 2.29px 2.13px 9.84px rgba(255,255,255,0.126),
-              inset 1.36px 1.26px 4.92px rgba(255,255,255,0.126);
-  border: none;
+              inset 2.29px 2.13px 9.84px rgba(255,255,255,0.13),
+              inset 1.36px 1.26px 4.92px rgba(255,255,255,0.13);
+  border: 1px solid rgba(255,255,255,0.35);
   font-size: 12px;
   font-weight: 400;
   line-height: 20px;
@@ -585,6 +593,56 @@
   text-align: center;
   font-size: 13px;
   color: rgba(255,255,255,0.6);
+}
+
+/* ===================== HEBREW (RTL) OVERRIDES ===================== */
+
+/* Gallery title — Ploni DemiBold */
+:global([lang="he"]) .galleryTitle {
+  font-family: var(--font-ploni), serif;
+  font-weight: 600;
+}
+
+/* Section labels — Ploni Regular */
+:global([lang="he"]) .sectionLabel {
+  font-family: var(--font-ploni), serif;
+  font-weight: 400;
+}
+
+/* Filter pills + search — Ploni Regular */
+:global([lang="he"]) .filterPill,
+:global([lang="he"]) .searchInput {
+  font-family: var(--font-ploni), serif;
+}
+
+/* Card headings + subheadings — Ploni */
+:global([lang="he"]) .cardHeading,
+:global([lang="he"]) .gridCardHeading,
+:global([lang="he"]) .typeCardHeading {
+  font-family: var(--font-ploni), serif;
+  font-weight: 400;
+}
+
+:global([lang="he"]) .cardSubheading,
+:global([lang="he"]) .gridCardSubheading,
+:global([lang="he"]) .typeCardSub,
+:global([lang="he"]) .listRowCategory,
+:global([lang="he"]) .listRowSub {
+  font-family: var(--font-ploni), serif;
+  font-weight: 400;
+}
+
+/* Card body — align to inline-end (right in RTL) */
+:global([dir="rtl"]) .heroBody,
+:global([dir="rtl"]) .gridBody,
+:global([dir="rtl"]) .typeCardBody {
+  align-items: flex-end;
+}
+
+/* Heart button — swap to opposite side in RTL grid cards */
+:global([dir="rtl"]) .gridHeartBtn {
+  right: auto;
+  left: 8px;
 }
 
 @media print {

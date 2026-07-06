@@ -418,7 +418,7 @@ export default function HomeScreenClient({
         {/* Search */}
         <div className={styles.searchBar}>
           <SearchIcon />
-          <input className={styles.searchInput} type="search" placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder} />
+          <input className={styles.searchInput} type="search" dir="auto" placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder} />
         </div>
 
         {/* Filter pills — hidden in list view */}
