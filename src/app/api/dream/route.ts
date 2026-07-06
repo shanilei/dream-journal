@@ -64,9 +64,10 @@ export async function POST(req: NextRequest) {
     const mood = MOOD_LABELS[pickProfile(analysis)];
     const summaryText = analysis.themes?.length ? `${analysis.themes.slice(0, 2).join(". ")}.` : "";
     const symbols = (analysis.symbols ?? []).slice(0, 3).map(shortSymbol);
+    const dreamId = randomUUID();
 
     await saveDream({
-      id: randomUUID(),
+      id: dreamId,
       createdAt: new Date().toISOString(),
       imageUrl,
       clearImageUrl,
@@ -80,6 +81,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
+      id: dreamId,
       analysis,
       mood,
       imageUrl,

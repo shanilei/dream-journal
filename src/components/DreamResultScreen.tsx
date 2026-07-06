@@ -358,7 +358,7 @@ html,body{width:100%;height:100%;overflow:hidden}
         </div>
 
         <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
-          <div className={styles.titleRow} style={lang === "he" ? { flexDirection: "row-reverse" } : undefined}>
+          <div className={styles.titleRow}>
             <p className={styles.title}>{dreamTitle}</p>
             <button type="button" className={styles.titleHeartBtn} aria-label="Favourite" onClick={toggleFavorite}>
               <HeartIcon size={22} color="#ffffff" filled={favorited} />

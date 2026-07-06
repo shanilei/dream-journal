@@ -11,6 +11,7 @@ import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
 
 type DreamResult = {
+  id: string;
   imageUrl: string;
   clearImageUrl?: string;
   createdAt: string;
@@ -67,6 +68,7 @@ export default function RecordPage() {
       const data = await dreamRes.json();
 
       setResult({
+        id: data.id,
         imageUrl: data.imageUrl,
         clearImageUrl: data.clearImageUrl,
         createdAt: new Date().toISOString(),
