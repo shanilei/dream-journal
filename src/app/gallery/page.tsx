@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 const MOOD_TYPES = ["Fear", "Confused", "Sweet", "Sad", "Angry"] as const;
 
 export default async function GalleryPage() {
-  const dreams = await listDreams();
+  const dreams = await listDreams().catch(() => []);
 
   const toCard = (dream: (typeof dreams)[number]) => ({
     id: dream.id,

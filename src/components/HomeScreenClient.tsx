@@ -350,9 +350,9 @@ export default function HomeScreenClient({
     });
   }
 
-  function renderCard(card: Card, className: string, imgClass: string, bodyClass: string, headingClass: string, subClass: string) {
+  function renderCard(card: Card, className: string, imgClass: string, bodyClass: string, headingClass: string, subClass: string, index = 0) {
     return (
-      <Link key={card.id} href={`/dream/${card.id}`} className={className}>
+      <Link key={card.id} href={`/dream/${card.id}`} className={className} style={{ "--card-index": index } as React.CSSProperties}>
         <div className={styles.gridImgWrap}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={card.image} alt="" className={imgClass} />
@@ -487,8 +487,8 @@ export default function HomeScreenClient({
             {searchResults.length === 0 ? (
               <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.searchNoResults}</p>
             ) : (
-              searchResults.map((card) =>
-                renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading)
+              searchResults.map((card, i) =>
+                renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading, i)
               )
             )}
           </div>
@@ -500,8 +500,8 @@ export default function HomeScreenClient({
             {favoriteCards.length === 0 ? (
               <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.noFavorites}</p>
             ) : (
-              favoriteCards.map((card) =>
-                renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading)
+              favoriteCards.map((card, i) =>
+                renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading, i)
               )
             )}
           </div>
@@ -533,8 +533,8 @@ export default function HomeScreenClient({
               <>
                 <p className={styles.sectionLabel}>{t.moreCollection}</p>
                 <div className={styles.collectionGrid}>
-                  {collectionCards.map((card) =>
-                    renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading)
+                  {collectionCards.map((card, i) =>
+                    renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading, i)
                   )}
                 </div>
               </>

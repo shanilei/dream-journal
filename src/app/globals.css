@@ -86,13 +86,13 @@ button {
 a:hover,
 button:hover {
   opacity: 1;
-  filter: brightness(1.15) drop-shadow(0 0 6px rgba(138, 120, 255, 0.45));
+  filter: brightness(1.12) drop-shadow(0 0 5px rgba(138, 120, 255, 0.35));
 }
 
 a:active,
 button:active {
   opacity: 0.85;
-  filter: brightness(1.05) drop-shadow(0 0 4px rgba(138, 120, 255, 0.3));
+  filter: brightness(1.04) drop-shadow(0 0 3px rgba(138, 120, 255, 0.25));
 }
 
 p {
@@ -103,14 +103,29 @@ h1, h2, h3, h4, h5, h6, p, li, span, label {
   text-wrap: pretty;
 }
 
+/* ── PREMIUM SCREEN ENTRY ─────────────────────────────────────────────────
+   Camera-dolly feel: gentle forward push + soft focus clearing.
+   Used on every .screen class; duration/easing set per module.            */
 @keyframes screenIn {
   from {
     opacity: 0;
-    transform: translateY(-16px);
+    transform: translateY(20px) scale(0.98);
+    filter: blur(8px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* Honour system accessibility preference */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

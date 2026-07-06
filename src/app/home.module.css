@@ -4,9 +4,28 @@
   50%       { opacity: 1;   }
 }
 
+/* ── GALLERY MOTION SYSTEM ────────────────────────────────────────────────*/
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes labelIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 /* ===================== SCREEN ===================== */
 .screen {
-  animation: screenIn 0.42s ease-out both;
+  animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   position: relative;
   width: 100%;
   max-width: var(--shell-max-width);
@@ -208,6 +227,7 @@
 
 /* ===================== SECTION LABELS ===================== */
 .sectionLabel {
+  animation: labelIn 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   margin: 27px 0 10px;
   padding: 0;
   font-size: 16px;
@@ -220,6 +240,7 @@
 
 /* Outer card shell */
 .heroCard {
+  animation: cardIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) 0.06s both;
   border-radius: 20px;
   background: rgba(66, 64, 85, 0.15);
   backdrop-filter: blur(20px);
@@ -235,9 +256,33 @@
   padding: 8px;
   box-sizing: border-box;
   margin: 0;
+  transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1),
+              box-shadow 0.18s cubic-bezier(0.22, 0.61, 0.36, 1),
+              backdrop-filter 0.18s ease,
+              filter 0.18s ease,
+              opacity 0.18s ease;
+}
+
+.heroCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45),
+              0 4px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  filter: none;
+  opacity: 1;
+}
+
+.heroCard:active {
+  transform: scale(0.98);
+  transition: transform 0.12s ease;
+  filter: none;
+  opacity: 1;
 }
 
 .gridCard {
+  animation: cardIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  animation-delay: calc(var(--card-index, 0) * 60ms + 0.1s);
   border-radius: 20px;
   background: rgba(66, 64, 85, 0.4);
   backdrop-filter: blur(20px);
@@ -252,6 +297,28 @@
   gap: 10px;
   padding: 8px;
   box-sizing: border-box;
+  transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1),
+              box-shadow 0.18s cubic-bezier(0.22, 0.61, 0.36, 1),
+              backdrop-filter 0.18s ease,
+              filter 0.18s ease,
+              opacity 0.18s ease;
+}
+
+.gridCard:hover {
+  transform: scale(1.02);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45),
+              0 4px 8px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(26px);
+  -webkit-backdrop-filter: blur(26px);
+  filter: none;
+  opacity: 1;
+}
+
+.gridCard:active {
+  transform: scale(0.98);
+  transition: transform 0.12s ease;
+  filter: none;
+  opacity: 1;
 }
 
 /* Image container — heart sits top-right via absolute positioning */
@@ -518,6 +585,7 @@
 }
 
 .calMonthName {
+  animation: labelIn 0.35s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   font-size: 16px;
   font-weight: 500;
   line-height: 24px;
@@ -563,6 +631,24 @@
   justify-content: center;
   text-decoration: none;
   overflow: hidden;
+  transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1),
+              box-shadow 0.18s ease,
+              filter 0.18s ease,
+              opacity 0.18s ease;
+}
+
+.calCell:hover {
+  transform: scale(1.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  filter: none;
+  opacity: 1;
+}
+
+.calCell:active {
+  transform: scale(0.94);
+  transition: transform 0.1s ease;
+  filter: none;
+  opacity: 1;
 }
 
 .calCellEmpty {

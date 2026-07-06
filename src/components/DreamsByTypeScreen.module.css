@@ -1,6 +1,6 @@
 /* ── Background ── */
 .screen {
-  animation: screenIn 0.42s ease-out both;
+  animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   position: relative;
   width: 100%;
   max-width: var(--shell-max-width);
