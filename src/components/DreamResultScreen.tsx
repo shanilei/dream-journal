@@ -361,7 +361,7 @@ html,body{width:100%;height:100%;overflow:hidden}
           <div className={styles.titleRow} style={lang === "he" ? { flexDirection: "row-reverse", width: "100%" } : undefined}>
             <p className={styles.title}>{dreamTitle}</p>
             <button type="button" className={styles.titleHeartBtn} aria-label="Favourite" onClick={toggleFavorite}>
-              <HeartIcon size={22} color={favorited ? "#ff6b8a" : "rgba(255,255,255,0.7)"} filled={favorited} />
+              <HeartIcon size={22} color="#ffffff" filled={favorited} />
             </button>
           </div>
           <div className={styles.metaRow} style={lang === "he" ? { justifyContent: "flex-end", width: "100%" } : undefined}>
