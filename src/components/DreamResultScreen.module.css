@@ -490,6 +490,7 @@
 /* Meta row: right-aligned in Hebrew */
 :global([lang="he"]) .metaRow {
   justify-content: flex-end;
+  width: 100%;
 }
 
 /* Date/time meta text: pill-style */
@@ -533,6 +534,7 @@
 /* Symbol chips: Ploni, right-aligned row */
 :global([lang="he"]) .symbolsRow {
   justify-content: flex-end;
+  width: 100%;
 }
 
 :global([lang="he"]) .symbolChip {
