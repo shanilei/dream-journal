@@ -461,36 +461,39 @@
     padding: 0 !important;
   }
 
-  /* Hide everything — proven to work on Safari iOS */
   body * {
     visibility: hidden !important;
   }
 
-  /* Hide BottomNav (position:fixed z-index:5 — would print over the image) */
-  /* and the clear/unblurred version */
+  /* Reset eyeOpen animation so clip-path doesn't collapse the image */
+  .imageCard,
+  .imageCardNoBorder {
+    animation: none !important;
+    clip-path: none !important;
+    filter: none !important;
+    opacity: 1 !important;
+  }
+
   .imageClear {
     display: none !important;
   }
 
-  /* Base image fills the full page */
   .image {
     visibility: visible !important;
     position: fixed !important;
     inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
+    width: 100vw !important;
+    height: 100vh !important;
     aspect-ratio: auto !important;
     object-fit: cover !important;
     border-radius: 0 !important;
     opacity: 1 !important;
     filter: none !important;
     animation: none !important;
-    z-index: 1 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  /* Scrim gradient layer */
   .imageScrimDark,
   .imageScrimLight {
     visibility: visible !important;
@@ -498,12 +501,10 @@
     inset: 0 !important;
     border-radius: 0 !important;
     opacity: 1 !important;
-    z-index: 2 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  /* Caption text layer */
   .captionOverlay,
   .captionOverlay * {
     visibility: visible !important;
@@ -513,7 +514,6 @@
     position: fixed !important;
     inset: 0 !important;
     opacity: 1 !important;
-    z-index: 3 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }

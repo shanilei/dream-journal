@@ -151,9 +151,85 @@ export default function DreamResultScreen({
     if (imgRef.current?.complete) sampleBrightness();
   }, [imageUrl]);
 
-  function handlePrint() {
+  async function handlePrint() {
     setShowPrintModal(false);
-    setTimeout(() => window.print(), 50);
+
+    // Open window synchronously — iOS Safari blocks window.open() called after any await
+    const win = window.open("", "_blank");
+    if (!win) {
+      setTimeout(() => window.print(), 50);
+      return;
+    }
+
+    try {
+      const res = await fetch(imageUrl);
+      const blob = await res.blob();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+      });
+
+      const captionFont = isHebrew
+        ? `'David Libre', Arial, serif`
+        : `'Alumni Sans', 'Helvetica Neue', Arial, sans-serif`;
+      const scrimGradient =
+        textColor === "white"
+          ? isHebrew
+            ? "linear-gradient(to right, rgba(0,0,0,0.4), transparent 65%)"
+            : "linear-gradient(to left, rgba(0,0,0,0.4), transparent 65%)"
+          : isHebrew
+          ? "linear-gradient(to right, rgba(255,255,255,0.45), transparent 65%)"
+          : "linear-gradient(to left, rgba(255,255,255,0.45), transparent 65%)";
+      const fg = textColor === "white" ? "#fff" : "#000";
+      const fgMuted = textColor === "white" ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.55)";
+      const captionAlignItems = captionLayout === "center" ? "center" : "flex-end";
+      const captionHtml = captionLines
+        .map((line) => `<span style="display:block">${line}</span>`)
+        .join("");
+
+      win.document.write(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alumni+Sans:wght@400;600&family=David+Libre:wght@400;700&display=swap">
+<style>
+@page{margin:0}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden}
+.w{position:fixed;inset:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+.img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.scrim{position:absolute;inset:0;background:${scrimGradient}}
+.cap{position:absolute;inset:0;display:flex;flex-direction:${isHebrew ? "row-reverse" : "row"};justify-content:space-between;align-items:${captionAlignItems};gap:16px;padding:20px;direction:${isHebrew ? "rtl" : "ltr"}}
+.ct{flex:1;font-family:${captionFont};font-size:12px;font-weight:400;line-height:1.4;color:${fg}}
+.cm{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
+.cd{font-family:${captionFont};font-size:13px;font-weight:600;color:${fg};white-space:nowrap}
+.ctm{font-family:${captionFont};font-size:11px;font-weight:600;color:${fgMuted};white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="w">
+<img class="img" src="${dataUrl}">
+<div class="scrim"></div>
+<div class="cap">
+<p class="ct">${captionHtml}</p>
+<div class="cm"><span class="cd">${dateLabel}</span><span class="ctm">${timeLabel}</span></div>
+</div>
+</div>
+</body>
+</html>`);
+      win.document.close();
+
+      setTimeout(() => {
+        win.focus();
+        win.print();
+        setTimeout(() => win.close(), 1000);
+      }, 700);
+    } catch {
+      win.close();
+      setTimeout(() => window.print(), 50);
+    }
   }
 
   return (
