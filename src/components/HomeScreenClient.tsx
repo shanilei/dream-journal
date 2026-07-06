@@ -7,7 +7,7 @@ import OnboardingGate from "@/components/OnboardingGate";
 import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 
 type Card = {
   id: string;
@@ -66,7 +66,8 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
 
   const now = new Date();
 
-  let startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+  // Always show at least 6 months back for demo; extend further if older dreams exist
+  let startDate = new Date(now.getFullYear(), now.getMonth() - 5, 1);
   if (gridCards.length > 0) {
     const earliest = gridCards.reduce(
       (min, c) => (c.createdAt < min ? c.createdAt : min),
