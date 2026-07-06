@@ -6,7 +6,7 @@ import { analyzeDream } from "@/analyze";
 import { interpretDream } from "@/interpret";
 import { generateImage, pickProfile } from "@/generate-image";
 import { saveDream } from "@/dreams-store";
-import { supabase } from "@/supabase";
+import { getSupabase } from "@/supabase";
 
 export const runtime = "nodejs";
 
@@ -46,19 +46,19 @@ export async function POST(req: NextRequest) {
     rmSync(clearPath, { force: true });
 
     const storagePath = `${randomUUID()}.png`;
-    const { error: uploadError } = await supabase.storage
+    const { error: uploadError } = await getSupabase().storage
       .from("dream-images")
       .upload(storagePath, imageBuffer, { contentType: "image/png" });
     if (uploadError) throw uploadError;
-    const { data: publicUrlData } = supabase.storage.from("dream-images").getPublicUrl(storagePath);
+    const { data: publicUrlData } = getSupabase().storage.from("dream-images").getPublicUrl(storagePath);
     const imageUrl = publicUrlData.publicUrl;
 
     const clearStoragePath = `${randomUUID()}.png`;
-    const { error: clearUploadError } = await supabase.storage
+    const { error: clearUploadError } = await getSupabase().storage
       .from("dream-images")
       .upload(clearStoragePath, clearBuffer, { contentType: "image/png" });
     if (clearUploadError) throw clearUploadError;
-    const { data: clearPublicUrlData } = supabase.storage.from("dream-images").getPublicUrl(clearStoragePath);
+    const { data: clearPublicUrlData } = getSupabase().storage.from("dream-images").getPublicUrl(clearStoragePath);
     const clearImageUrl = clearPublicUrlData.publicUrl;
 
     const mood = MOOD_LABELS[pickProfile(analysis)];

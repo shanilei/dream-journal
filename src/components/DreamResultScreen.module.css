@@ -451,24 +451,33 @@
 }
 
 @media print {
-  /* Hide everything on the page */
-  body * {
-    visibility: hidden !important;
+  html, body {
+    background: white !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
-  /* Show only the illustration, stretched to fill the printed page */
+  /* Hide everything */
+  body * {
+    visibility: hidden !important;
+    background: transparent !important;
+  }
+
+  /* Show only the illustration, filling the entire printed page */
   .image,
   .imageClear {
     visibility: visible !important;
     position: fixed !important;
     inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    object-fit: contain !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
     border-radius: 0 !important;
     opacity: 1 !important;
     filter: none !important;
     animation: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }

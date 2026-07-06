@@ -1,4 +1,4 @@
-import { supabase } from "./supabase";
+import { getSupabase } from "./supabase";
 
 export interface DreamEntry {
   id: string;
@@ -45,7 +45,7 @@ function fromRow(row: DreamRow): DreamEntry {
 }
 
 export async function saveDream(entry: DreamEntry): Promise<void> {
-  const { error } = await supabase.from("dreams").insert({
+  const { error } = await getSupabase().from("dreams").insert({
     id: entry.id,
     created_at: entry.createdAt,
     image_url: entry.imageUrl,
@@ -62,7 +62,7 @@ export async function saveDream(entry: DreamEntry): Promise<void> {
 }
 
 export async function listDreams(): Promise<DreamEntry[]> {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("dreams")
     .select("*")
     .order("created_at", { ascending: false });
@@ -71,7 +71,7 @@ export async function listDreams(): Promise<DreamEntry[]> {
 }
 
 export async function getDream(id: string): Promise<DreamEntry | undefined> {
-  const { data, error } = await supabase.from("dreams").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await getSupabase().from("dreams").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   return data ? fromRow(data) : undefined;
 }

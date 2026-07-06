@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
-import { supabase } from "./supabase";
+import { getSupabase } from "./supabase";
 import { saveDream } from "./dreams-store";
 import { pickProfile } from "./generate-image";
 
@@ -14,14 +14,14 @@ async function main() {
   const clearImage = readFileSync("images/mask-sea-direct-clear.png");
 
   const rawPath = `${randomUUID()}.png`;
-  const { error: e1 } = await supabase.storage.from("dream-images").upload(rawPath, rawImage, { contentType: "image/png" });
+  const { error: e1 } = await getSupabase().storage.from("dream-images").upload(rawPath, rawImage, { contentType: "image/png" });
   if (e1) throw e1;
-  const imageUrl = supabase.storage.from("dream-images").getPublicUrl(rawPath).data.publicUrl;
+  const imageUrl = getSupabase().storage.from("dream-images").getPublicUrl(rawPath).data.publicUrl;
 
   const clearPath = `${randomUUID()}.png`;
-  const { error: e2 } = await supabase.storage.from("dream-images").upload(clearPath, clearImage, { contentType: "image/png" });
+  const { error: e2 } = await getSupabase().storage.from("dream-images").upload(clearPath, clearImage, { contentType: "image/png" });
   if (e2) throw e2;
-  const clearImageUrl = supabase.storage.from("dream-images").getPublicUrl(clearPath).data.publicUrl;
+  const clearImageUrl = getSupabase().storage.from("dream-images").getPublicUrl(clearPath).data.publicUrl;
 
   const mood = MOOD_LABELS[pickProfile(analysis)];
   const summaryText = (analysis.themes ?? []).slice(0, 2).join(". ") + ".";
