@@ -462,30 +462,14 @@
     padding: 0 !important;
   }
 
-  /* Hide everything */
   body * {
     visibility: hidden !important;
   }
 
-  /* Show the full composition: image + scrim + caption */
-  .imageWrap,
-  .imageWrap * {
-    visibility: visible !important;
-  }
-
-  .imageWrap {
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    border-radius: 0 !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  /* Override aspect-ratio so image stretches to fill the page */
+  /* Each layer independently fills the page */
   .image {
-    position: absolute !important;
+    visibility: visible !important;
+    position: fixed !important;
     inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
@@ -493,32 +477,41 @@
     object-fit: cover !important;
     border-radius: 0 !important;
     animation: none !important;
+    z-index: 1 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  /* Hide the clear image — print the artistic effect version */
   .imageClear {
     display: none !important;
   }
 
-  /* Scrim gradient always visible */
   .imageScrimDark,
   .imageScrimLight {
-    opacity: 1 !important;
+    visibility: visible !important;
+    position: fixed !important;
+    inset: 0 !important;
     border-radius: 0 !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  /* Caption text always visible */
-  .captionOverlay {
     opacity: 1 !important;
+    z-index: 2 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  /* Force visible even if overlay was hidden */
+  .captionOverlay,
+  .captionOverlay * {
+    visibility: visible !important;
+  }
+
+  .captionOverlay {
+    position: fixed !important;
+    inset: 0 !important;
+    opacity: 1 !important;
+    z-index: 3 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
   .imageOverlayHidden {
     opacity: 1 !important;
   }
