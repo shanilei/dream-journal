@@ -457,7 +457,7 @@
 
 @media print {
   html, body {
-    background: black !important;
+    background: white !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -467,7 +467,7 @@
     visibility: hidden !important;
   }
 
-  /* Show the full image composition: image + scrim + caption */
+  /* Show the full composition: image + scrim + caption */
   .imageWrap,
   .imageWrap * {
     visibility: visible !important;
@@ -483,25 +483,26 @@
     -webkit-print-color-adjust: exact;
   }
 
-  /* Base image fills the full page */
+  /* Override aspect-ratio so image stretches to fill the page */
   .image {
-    border-radius: 0 !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: auto !important;
     object-fit: cover !important;
+    border-radius: 0 !important;
     animation: none !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
-  /* Clear image always shown on top at full opacity */
+  /* Hide the clear image — print the artistic effect version */
   .imageClear {
-    opacity: 1 !important;
-    filter: none !important;
-    border-radius: 0 !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
+    display: none !important;
   }
 
-  /* Scrim and caption always visible */
+  /* Scrim gradient always visible */
   .imageScrimDark,
   .imageScrimLight {
     opacity: 1 !important;
@@ -510,12 +511,14 @@
     -webkit-print-color-adjust: exact;
   }
 
+  /* Caption text always visible */
   .captionOverlay {
     opacity: 1 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
 
+  /* Force visible even if overlay was hidden */
   .imageOverlayHidden {
     opacity: 1 !important;
   }
