@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Urbanist, Alumni_Sans } from "next/font/google";
+import { Urbanist, Alumni_Sans, David_Libre } from "next/font/google";
 import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
@@ -34,6 +34,12 @@ const alumniSans = Alumni_Sans({
   variable: "--font-alumni-sans",
 });
 
+const davidLibre = David_Libre({
+  subsets: ["latin", "hebrew"],
+  weight: ["400", "700"],
+  variable: "--font-david-libre",
+});
+
 export const metadata: Metadata = {
   title: "Lucid — Dream Journal",
   description: "Record your dreams and let Lucid interpret them.",
@@ -52,7 +58,7 @@ export default function RootLayout({
           {LANG_INIT_SCRIPT}
         </Script>
       </head>
-      <body className={`${urbanist.variable} ${alumniSans.variable}`}>
+      <body className={`${urbanist.variable} ${alumniSans.variable} ${davidLibre.variable}`}>
         <ThemeProvider>
           <LanguageProvider>
             <PhotoBorderProvider>{children}</PhotoBorderProvider>

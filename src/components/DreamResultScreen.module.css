@@ -208,7 +208,7 @@
 }
 
 .captionTextHe {
-  font-family: 'Stanga AAA', 'David Libre', serif;
+  font-family: 'Stanga AAA', var(--font-david-libre), serif;
   direction: rtl;
 }
 
@@ -267,7 +267,7 @@
 }
 
 .captionMetaDateHe {
-  font-family: 'Stanga AAA', 'David Libre', serif;
+  font-family: 'Stanga AAA', var(--font-david-libre), serif;
 }
 
 .captionMetaTime {
