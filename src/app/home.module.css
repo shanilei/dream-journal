@@ -598,6 +598,16 @@
   display: block;
 }
 
+/* Scrim so the date number is readable over the dream image */
+.calCell:has(.calCellImg)::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
 .calDivider {
   width: 375px;
   height: 1px;

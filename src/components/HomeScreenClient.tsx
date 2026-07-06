@@ -57,14 +57,13 @@ const DAY_LABELS_HE = ["א׳", "ב׳", "ג׳", "ד׳", "ה׳", "ו׳", "ש׳"];
 function CalendarView({ gridCards }: { gridCards: Card[] }) {
   const { lang } = useLanguage();
   const DAY_LABELS = lang === "he" ? DAY_LABELS_HE : DAY_LABELS_EN;
-  // Index first dream per calendar date
+
   const dreamsByDate = gridCards.reduce<Record<string, Card>>((acc, card) => {
     const key = card.createdAt.slice(0, 10);
     if (!acc[key]) acc[key] = card;
     return acc;
   }, {});
 
-  // All months oldest→newest; scroll container brings current month into view
   const now = new Date();
 
   let startDate = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -77,6 +76,7 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
     if (earliestStart < startDate) startDate = earliestStart;
   }
 
+  // Build months newest→oldest so current month is at the top
   const months: Date[] = [];
   const cur = new Date(startDate);
   const end = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -84,25 +84,7 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
     months.push(new Date(cur));
     cur.setMonth(cur.getMonth() + 1);
   }
-
-  const currentMonthRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    requestAnimationFrame(() => {
-      const el = currentMonthRef.current;
-      if (!el) return;
-      // Walk up the DOM to find the nearest scrollable ancestor
-      let ancestor = el.parentElement;
-      while (ancestor) {
-        const { overflowY } = window.getComputedStyle(ancestor);
-        if (overflowY === "auto" || overflowY === "scroll") {
-          ancestor.scrollTop = el.offsetTop - ancestor.offsetTop - 20;
-          break;
-        }
-        ancestor = ancestor.parentElement;
-      }
-    });
-  }, []);
+  months.reverse();
 
   return (
     <div className={styles.calScroll}>
@@ -110,9 +92,8 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
         const year = month.getFullYear();
         const m = month.getMonth();
         const daysInMonth = new Date(year, m + 1, 0).getDate();
-        const startDow = new Date(year, m, 1).getDay(); // 0=Sun
+        const startDow = new Date(year, m, 1).getDay();
 
-        // Split into weeks
         const weeks: (number | null)[][] = [];
         let week: (number | null)[] = Array(startDow).fill(null);
         for (let d = 1; d <= daysInMonth; d++) {
@@ -123,23 +104,18 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
           }
         }
 
-        const monthName = month.toLocaleString(lang === "he" ? "he-IL" : "en-US", { month: "long" });
-
-        const isCurrentMonth = year === now.getFullYear() && m === now.getMonth();
+        const monthName = month.toLocaleString(lang === "he" ? "he-IL" : "en-US", { month: "long", year: "numeric" });
 
         return (
-          <div key={`${year}-${m}`} ref={isCurrentMonth ? currentMonthRef : undefined}>
+          <div key={`${year}-${m}`}>
             {mi > 0 && <div className={styles.calDivider} />}
             <div className={styles.calMonth}>
-              {/* Day headers — only on the first month */}
-              {mi === 0 && (
-                <div className={styles.calDayHeaders}>
-                  {DAY_LABELS.map((l, i) => (
-                    <span key={i} className={styles.calDayHeader}>{l}</span>
-                  ))}
-                </div>
-              )}
               <p className={styles.calMonthName}>{monthName}</p>
+              <div className={styles.calDayHeaders}>
+                {DAY_LABELS.map((l, i) => (
+                  <span key={i} className={styles.calDayHeader}>{l}</span>
+                ))}
+              </div>
               {weeks.map((wk, wi) => {
                 const isFirst = wi === 0 && startDow > 0;
                 return (
@@ -151,9 +127,10 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
 
                       if (dream) {
                         return (
-                          <Link key={day} href={`/dream/${dream.id}`} className={styles.calCell}>
+                          <Link key={day} href={`/dream/${dream.id}`} className={`${styles.calCell} ${isToday ? styles.calCellSelected : ""}`}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={dream.image} alt="" className={styles.calCellImg} />
+                            <span className={`${styles.calCellNum} ${styles.calCellNumLight}`}>{day}</span>
                           </Link>
                         );
                       }
