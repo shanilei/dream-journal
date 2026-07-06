@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { getDream } from "@/dreams-store";
+
+export const dynamic = "force-dynamic";
 import DreamDetailClient from "@/components/DreamDetailClient";
 
 function shortSymbol(symbol: string): string {
