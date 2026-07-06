@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "./DreamLoadingScreen.module.css";
 import { SparkleIcon, MoonPhaseIcon } from "./Icons";
+import { useLanguage } from "./LanguageProvider";
 
 const MOON_RING_COUNT = 28;
 const MOON_RING_RADIUS_PX = 64;
@@ -24,14 +25,23 @@ const MESSAGE_STAGES: string[][] = [
   ["What a dream!", "There it is.", "Dream decoded."],
 ];
 
-function pickMessages(): string[] {
-  return MESSAGE_STAGES.map((options) => options[Math.floor(Math.random() * options.length)]);
+const MESSAGE_STAGES_HE: string[][] = [
+  ["נכנסים לחלום שלך...", "שוקעים לתוך הזיכרון...", "מתחברים לחלום..."],
+  ["מנתחים את הסמלים", "מפענחים את התחושה...", "קוראים את הדפוסים..."],
+  ["איזה חלום!", "הנה זה.", "החלום פוענח."],
+];
+
+function pickMessages(he: boolean): string[] {
+  const stages = he ? MESSAGE_STAGES_HE : MESSAGE_STAGES;
+  return stages.map((options) => options[Math.floor(Math.random() * options.length)]);
 }
 
 const MESSAGE_DELAY_MS = 1600;
 
 export default function DreamLoadingScreen() {
-  const [messages] = useState(pickMessages);
+  const { lang } = useLanguage();
+  const isHe = lang === "he";
+  const [messages] = useState<string[]>(() => pickMessages(isHe));
   const [visibleCount, setVisibleCount] = useState(1);
 
   useEffect(() => {
@@ -58,11 +68,20 @@ export default function DreamLoadingScreen() {
         </div>
       </div>
 
-      <div className={styles.messages}>
+      <div className={`${styles.messages} ${isHe ? styles.messagesHe : ""}`}>
         {messages.slice(0, visibleCount).map((message, i) => (
-          <div key={i} className={styles.messageRow}>
-            <SparkleIcon size={12} color="currentColor" />
-            <p className={styles.messageText}>{message}</p>
+          <div key={i} className={`${styles.messageRow} ${isHe ? styles.messageRowHe : ""}`}>
+            {isHe ? (
+              <>
+                <p className={`${styles.messageText} ${styles.messageTextHe}`}>{message}</p>
+                <SparkleIcon size={12} color="currentColor" />
+              </>
+            ) : (
+              <>
+                <SparkleIcon size={12} color="currentColor" />
+                <p className={styles.messageText}>{message}</p>
+              </>
+            )}
           </div>
         ))}
       </div>

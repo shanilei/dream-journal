@@ -57,9 +57,9 @@ export type ProfileKey = "sweet" | "confused" | "fear" | "sad" | "angry";
 
 const PROFILES: Record<ProfileKey, string> = {
   sweet: `
-Colors — Honeydew (#F6FFEA), Soft Peach (#FFDE96), Coral Glow (#FA855A), Tomato Jam (#C93638), Sky Blue (#62C4DA). Coral Glow and Soft Peach dominant, Sky Blue as contrast, Tomato Jam as deep anchor, Honeydew bleeding at edges.
-Mood: warm, soft, glowing, nostalgic.
-Subjects: choose soft, delicate nature forms — blooming flowers, open petals, light floating seeds, gentle leaves, soft organic shapes. Warm and tender, not dark or eerie.
+Colors — Blossom Pink (#F7B8C4), Tangerine (#FF7D3B), Lime Foam (#C8F0A0), Warm Cream (#FFF3D6), Coral Ember (#F05C3A). Tangerine and Blossom Pink dominant and vivid, Lime Foam as a bright contrasting accent, Coral Ember as a deep warm anchor, Warm Cream bleeding at edges.
+Mood: radiant, joyful, luminous, alive — not soft or muted, but vivid and celebratory.
+Subjects: choose lush, abundant nature forms — ONE large central botanical form (a fully open flower head, a bursting ripe fruit, a dense cluster of petals) looming close to the camera or filling a large portion of the frame, surrounded by MANY smaller secondary elements scattered and layered across the remaining space (floating seeds, loose petals, small buds, pollen, tiny leaves, drifting fragments). The composition should feel dense with life and detail — a dominant large form with numerous small elements filling the frame, never a single isolated object on an empty backdrop.
 `.trim(),
   confused: `
 Colors — Frozen Water (#D9FCED), Electric Sapphire (#405FFA), Strong Cyan (#09BBC8), Twilight Indigo (#3B3664), Evergreen (#07240F). Electric Sapphire and Strong Cyan dominant, Twilight Indigo and Evergreen as dark foundation, Frozen Water bleeding at edges.
@@ -112,7 +112,7 @@ const LUCID_SYSTEM_COLORS: Record<ProfileKey, string> = {
 
 // רקע שטוח וצבעוני לכל מצב-רוח, לפי "SURREAL MINIMALIST & ANALOG DREAMSCAPE" — תואם לתמונות הרפרנס שהמשתמש שלח
 const SURREAL_MINIMALIST_COLORS: Record<ProfileKey, string> = {
-  sweet: "a rich amber and rose-gold gradient sky, or a warm ochre environment dense with golden light and soft botanical detail",
+  sweet: "a vivid coral-pink to warm orange gradient sky, or a lush light-green environment alive with scattered petals and golden light — saturated and luminous, not pale or pastel",
   confused: "a deep forest-teal environment layered with dusty violet atmosphere, or a dense indigo-to-moss-green gradient",
   fear: "a heavily textured dark olive and charcoal environment, or a dramatic deep-teal-to-near-black atmospheric gradient with flickers of cold jade green",
   sad: "a muted dusty-mauve and slate-indigo landscape, or a dense fog-grey environment with faint lavender undertones and dim diffused light",

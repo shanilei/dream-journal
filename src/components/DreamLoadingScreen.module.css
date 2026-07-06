@@ -84,6 +84,18 @@
   white-space: nowrap;
 }
 
+.messagesHe {
+  align-items: flex-end;
+}
+
+.messageRowHe {
+  flex-direction: row-reverse;
+}
+
+.messageTextHe {
+  font-family: var(--font-ploni), serif;
+}
+
 @keyframes moonChase {
   0%,
   85%,

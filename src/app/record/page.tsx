@@ -8,6 +8,7 @@ import BottomNav from "@/components/BottomNav";
 import DreamLoadingScreen from "@/components/DreamLoadingScreen";
 import DreamResultScreen from "@/components/DreamResultScreen";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
+import { useLanguage } from "@/components/LanguageProvider";
 
 type DreamResult = {
   imageUrl: string;
@@ -32,6 +33,7 @@ function shortSymbol(symbol: string): string {
 
 export default function RecordPage() {
   const router = useRouter();
+  const { t, lang } = useLanguage();
   const [status, setStatus] = useState<Status>("idle");
   const [result, setResult] = useState<DreamResult | null>(null);
   const [liveTranscript, setLiveTranscript] = useState("");
@@ -82,7 +84,7 @@ export default function RecordPage() {
   }
 
   if (status === "result" && result) {
-    return <DreamResultScreen {...result} onBack={() => router.push("/")} />;
+    return <DreamResultScreen {...result} onBack={() => router.push("/gallery")} />;
   }
 
   if (status === "loading") {
@@ -98,12 +100,16 @@ export default function RecordPage() {
       <div className={styles.glowPurple} />
       <div className={styles.starfield} />
 
-      <p className={styles.prompt}>
+      <p className={`${styles.prompt} ${lang === "he" ? styles.promptHe : ""}`}>
         {status === "error"
-          ? "Something went wrong — tap to try again"
+          ? t.recordError
           : isRecording
-          ? "Listening to the dream"
-          : "Tap to record the dream"}
+          ? t.recordingPrompt
+          : lang === "he"
+          ? t.recordPrompt.split("\n").map((line, i) => (
+              <span key={i} className={styles.promptLine}>{line}</span>
+            ))
+          : t.recordPrompt}
       </p>
 
       {/* VoiceRecordCircle handles all recording/speech logic invisibly */}
@@ -134,9 +140,9 @@ export default function RecordPage() {
       )}
 
       <div className={styles.typeFallback}>
-        <span className={styles.typeFallbackOr}>OR</span>
-        <Link className={styles.typeFallbackLink} href="/record/type">
-          Type it
+        <span className={`${styles.typeFallbackOr} ${lang === "he" ? styles.typeFallbackOrHe : ""}`}>{t.recordOr}</span>
+        <Link className={`${styles.typeFallbackLink} ${lang === "he" ? styles.typeFallbackLinkHe : ""}`} href="/record/type">
+          {t.recordTypeIt}
         </Link>
       </div>
 

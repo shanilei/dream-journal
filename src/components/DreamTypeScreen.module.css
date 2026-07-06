@@ -127,3 +127,8 @@
   opacity: 0.5;
   cursor: default;
 }
+
+:global([lang="he"]) .textarea,
+:global([lang="he"]) .textarea::placeholder {
+  font-family: var(--font-ploni), serif;
+}

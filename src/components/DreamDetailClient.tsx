@@ -34,7 +34,7 @@ export default function DreamDetailClient({
       interpretationText={interpretationText}
       symbols={symbols}
       dreamText={dreamText}
-      onBack={() => router.push("/")}
+      onBack={() => router.push("/gallery")}
     />
   );
 }

@@ -76,7 +76,7 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
           dark ? styles.bodyTextDark : ""
         }`}
       >
-        {text}
+        {text.replace(/\n+/g, " ")}
       </p>
       {(overflowing || expanded) && (
         <button type="button" className={styles.readMoreBtn} onClick={() => setExpanded((v) => !v)}>

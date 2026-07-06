@@ -4,6 +4,7 @@ import { useRef } from "react";
 import Link from "next/link";
 import styles from "./DreamTypeScreen.module.css";
 import { ArrowLeftIcon, ArrowUpIcon } from "./Icons";
+import { useLanguage } from "./LanguageProvider";
 
 type Status = "typing" | "error";
 
@@ -18,6 +19,7 @@ export default function DreamTypeScreen({
   onSubmit: () => void;
   status: Status;
 }) {
+  const { t } = useLanguage();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function handleInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
@@ -50,7 +52,7 @@ export default function DreamTypeScreen({
         <textarea
           ref={textareaRef}
           className={styles.textarea}
-          placeholder="Describe your dream..."
+          placeholder={t.dreamInputPlaceholder}
           rows={1}
           value={value}
           onChange={handleInput}

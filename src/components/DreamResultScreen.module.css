@@ -47,10 +47,6 @@
   display: flex;
 }
 
-:global([dir="rtl"]) .topBar {
-  flex-direction: row-reverse;
-}
-
 :global([dir="rtl"]) .backIcon {
   transform: scaleX(-1);
 }
@@ -452,6 +448,101 @@
   color: #fff;
   background: #5a46fc;
   cursor: pointer;
+}
+
+/* ── HEBREW DESIGN ───────────────────────────────────────────────────────── */
+
+/* Image card: transparent background, no photo-print padding */
+:global([lang="he"]) .imageCard {
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+/* No scrim gradient or caption overlay on the image */
+:global([lang="he"]) .imageScrimDark,
+:global([lang="he"]) .imageScrimLight,
+:global([lang="he"]) .captionOverlay {
+  display: none !important;
+}
+
+/* Image: full rounded-24 corners (no card padding to push into) */
+:global([lang="he"]) .image,
+:global([lang="he"]) .imageClear {
+  border-radius: 24px !important;
+}
+
+/* Title block: right-aligned */
+:global([lang="he"]) .titleBlock {
+  align-items: flex-end;
+}
+
+/* Dream title: 30px Ploni Medium */
+:global([lang="he"]) .title {
+  font-family: var(--font-ploni), serif;
+  font-size: 30px;
+  font-weight: 500;
+  text-align: right;
+  width: 100%;
+  letter-spacing: -0.5px;
+}
+
+/* Meta row: right-to-left order */
+:global([lang="he"]) .metaRow {
+  flex-direction: row-reverse;
+}
+
+/* Date/time meta text: pill-style */
+:global([lang="he"]) .metaText {
+  font-family: var(--font-ploni), serif;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 2px 7px;
+  color: white;
+}
+
+/* Mood pill: Ploni */
+:global([lang="he"]) .moodPill {
+  font-family: var(--font-ploni), serif;
+  font-size: 12px;
+}
+
+/* Section headings: 22px Ploni Regular, right-aligned */
+:global([lang="he"]) .blockHeading {
+  font-family: var(--font-ploni), serif;
+  font-size: 22px;
+  font-weight: 400;
+  text-align: right;
+  width: 100%;
+}
+
+/* Body text: Ploni, right-aligned */
+:global([lang="he"]) .bodyText {
+  font-family: var(--font-ploni), serif;
+  text-align: right;
+  width: 100%;
+}
+
+/* Read more/less button */
+:global([lang="he"]) .readMoreBtn {
+  font-family: var(--font-ploni), serif;
+  align-self: flex-end;
+}
+
+/* Symbol chips: Ploni, right-aligned row */
+:global([lang="he"]) .symbolsRow {
+  justify-content: flex-end;
+}
+
+:global([lang="he"]) .symbolChip {
+  font-family: var(--font-ploni), serif;
+}
+
+/* Print modal: Ploni */
+:global([lang="he"]) .printModalTitle,
+:global([lang="he"]) .printModalCancel,
+:global([lang="he"]) .printModalConfirm {
+  font-family: var(--font-ploni), serif;
 }
 
 @page {

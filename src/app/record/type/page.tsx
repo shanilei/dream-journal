@@ -58,7 +58,7 @@ export default function TypeDreamPage() {
   }
 
   if (status === "result" && result) {
-    return <DreamResultScreen {...result} onBack={() => router.push("/")} />;
+    return <DreamResultScreen {...result} onBack={() => router.push("/gallery")} />;
   }
 
   if (status === "loading") {

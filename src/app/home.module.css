@@ -650,6 +650,13 @@
   left: 8px;
 }
 
+/* Calendar — Ploni for month name, day headers, and day numbers */
+:global([lang="he"]) .calMonthName,
+:global([lang="he"]) .calDayHeader,
+:global([lang="he"]) .calCellNum {
+  font-family: var(--font-ploni), serif;
+}
+
 @media print {
   .screen { display: none; }
 }
