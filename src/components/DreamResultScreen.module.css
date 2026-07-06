@@ -472,9 +472,15 @@
   border-radius: 24px !important;
 }
 
-/* Title block: right-aligned */
-:global([lang="he"]) .titleBlock {
+/* Entire content column: right-aligned */
+:global([lang="he"]) .content {
   align-items: flex-end;
+}
+
+:global([lang="he"]) .titleBlock,
+:global([lang="he"]) .block {
+  align-items: flex-end;
+  width: 100%;
 }
 
 /* Dream title: 30px Ploni Medium */
