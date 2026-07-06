@@ -615,12 +615,14 @@
   font-family: var(--font-ploni), serif;
 }
 
-/* Card headings + subheadings — Ploni */
+/* Card headings + subheadings — Ploni + right-aligned in Hebrew */
 :global([lang="he"]) .cardHeading,
 :global([lang="he"]) .gridCardHeading,
 :global([lang="he"]) .typeCardHeading {
   font-family: var(--font-ploni), serif;
   font-weight: 400;
+  text-align: right;
+  width: 100%;
 }
 
 :global([lang="he"]) .cardSubheading,
@@ -630,13 +632,16 @@
 :global([lang="he"]) .listRowSub {
   font-family: var(--font-ploni), serif;
   font-weight: 400;
+  text-align: right;
+  width: 100%;
 }
 
 /* Card body — align to inline-end (right in RTL) */
-:global([dir="rtl"]) .heroBody,
-:global([dir="rtl"]) .gridBody,
-:global([dir="rtl"]) .typeCardBody {
+:global([lang="he"]) .heroBody,
+:global([lang="he"]) .gridBody,
+:global([lang="he"]) .typeCardBody {
   align-items: flex-end;
+  text-align: right;
 }
 
 /* Heart button — swap to opposite side in RTL grid cards */
