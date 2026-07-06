@@ -13,6 +13,7 @@ type Card = {
   id: string;
   image: string;
   mood: string;
+  name?: string;
   createdAt: string;
   summary?: string;
 };
@@ -364,7 +365,7 @@ export default function HomeScreenClient({
           </button>
         </div>
         <div className={bodyClass}>
-          <p className={headingClass}>{translateMood(card.mood, lang)}</p>
+          <p className={headingClass}>{card.name || translateMood(card.mood, lang)}</p>
           <p className={subClass}>{formatDreamDate(card.createdAt, langFromText(card.summary, lang))}</p>
         </div>
       </Link>
@@ -504,7 +505,7 @@ export default function HomeScreenClient({
                     </button>
                   </div>
                   <div className={styles.heroBody}>
-                    <p className={styles.cardHeading}>{translateMood(recentDream.mood, lang)}</p>
+                    <p className={styles.cardHeading}>{recentDream.name || translateMood(recentDream.mood, lang)}</p>
                     <p className={styles.cardSubheading}>{formatDreamDate(recentDream.createdAt, langFromText(recentDream.summary, lang))}</p>
                   </div>
                 </Link>

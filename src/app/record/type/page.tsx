@@ -8,6 +8,7 @@ import DreamLoadingScreen from "@/components/DreamLoadingScreen";
 
 type DreamResult = {
   id: string;
+  name?: string;
   imageUrl: string;
   clearImageUrl?: string;
   createdAt: string;
@@ -44,6 +45,7 @@ export default function TypeDreamPage() {
       const data = await res.json();
       setResult({
         id: data.id,
+        name: data.name,
         imageUrl: data.imageUrl,
         clearImageUrl: data.clearImageUrl,
         createdAt: new Date().toISOString(),

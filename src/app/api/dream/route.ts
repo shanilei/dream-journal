@@ -72,6 +72,7 @@ export async function POST(req: NextRequest) {
       imageUrl,
       clearImageUrl,
       mood,
+      name: interpretation.name,
       summaryText,
       symbols,
       imagePrompt: prompt,
@@ -82,6 +83,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       id: dreamId,
+      name: interpretation.name,
       analysis,
       mood,
       imageUrl,
