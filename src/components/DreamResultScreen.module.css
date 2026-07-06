@@ -450,9 +450,14 @@
   cursor: pointer;
 }
 
+@page {
+  margin: 0;
+  size: auto;
+}
+
 @media print {
   html, body {
-    background: white !important;
+    background: black !important;
     margin: 0 !important;
     padding: 0 !important;
   }
@@ -460,25 +465,58 @@
   /* Hide everything */
   body * {
     visibility: hidden !important;
-    background: transparent !important;
   }
 
-  /* Show only the illustration, filling the entire printed page */
-  .image,
-  .imageClear {
+  /* Show the full image composition: image + scrim + caption */
+  .imageWrap,
+  .imageWrap * {
     visibility: visible !important;
+  }
+
+  .imageWrap {
     position: fixed !important;
     inset: 0 !important;
     width: 100% !important;
     height: 100% !important;
-    object-fit: cover !important;
     border-radius: 0 !important;
-    opacity: 1 !important;
-    filter: none !important;
-    animation: none !important;
-    margin: 0 !important;
-    padding: 0 !important;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
+  }
+
+  /* Base image fills the full page */
+  .image {
+    border-radius: 0 !important;
+    object-fit: cover !important;
+    animation: none !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Clear image always shown on top at full opacity */
+  .imageClear {
+    opacity: 1 !important;
+    filter: none !important;
+    border-radius: 0 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  /* Scrim and caption always visible */
+  .imageScrimDark,
+  .imageScrimLight {
+    opacity: 1 !important;
+    border-radius: 0 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .captionOverlay {
+    opacity: 1 !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .imageOverlayHidden {
+    opacity: 1 !important;
   }
 }
