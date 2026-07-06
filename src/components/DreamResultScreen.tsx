@@ -87,7 +87,27 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
   );
 }
 
+const FAVORITES_KEY = "dream-favorites";
+
+function loadFavorites(): Set<string> {
+  try {
+    const raw = localStorage.getItem(FAVORITES_KEY);
+    return raw ? new Set(JSON.parse(raw)) : new Set();
+  } catch {
+    return new Set();
+  }
+}
+
+function saveFavorites(set: Set<string>) {
+  try {
+    localStorage.setItem(FAVORITES_KEY, JSON.stringify([...set]));
+  } catch {
+    // ignore
+  }
+}
+
 export default function DreamResultScreen({
+  id,
   imageUrl,
   clearImageUrl,
   createdAt,
@@ -98,6 +118,7 @@ export default function DreamResultScreen({
   dreamText,
   onBack,
 }: {
+  id?: string;
   imageUrl: string;
   clearImageUrl?: string;
   createdAt: string;
@@ -110,6 +131,22 @@ export default function DreamResultScreen({
 }) {
   const { lang, t } = useLanguage();
   const { showBorder } = usePhotoBorder();
+  const [favorited, setFavorited] = useState(false);
+
+  useEffect(() => {
+    if (id) setFavorited(loadFavorites().has(id));
+  }, [id]);
+
+  function toggleFavorite() {
+    if (!id) return;
+    setFavorited((prev) => {
+      const next = !prev;
+      const set = loadFavorites();
+      next ? set.add(id) : set.delete(id);
+      saveFavorites(set);
+      return next;
+    });
+  }
   const imgRef = useRef<HTMLImageElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
@@ -321,10 +358,10 @@ html,body{width:100%;height:100%;overflow:hidden}
         </div>
 
         <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
-          <div className={styles.titleRow} style={lang === "he" ? { flexDirection: "row-reverse" } : undefined}>
+          <div className={styles.titleRow} style={lang === "he" ? { flexDirection: "row-reverse", width: "100%" } : undefined}>
             <p className={styles.title}>{dreamTitle}</p>
-            <button type="button" className={styles.titleHeartBtn} aria-label="Favourite">
-              <HeartIcon size={22} color="rgba(255,255,255,0.7)" />
+            <button type="button" className={styles.titleHeartBtn} aria-label="Favourite" onClick={toggleFavorite}>
+              <HeartIcon size={22} color={favorited ? "#ff6b8a" : "rgba(255,255,255,0.7)"} filled={favorited} />
             </button>
           </div>
           <div className={styles.metaRow} style={lang === "he" ? { justifyContent: "flex-end", width: "100%" } : undefined}>

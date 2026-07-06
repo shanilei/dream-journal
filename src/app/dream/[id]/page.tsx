@@ -20,6 +20,7 @@ export default async function DreamDetailPage({
 
   return (
     <DreamDetailClient
+      id={id}
       imageUrl={dream.imageUrl}
       clearImageUrl={dream.clearImageUrl}
       createdAt={dream.createdAt}

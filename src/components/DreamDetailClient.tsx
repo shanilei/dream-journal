@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import DreamResultScreen from "./DreamResultScreen";
 
 export default function DreamDetailClient({
+  id,
   imageUrl,
   clearImageUrl,
   createdAt,
@@ -13,6 +14,7 @@ export default function DreamDetailClient({
   symbols,
   dreamText,
 }: {
+  id: string;
   imageUrl: string;
   clearImageUrl?: string;
   createdAt: string;
@@ -26,6 +28,7 @@ export default function DreamDetailClient({
 
   return (
     <DreamResultScreen
+      id={id}
       imageUrl={imageUrl}
       clearImageUrl={clearImageUrl}
       createdAt={createdAt}
