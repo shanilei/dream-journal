@@ -320,9 +320,9 @@ html,body{width:100%;height:100%;overflow:hidden}
           </div>
         </div>
 
-        <div className={styles.titleBlock}>
+        <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
           <p className={styles.title}>{dreamTitle}</p>
-          <div className={styles.metaRow}>
+          <div className={styles.metaRow} style={lang === "he" ? { justifyContent: "flex-end", width: "100%" } : undefined}>
             <span className={styles.moodPill}>{translateMood(mood, lang)}</span>
             <span className={styles.metaText}>{dateLabel}</span>
             {timeLabel && <span className={styles.metaText}>{timeLabel}</span>}
@@ -330,16 +330,16 @@ html,body{width:100%;height:100%;overflow:hidden}
         </div>
 
         {(interpretationText || summaryText) && (
-          <div className={styles.block}>
+          <div className={styles.block} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
             <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
             <CollapsibleText text={interpretationText || summaryText} dark={false} />
           </div>
         )}
 
         {symbols.length > 0 && (
-          <div className={styles.block}>
+          <div className={styles.block} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
             <p className={styles.blockHeading}>{t.symbolsInYourDream}</p>
-            <div className={styles.symbolsRow}>
+            <div className={styles.symbolsRow} style={lang === "he" ? { justifyContent: "flex-end", width: "100%" } : undefined}>
               {symbols.map((symbol, i) => (
                 <span key={i} className={styles.symbolChip}>
                   {symbol}
@@ -350,7 +350,7 @@ html,body{width:100%;height:100%;overflow:hidden}
         )}
 
         {dreamText && (
-          <div className={styles.block}>
+          <div className={styles.block} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
             <p className={styles.blockHeading}>{t.theDreamItself}</p>
             <CollapsibleText text={dreamText} dark={false} />
           </div>
