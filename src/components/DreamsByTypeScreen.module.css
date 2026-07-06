@@ -136,6 +136,11 @@
   color: #2B2B2B;
 }
 
+/* ── RTL: keep back button on the left ── */
+:global([dir="rtl"]) .header {
+  flex-direction: row-reverse;
+}
+
 /* ── Empty state ── */
 .empty {
   grid-column: 1 / -1;

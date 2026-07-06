@@ -47,6 +47,10 @@
   display: flex;
 }
 
+:global([dir="rtl"]) .topBar {
+  flex-direction: row-reverse;
+}
+
 :global([dir="rtl"]) .backIcon {
   transform: scaleX(-1);
 }
