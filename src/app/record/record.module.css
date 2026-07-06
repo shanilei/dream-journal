@@ -3,6 +3,17 @@
   50%       { opacity: 1;   }
 }
 
+@keyframes recordIn {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(0);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
 .screen {
   animation: screenIn 0.42s ease-out both;
   position: relative;
@@ -68,10 +79,10 @@
 .glowPurple{ background: var(--glow-purple);     opacity: 0.2;  }
 
 .prompt {
+  animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
   position: absolute;
   left: 50%;
   top: calc(23.08% - 14px);
-  transform: translateX(-50%);
   width: 260px;
   margin: 0;
   font-size: 28px;
@@ -83,10 +94,10 @@
 }
 
 .recordButton {
+  animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
   position: absolute;
   left: 50%;
   top: calc(30.77% + 20px);
-  transform: translateX(-50%);
   width: 260px;
   height: 260px;
   display: flex;
@@ -104,6 +115,12 @@
   height: 100%;
   object-fit: contain;
   pointer-events: none;
+}
+
+.recordButton:hover,
+.recordButton:active {
+  filter: none;
+  opacity: 1;
 }
 
 .liveTranscript {
@@ -125,10 +142,10 @@
 }
 
 .typeFallback {
+  animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
   position: absolute;
   left: 50%;
   top: calc(30.77% + 305px);
-  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
