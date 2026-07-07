@@ -326,9 +326,9 @@ body{display:flex;align-items:center;justify-content:center;background:#fff}
   padding:${showBorder ? "16px 8px 74px" : "0"};
   print-color-adjust:exact;-webkit-print-color-adjust:exact;
 }
-.wrap{position:relative;width:100%;aspect-ratio:338/475;border-radius:26px;overflow:hidden}
-.img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
-.scrim{position:absolute;inset:0;background:${scrimGradient}}
+.wrap{position:relative;width:100%;aspect-ratio:338/475}
+.img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border-radius:26px}
+.scrim{position:absolute;inset:0;border-radius:26px;background:${scrimGradient}}
 .cap{position:absolute;inset:0;display:flex;flex-direction:${isHebrew ? "row-reverse" : "row"};justify-content:space-between;align-items:${captionAlignItems};gap:16px;padding:20px;direction:${isHebrew ? "rtl" : "ltr"}}
 .ct{flex:1;font-family:${captionFont};font-size:12px;font-weight:400;line-height:1.4;letter-spacing:0.4px;color:${fg}}
 .cl{display:block;text-align:start}
@@ -340,7 +340,7 @@ body{display:flex;align-items:center;justify-content:center;background:#fff}
 <body>
 <div class="card">
 <div class="wrap">
-<img class="img" src="${dataUrl}">
+<img class="img" id="printImg" src="${dataUrl}">
 <div class="scrim"></div>
 <div class="cap">
 <p class="ct">${captionHtml}</p>
@@ -348,15 +348,23 @@ body{display:flex;align-items:center;justify-content:center;background:#fff}
 </div>
 </div>
 </div>
+<script>
+Promise.all([
+  document.fonts ? document.fonts.ready : Promise.resolve(),
+  new Promise(function (resolve) {
+    var img = document.getElementById('printImg');
+    if (img.complete) resolve();
+    else { img.onload = resolve; img.onerror = resolve; }
+  })
+]).then(function () {
+  window.focus();
+  window.print();
+  setTimeout(function () { window.close(); }, 1000);
+});
+</script>
 </body>
 </html>`);
       win.document.close();
-
-      setTimeout(() => {
-        win.focus();
-        win.print();
-        setTimeout(() => win.close(), 1000);
-      }, 700);
     } catch {
       win.close();
       setTimeout(() => window.print(), 50);
