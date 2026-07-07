@@ -261,10 +261,9 @@ export default function DreamResultScreen({
     }
   }
 
-  async function handlePrint() {
+  function handlePrint() {
     setShowPrintModal(false);
 
-    // Open window synchronously — iOS Safari blocks window.open() called after any await
     const win = window.open("", "_blank");
     if (!win) {
       setTimeout(() => window.print(), 50);
@@ -272,15 +271,6 @@ export default function DreamResultScreen({
     }
 
     try {
-      const res = await fetch(imageUrl);
-      const blob = await res.blob();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(blob);
-      });
-
       // Mirrors DreamResultScreen.module.css so the printed card matches
       // what's on screen: same border style, scrim, and caption layout.
       const captionFont = isHebrew
@@ -340,7 +330,7 @@ body{display:flex;align-items:center;justify-content:center;background:#fff}
 <body>
 <div class="card">
 <div class="wrap">
-<img class="img" id="printImg" src="${dataUrl}">
+<img class="img" id="printImg" src="${imageUrl}">
 <div class="scrim"></div>
 <div class="cap">
 <p class="ct">${captionHtml}</p>
