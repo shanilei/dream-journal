@@ -2,14 +2,12 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-const STORAGE_KEY = "dream-journal-photo-border";
+const STORAGE_KEY = "dream-journal-photo-border-v2";
 
 const PhotoBorderContext = createContext<{ showBorder: boolean; toggleBorder: () => void } | null>(null);
 
 export function PhotoBorderProvider({ children }: { children: ReactNode }) {
-  // Default to true (today's behavior) so anyone who hasn't touched the
-  // setting yet keeps seeing the polaroid frame they're used to.
-  const [showBorder, setShowBorder] = useState(true);
+  const [showBorder, setShowBorder] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);

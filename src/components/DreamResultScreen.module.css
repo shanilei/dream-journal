@@ -105,10 +105,11 @@
   border-radius: 26px;
 }
 
-/* The unblurred photo, stacked on top of .image — hidden by default and
-   faded/sharpened into view on hover or touch, like the dream suddenly
-   coming into focus. Starts slightly blurred itself so the transition reads
-   as a gradual "clearing up" rather than an abrupt swap. */
+/* The unblurred photo, stacked on top of .image — revealed only inside an
+   80px circle that glides toward the pointer/finger with a soft, blurred
+   edge, like the dream clearing up under a flashlight. --mask-x/--mask-y/
+   --mask-r are written directly onto .imageWrap by a rAF easing loop, so
+   the circle glides and fades rather than snapping to the pointer. */
 .imageClear {
   display: block;
   position: absolute;
@@ -117,15 +118,47 @@
   height: 100%;
   object-fit: cover;
   border-radius: 26px;
-  opacity: 0;
-  filter: blur(14px);
-  transition: opacity 550ms ease, filter 550ms ease;
+  filter: blur(2px);
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mask-x, 50%) var(--mask-y, 50%),
+    #000 0,
+    #000 calc(var(--mask-r, 0px) - 16px),
+    transparent var(--mask-r, 0px)
+  );
+  mask-image: radial-gradient(
+    circle at var(--mask-x, 50%) var(--mask-y, 50%),
+    #000 0,
+    #000 calc(var(--mask-r, 0px) - 16px),
+    transparent var(--mask-r, 0px)
+  );
   pointer-events: none;
 }
 
-.imageClearRevealed {
-  opacity: 1;
-  filter: blur(0);
+/* Soft, larger echo that lags behind .imageClear (slower easing target in
+   DreamResultScreen.tsx) — reads as the reveal being "pulled" along. */
+.imageClearTrail {
+  display: block;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 26px;
+  filter: blur(6px);
+  opacity: 0.45;
+  -webkit-mask-image: radial-gradient(
+    circle at var(--trail-x, 50%) var(--trail-y, 50%),
+    #000 0,
+    #000 calc(var(--trail-r, 0px) - 24px),
+    transparent var(--trail-r, 0px)
+  );
+  mask-image: radial-gradient(
+    circle at var(--trail-x, 50%) var(--trail-y, 50%),
+    #000 0,
+    #000 calc(var(--trail-r, 0px) - 24px),
+    transparent var(--trail-r, 0px)
+  );
+  pointer-events: none;
 }
 
 .imageScrimDark,
@@ -134,7 +167,18 @@
   inset: 0;
   border-radius: 26px;
   pointer-events: none;
-  transition: opacity 550ms ease;
+  -webkit-mask-image: radial-gradient(
+    circle at var(--mask-x, 50%) var(--mask-y, 50%),
+    transparent 0,
+    transparent calc(var(--mask-r, 0px) - 16px),
+    #000 var(--mask-r, 0px)
+  );
+  mask-image: radial-gradient(
+    circle at var(--mask-x, 50%) var(--mask-y, 50%),
+    transparent 0,
+    transparent calc(var(--mask-r, 0px) - 16px),
+    #000 var(--mask-r, 0px)
+  );
 }
 
 .imageOverlayHidden {

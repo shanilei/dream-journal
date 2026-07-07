@@ -150,9 +150,55 @@ export default function DreamResultScreen({
     });
   }
   const imgRef = useRef<HTMLImageElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [revealed, setRevealed] = useState(false);
+
+  const REVEAL_RADIUS = 40; // 80px spotlight
+  const targetMaskRef = useRef({ x: 0, y: 0, r: 0 });
+  const displayMaskRef = useRef({ x: 0, y: 0, r: 0 });
+  // Trails behind the main circle with slower easing and a larger target
+  // radius, so it visually "lags" and gets dragged along — the pull effect.
+  const trailMaskRef = useRef({ x: 0, y: 0, r: 0 });
+  const maskRafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    function tick() {
+      const target = targetMaskRef.current;
+      const display = displayMaskRef.current;
+      display.x += (target.x - display.x) * 0.22;
+      display.y += (target.y - display.y) * 0.22;
+      display.r += (target.r - display.r) * 0.15;
+
+      const trail = trailMaskRef.current;
+      trail.x += (target.x - trail.x) * 0.07;
+      trail.y += (target.y - trail.y) * 0.07;
+      trail.r += (target.r * 1.4 - trail.r) * 0.06;
+
+      const el = wrapRef.current;
+      if (el) {
+        el.style.setProperty("--mask-x", `${display.x}px`);
+        el.style.setProperty("--mask-y", `${display.y}px`);
+        el.style.setProperty("--mask-r", `${display.r}px`);
+        el.style.setProperty("--trail-x", `${trail.x}px`);
+        el.style.setProperty("--trail-y", `${trail.y}px`);
+        el.style.setProperty("--trail-r", `${trail.r}px`);
+      }
+      maskRafRef.current = requestAnimationFrame(tick);
+    }
+    maskRafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (maskRafRef.current) cancelAnimationFrame(maskRafRef.current);
+    };
+  }, []);
+
+  function updateMaskPos(clientX: number, clientY: number) {
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    targetMaskRef.current.x = clientX - rect.left;
+    targetMaskRef.current.y = clientY - rect.top;
+  }
   const [copied, setCopied] = useState(false);
   const isHebrew = /[֐-׿]/.test(dreamText || summaryText || "");
   const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
@@ -322,12 +368,39 @@ html,body{width:100%;height:100%;overflow:hidden}
       <div className={styles.content}>
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
           <div
+            ref={wrapRef}
             className={styles.imageWrap}
-            onMouseEnter={() => clearImageUrl && setRevealed(true)}
-            onMouseLeave={() => setRevealed(false)}
-            onTouchStart={() => clearImageUrl && setRevealed(true)}
-            onTouchEnd={() => setRevealed(false)}
-            onTouchCancel={() => setRevealed(false)}
+            onMouseEnter={(e) => {
+              if (!clearImageUrl) return;
+              updateMaskPos(e.clientX, e.clientY);
+              targetMaskRef.current.r = REVEAL_RADIUS;
+              setRevealed(true);
+            }}
+            onMouseMove={(e) => revealed && updateMaskPos(e.clientX, e.clientY)}
+            onMouseLeave={() => {
+              targetMaskRef.current.r = 0;
+              setRevealed(false);
+            }}
+            onTouchStart={(e) => {
+              if (!clearImageUrl) return;
+              const touch = e.touches[0];
+              if (touch) updateMaskPos(touch.clientX, touch.clientY);
+              targetMaskRef.current.r = REVEAL_RADIUS;
+              setRevealed(true);
+            }}
+            onTouchMove={(e) => {
+              if (!revealed) return;
+              const touch = e.touches[0];
+              if (touch) updateMaskPos(touch.clientX, touch.clientY);
+            }}
+            onTouchEnd={() => {
+              targetMaskRef.current.r = 0;
+              setRevealed(false);
+            }}
+            onTouchCancel={() => {
+              targetMaskRef.current.r = 0;
+              setRevealed(false);
+            }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -339,23 +412,23 @@ html,body{width:100%;height:100%;overflow:hidden}
             />
             {clearImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
+              <img className={styles.imageClearTrail} src={clearImageUrl} alt="" aria-hidden="true" />
+            )}
+            {clearImageUrl && (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
-                className={`${styles.imageClear} ${revealed ? styles.imageClearRevealed : ""}`}
+                className={styles.imageClear}
                 src={clearImageUrl}
                 alt=""
                 aria-hidden="true"
               />
             )}
-            <div
-              className={`${textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} ${
-                revealed ? styles.imageOverlayHidden : ""
-              }`}
-            />
+            <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
             {(captionText || dateLabel) && (
               <div
                 className={`${styles.captionOverlay} ${
                   captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
-                } ${isHebrew ? styles.captionOverlayRtl : ""} ${revealed ? styles.imageOverlayHidden : ""}`}
+                } ${isHebrew ? styles.captionOverlayRtl : ""}`}
               >
                 {captionLines.length > 0 && (
                   <p className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}>
