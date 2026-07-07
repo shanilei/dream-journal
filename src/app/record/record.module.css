@@ -3,9 +3,27 @@
   50%       { opacity: 1;   }
 }
 
+@keyframes orbit {
+  0%   { transform: translateX(-50%) translate(0, 0); }
+  25%  { transform: translateX(-50%) translate(18px, -14px); }
+  50%  { transform: translateX(-50%) translate(0, -22px); }
+  75%  { transform: translateX(-50%) translate(-18px, -14px); }
+  100% { transform: translateX(-50%) translate(0, 0); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.4; }
+  50%       { opacity: 0.75; }
+}
+
 @keyframes recordIn {
-  from { opacity: 0; transform: translateX(-50%) scale(0); }
-  to   { opacity: 1; transform: translateX(-50%) scale(1); }
+  from { opacity: 0; scale: 0; }
+  to   { opacity: 1; scale: 1; }
+}
+
+@keyframes breathe {
+  0%, 100% { scale: 1; }
+  50%       { scale: 1.06; }
 }
 
 .screen {
@@ -25,7 +43,7 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
-  animation: gradientFade 12s ease-in-out infinite;
+  animation: gradientFade 4.5s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
 }
@@ -35,8 +53,8 @@
   position: absolute;
   inset: 0;
   background: linear-gradient(168.69deg, #050A1A 0%, #080C36 52.67%, #3B3F9E 105.33%);
-  animation: gradientFade 12s ease-in-out infinite;
-  animation-delay: -6s;
+  animation: gradientFade 4.5s ease-in-out infinite;
+  animation-delay: -2.25s;
   pointer-events: none;
   z-index: 0;
 }
@@ -46,12 +64,12 @@
   inset: 0;
   background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
   mix-blend-mode: plus-lighter;
-  opacity: 0.35;
+  opacity: 0.6;
+  animation: twinkle 3.5s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
 }
 
-/* ── Glow ────────────────────────────────────────────────────────────────── */
 .glowNavy,
 .glowBlue,
 .glowPurple {
@@ -63,18 +81,18 @@
   left: 50%;
   top: 28%;
   transform: translateX(-50%);
+  animation: orbit 9s ease-in-out infinite;
   pointer-events: none;
   z-index: 0;
 }
 .glowNavy  { background: var(--glow-navy);      opacity: 1;    }
-.glowBlue  { background: var(--glow-blue-deep);  opacity: 0.25; }
-.glowPurple{ background: var(--glow-purple);     opacity: 0.2;  }
+.glowBlue  { background: var(--glow-blue-deep);  opacity: 0.25; animation-delay: -3s; }
+.glowPurple{ background: var(--glow-purple);     opacity: 0.2;  animation-delay: -6s; }
 
-/* ── Prompt ──────────────────────────────────────────────────────────────── */
 .prompt {
   animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
   position: absolute;
-  left: 50%;
+  left: calc(50% - 130px);
   top: calc(23.08% - 14px);
   width: 260px;
   margin: 0;
@@ -86,22 +104,13 @@
   z-index: 1;
 }
 
-/* ── Orb wrapper — centered via margin auto, NO transform (Framer Motion owns y) */
-.orbWrap {
+.recordButton {
+  animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
   position: absolute;
-  left: 0;
-  right: 0;
+  left: calc(50% - 130px);
   top: calc(30.77% + 20px);
   width: 260px;
   height: 260px;
-  margin: 0 auto;
-  mix-blend-mode: screen;
-  z-index: 2;
-}
-
-.recordButton {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -111,6 +120,22 @@
   outline: none;
   border-radius: 0;
   padding: 0;
+  mix-blend-mode: screen;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-mask-image: radial-gradient(circle, #000 45%, transparent 72%);
+  mask-image: radial-gradient(circle, #000 45%, transparent 72%);
+  z-index: 1;
+}
+
+.recordButton:hover,
+.recordButton:focus,
+.recordButton:active {
+  background: none;
+  outline: none;
+}
+
+.recordButtonActive {
+  animation: breathe 2s ease-in-out infinite;
 }
 
 .orbGif {
@@ -121,110 +146,12 @@
   display: block;
 }
 
-/* Pulse ring — expands and fades on transcript update */
-.orbPulseRing {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1.5px solid rgba(160, 140, 255, 0.5);
-  pointer-events: none;
-}
-
-/* ── Live transcript ─────────────────────────────────────────────────────── */
-.transcriptArea {
-  position: absolute;
-  top: 88px;
-  left: 28px;
-  right: 28px;
-  bottom: 350px;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  gap: 6px;
-  overflow: hidden;
-  z-index: 1;
-  pointer-events: none;
-}
-
-.transcriptLine {
-  margin: 0;
-  font-size: 32px;
-  font-weight: 400;
-  line-height: 1.25;
-  color: #fff;
-  text-align: left;
-  word-break: break-word;
-}
-
-/* ── Captured state ──────────────────────────────────────────────────────── */
-.capturedArea {
-  position: absolute;
-  left: 28px;
-  right: 28px;
-  top: 38%;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 20px;
-  z-index: 3;
-}
-
-.capturedLabel {
-  margin: 0;
-  font-size: 22px;
-  font-weight: 400;
-  color: rgba(255, 255, 255, 0.65);
-  letter-spacing: 0.1px;
-}
-
-.capturedLabelHe {
-  font-family: var(--font-ploni), serif;
-  font-weight: 500;
-}
-
-.capturedButtons {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-}
-
-.continueBtn {
-  width: 100%;
-  height: 52px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  color: rgba(255, 255, 255, 0.85);
-  font-size: 17px;
-  font-weight: 400;
-  cursor: pointer;
-  letter-spacing: 0.1px;
-}
-
-.analyzeBtn {
-  width: 100%;
-  height: 52px;
-  border-radius: 26px;
-  background: rgba(255, 255, 255, 0.95);
-  color: #050A1A;
-  font-size: 17px;
-  font-weight: 500;
-  cursor: pointer;
-  letter-spacing: 0.1px;
-}
-
-.analyzeBtn:disabled {
-  opacity: 0.45;
-  cursor: not-allowed;
-}
-
-/* ── Type fallback ───────────────────────────────────────────────────────── */
 .typeFallback {
   animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
   position: absolute;
   left: 50%;
   top: calc(30.77% + 305px);
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -235,19 +162,19 @@
 .typeFallbackOr   { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
 .typeFallbackLink { font-size: 12px; color: var(--text-primary); text-decoration: underline; }
 
-/* ── Hebrew overrides ────────────────────────────────────────────────────── */
 .promptHe {
   font-family: var(--font-ploni), serif;
   font-size: 30px;
   font-weight: 500;
   line-height: 36px;
+  left: 50%;
+  transform: translateX(-50%);
   width: auto;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.promptLine { display: block; text-align: center; }
-
+.promptLine         { display: block; text-align: center; }
 .typeFallbackOrHe   { font-family: var(--font-ploni), serif; color: rgba(255,255,255,0.6); }
 .typeFallbackLinkHe { font-family: var(--font-ploni), serif; font-size: 12px; }
