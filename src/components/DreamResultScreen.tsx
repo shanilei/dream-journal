@@ -281,50 +281,71 @@ export default function DreamResultScreen({
         reader.readAsDataURL(blob);
       });
 
+      // Mirrors DreamResultScreen.module.css so the printed card matches
+      // what's on screen: same border style, scrim, and caption layout.
       const captionFont = isHebrew
-        ? `'Ploni AAA', Arial, serif`
+        ? `'Ploni Print', Arial, serif`
         : `'Alumni Sans', 'Helvetica Neue', Arial, sans-serif`;
+      const scrimSide = isHebrew ? "to right" : "to left";
       const scrimGradient =
         textColor === "white"
-          ? isHebrew
-            ? "linear-gradient(to right, rgba(0,0,0,0.4), transparent 65%)"
-            : "linear-gradient(to left, rgba(0,0,0,0.4), transparent 65%)"
-          : isHebrew
-          ? "linear-gradient(to right, rgba(255,255,255,0.45), transparent 65%)"
-          : "linear-gradient(to left, rgba(255,255,255,0.45), transparent 65%)";
+          ? `linear-gradient(${scrimSide}, rgba(0,0,0,0.4), transparent 65%)`
+          : `linear-gradient(${scrimSide}, rgba(255,255,255,0.45), transparent 65%)`;
       const fg = textColor === "white" ? "#fff" : "#000";
-      const fgMuted = textColor === "white" ? "rgba(255,255,255,0.65)" : "rgba(0,0,0,0.55)";
+      const dateColor = fg;
+      const timeColor =
+        textColor === "black" ? "rgba(0,0,0,0.55)" : isHebrew ? "#fff" : "rgba(255,255,255,0.65)";
+      const timeFontSize = isHebrew ? 13 : 11;
       const captionAlignItems = captionLayout === "center" ? "center" : "flex-end";
-      const captionHtml = captionLines
-        .map((line) => `<span style="display:block">${line}</span>`)
-        .join("");
+      const captionHtml = captionLines.map((line) => `<span class="cl">${line}</span>`).join("");
+      const origin = window.location.origin;
 
       win.document.write(`<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alumni+Sans:wght@400;600&family=David+Libre:wght@400;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alumni+Sans:wght@400;600&display=swap">
 <style>
-@page{margin:0}
+@font-face{
+  font-family:'Ploni Print';
+  src:url('${origin}/fonts/ploni-regular-aaa.otf') format('opentype');
+  font-weight:400;
+}
+@font-face{
+  font-family:'Ploni Print';
+  src:url('${origin}/fonts/ploni-demibold-aaa.otf') format('opentype');
+  font-weight:600;
+}
+@page{margin:24px}
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%;overflow:hidden}
-.w{position:fixed;inset:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+html,body{width:100%;height:100%}
+body{display:flex;align-items:center;justify-content:center;background:#fff}
+.card{
+  width:400px;
+  background:${showBorder ? "#fff" : "transparent"};
+  padding:${showBorder ? "16px 8px 74px" : "0"};
+  print-color-adjust:exact;-webkit-print-color-adjust:exact;
+}
+.wrap{position:relative;width:100%;aspect-ratio:338/475;border-radius:26px;overflow:hidden}
 .img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .scrim{position:absolute;inset:0;background:${scrimGradient}}
 .cap{position:absolute;inset:0;display:flex;flex-direction:${isHebrew ? "row-reverse" : "row"};justify-content:space-between;align-items:${captionAlignItems};gap:16px;padding:20px;direction:${isHebrew ? "rtl" : "ltr"}}
-.ct{flex:1;font-family:${captionFont};font-size:12px;font-weight:400;line-height:1.4;color:${fg}}
-.cm{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0}
-.cd{font-family:${captionFont};font-size:13px;font-weight:600;color:${fg};white-space:nowrap}
-.ctm{font-family:${captionFont};font-size:11px;font-weight:600;color:${fgMuted};white-space:nowrap}
+.ct{flex:1;font-family:${captionFont};font-size:12px;font-weight:400;line-height:1.4;letter-spacing:0.4px;color:${fg}}
+.cl{display:block;text-align:start}
+.cm{display:flex;flex-direction:column;align-items:${isHebrew ? "flex-start" : "flex-end"};gap:2px;flex-shrink:0}
+.cd{font-family:${captionFont};font-size:13px;font-weight:600;line-height:1.3;color:${dateColor};white-space:nowrap}
+.ctm{font-family:${captionFont};font-size:${timeFontSize}px;font-weight:600;line-height:1.3;color:${timeColor};white-space:nowrap}
 </style>
 </head>
 <body>
-<div class="w">
+<div class="card">
+<div class="wrap">
 <img class="img" src="${dataUrl}">
 <div class="scrim"></div>
 <div class="cap">
 <p class="ct">${captionHtml}</p>
-<div class="cm"><span class="cd">${dateLabel}</span><span class="ctm">${timeLabel}</span></div>
+<div class="cm"><span class="cd">${dateLabel}</span>${timeLabel ? `<span class="ctm">${timeLabel}</span>` : ""}</div>
+</div>
 </div>
 </div>
 </body>
