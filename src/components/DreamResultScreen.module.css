@@ -687,70 +687,8 @@
   to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-@media print {
-  html, body {
-    margin: 0 !important;
-    padding: 0 !important;
-  }
-
-  body * {
-    visibility: hidden !important;
-  }
-
-  /* Reset eyeOpen animation so clip-path doesn't collapse the image */
-  .imageCard,
-  .imageCardNoBorder {
-    animation: none !important;
-    clip-path: none !important;
-    filter: none !important;
-    opacity: 1 !important;
-  }
-
-  .imageClear {
-    display: none !important;
-  }
-
-  .image {
-    visibility: visible !important;
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    aspect-ratio: auto !important;
-    object-fit: cover !important;
-    border-radius: 0 !important;
-    opacity: 1 !important;
-    filter: none !important;
-    animation: none !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  .imageScrimDark,
-  .imageScrimLight {
-    visibility: visible !important;
-    position: fixed !important;
-    inset: 0 !important;
-    border-radius: 0 !important;
-    opacity: 1 !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  .captionOverlay,
-  .captionOverlay * {
-    visibility: visible !important;
-  }
-
-  .captionOverlay {
-    position: fixed !important;
-    inset: 0 !important;
-    opacity: 1 !important;
-    print-color-adjust: exact;
-    -webkit-print-color-adjust: exact;
-  }
-
-  .imageOverlayHidden {
-    opacity: 1 !important;
-  }
-}
+/* Superseded by the .printCard rules above — this older block tried to
+   make the live screen printable via visibility toggling + position:fixed,
+   but its rules matched the same class names used by .printCard's markup
+   and stretched them to fill the full viewport, blowing up the scrim
+   gradient's dark region to cover almost the entire page. Removed. */
