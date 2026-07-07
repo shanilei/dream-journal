@@ -11,6 +11,7 @@ type DreamResult = {
   name?: string;
   imageUrl: string;
   clearImageUrl?: string;
+  printImageUrl?: string;
   createdAt: string;
   mood: string;
   summaryText: string;
@@ -48,6 +49,7 @@ export default function TypeDreamPage() {
         name: data.name,
         imageUrl: data.imageUrl,
         clearImageUrl: data.clearImageUrl,
+        printImageUrl: data.printImageUrl,
         createdAt: new Date().toISOString(),
         mood: data.mood,
         summaryText: summarize(data.analysis.themes ?? []),

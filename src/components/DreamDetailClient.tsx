@@ -8,6 +8,7 @@ export default function DreamDetailClient({
   name,
   imageUrl,
   clearImageUrl,
+  printImageUrl,
   createdAt,
   mood,
   summaryText,
@@ -19,6 +20,7 @@ export default function DreamDetailClient({
   name?: string;
   imageUrl: string;
   clearImageUrl?: string;
+  printImageUrl?: string;
   createdAt: string;
   mood: string;
   summaryText: string;
@@ -34,6 +36,7 @@ export default function DreamDetailClient({
       name={name}
       imageUrl={imageUrl}
       clearImageUrl={clearImageUrl}
+      printImageUrl={printImageUrl}
       createdAt={createdAt}
       mood={mood}
       summaryText={summaryText}

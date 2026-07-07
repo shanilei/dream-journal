@@ -7,6 +7,7 @@ import { interpretDream } from "@/interpret";
 import { generateImage, pickProfile } from "@/generate-image";
 import { saveDream } from "@/dreams-store";
 import { getSupabase } from "@/supabase";
+import { generatePrintImage } from "@/print-image";
 
 export const runtime = "nodejs";
 
@@ -65,12 +66,39 @@ export async function POST(req: NextRequest) {
     const summaryText = analysis.themes?.length ? `${analysis.themes.slice(0, 2).join(". ")}.` : "";
     const symbols = (analysis.symbols ?? []).slice(0, 3).map(shortSymbol);
     const dreamId = randomUUID();
+    const createdAt = new Date().toISOString();
+
+    // Flattened, fully-opaque copy of the image+scrim+caption card for
+    // printing — Safari's print/PDF rasterizer has proven unreliable with
+    // layered/semi-transparent DOM content, so print always uses this single
+    // pre-composited PNG instead of rendering the live layout at print time.
+    let printImageUrl: string | undefined;
+    try {
+      const printImageBuffer = await generatePrintImage({
+        imageBuffer,
+        imageUrl,
+        summaryText,
+        dreamText,
+        createdAt,
+      });
+      const printStoragePath = `${randomUUID()}.png`;
+      const { error: printUploadError } = await getSupabase().storage
+        .from("dream-images")
+        .upload(printStoragePath, printImageBuffer, { contentType: "image/png" });
+      if (printUploadError) throw printUploadError;
+      printImageUrl = getSupabase().storage.from("dream-images").getPublicUrl(printStoragePath).data.publicUrl;
+    } catch (printErr) {
+      // Non-fatal — the dream itself is already generated; printing just
+      // falls back to the live layered layout for this one entry.
+      console.error("print image generation failed:", printErr);
+    }
 
     await saveDream({
       id: dreamId,
-      createdAt: new Date().toISOString(),
+      createdAt,
       imageUrl,
       clearImageUrl,
+      printImageUrl,
       mood,
       name: interpretation.name,
       summaryText,
@@ -88,6 +116,7 @@ export async function POST(req: NextRequest) {
       mood,
       imageUrl,
       clearImageUrl,
+      printImageUrl,
       interpretationText: interpretation.interpretationText,
       keywords: interpretation.keywords,
     });

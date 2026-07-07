@@ -106,16 +106,25 @@
     filter: none;
   }
 
-  /* On screen, transparent regions of the (alpha-blurred) dream image
-     blend into the app's dark background. On paper there's no such
-     background behind it by default, so give it one explicitly instead
-     of leaving it to composite against whatever the print engine
-     defaults to. */
+  /* Fallback path only (dreams created before printImageUrl existed): on
+     screen, transparent regions of the (alpha-blurred) dream image blend
+     into the app's dark background. On paper there's no such background
+     behind it by default, so give it one explicitly. */
   .printCardInner .imageWrap {
     background: #090a13;
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
+}
+
+/* Flattened print-ready image (image+scrim+caption pre-composited
+   server-side, see src/print-image.ts) — deliberately a plain opaque
+   rectangle with no border-radius/overflow-hidden clipping and no
+   transparency, since every one of those turned out to trip up Safari's
+   print rasterizer at some point during development. */
+.printFlatImage {
+  display: block;
+  width: 100%;
 }
 
 @keyframes eyeOpen {

@@ -24,6 +24,7 @@ export default async function DreamDetailPage({
       name={dream.name}
       imageUrl={dream.imageUrl}
       clearImageUrl={dream.clearImageUrl}
+      printImageUrl={dream.printImageUrl}
       createdAt={dream.createdAt}
       mood={dream.mood}
       summaryText={dream.summaryText}

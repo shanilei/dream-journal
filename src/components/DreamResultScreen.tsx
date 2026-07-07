@@ -8,53 +8,7 @@ import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
 import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translations";
 
-const CAPTION_MAX_WORDS = 7;
-function capitalizeFirst(text: string): string {
-  return text.length ? text[0].toUpperCase() + text.slice(1) : text;
-}
-
-const CAPTION_WORDS_PER_LINE = 4;
-
-function getCaptionWords(text: string, maxWords: number): string {
-  const words = text
-    .replace(/[.,!?\-–—]/g, '')
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, maxWords);
-
-  const lines: string[] = [];
-  for (let i = 0; i < words.length; i += CAPTION_WORDS_PER_LINE) {
-    lines.push(words.slice(i, i + CAPTION_WORDS_PER_LINE).join(' '));
-  }
-
-  // Prevent orphaned single word on the last line.
-  if (lines.length >= 2) {
-    const lastWords = lines[lines.length - 1].split(' ');
-    if (lastWords.length === 1) {
-      // Steal one word from the previous line so last line has 2 words.
-      const prevWords = lines[lines.length - 2].split(' ');
-      const stolen = prevWords.pop()!;
-      lines[lines.length - 2] = prevWords.join(' ');
-      lines[lines.length - 1] = stolen + ' ' + lastWords[0];
-    } else {
-      // Tie the last two words so the final word can never wrap alone.
-      lastWords[lastWords.length - 2] =
-        lastWords[lastWords.length - 2] + ' ' + lastWords[lastWords.length - 1];
-      lastWords.pop();
-      lines[lines.length - 1] = lastWords.join(' ');
-    }
-  }
-
-  return capitalizeFirst(lines.join('\n'));
-}
-
-type CaptionLayout = "center" | "bottom";
-
-function pickCaptionLayout(seed: string): CaptionLayout {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  return hash % 4 === 0 ? "bottom" : "center";
-}
+import { CAPTION_MAX_WORDS, getCaptionWords, pickCaptionLayout, isHebrewText } from "@/lib/caption";
 
 function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
   const { t } = useLanguage();
@@ -111,6 +65,7 @@ export default function DreamResultScreen({
   name,
   imageUrl,
   clearImageUrl,
+  printImageUrl,
   createdAt,
   mood,
   summaryText,
@@ -123,6 +78,7 @@ export default function DreamResultScreen({
   name?: string;
   imageUrl: string;
   clearImageUrl?: string;
+  printImageUrl?: string;
   createdAt: string;
   mood: string;
   summaryText: string;
@@ -200,7 +156,7 @@ export default function DreamResultScreen({
     targetMaskRef.current.y = clientY - rect.top;
   }
   const [copied, setCopied] = useState(false);
-  const isHebrew = /[֐-׿]/.test(dreamText || summaryText || "");
+  const isHebrew = isHebrewText(dreamText || summaryText || "");
   const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
   const captionLines = captionText ? captionText.split("\n") : [];
   const captionLayout = pickCaptionLayout(imageUrl);
@@ -454,49 +410,58 @@ export default function DreamResultScreen({
     </div>
 
     {/* Print-only copy of the image card — shown via @media print in
-        DreamResultScreen.module.css. Avoids popup windows entirely, since
-        window.open()/document.write() proved unreliable across browsers
-        (image rendered solid black in Safari's print rasterizer; Chrome
-        never showed a print dialog, likely from losing user-gesture
-        context by the time the popup's async work finished). */}
+        DreamResultScreen.module.css. When printImageUrl is available it's a
+        single flattened, fully-opaque PNG (image+scrim+caption baked in
+        server-side at creation time — see src/print-image.ts) so printing
+        is just "show one plain <img>". Safari's print/PDF rasterizer proved
+        unreliable compositing any layered/semi-transparent DOM content
+        (popups, gradients, transparent image regions all rendered as
+        solid black), so nothing print-specific is composited live anymore.
+        Dreams created before this existed fall back to the old layered
+        markup, which at least renders (if imperfectly) on other browsers. */}
     <div className={styles.printCard}>
       <div className={styles.printCardInner}>
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
-          <div className={styles.imageWrap}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className={styles.image} src={imageUrl} alt="Generated dream artwork" />
-            <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
-            {(captionText || dateLabel) && (
-              <div
-                className={`${styles.captionOverlay} ${
-                  captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
-                } ${isHebrew ? styles.captionOverlayRtl : ""}`}
-              >
-                {captionLines.length > 0 && (
-                  <p className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}>
-                    {captionLines.map((line, i) => (
-                      <span
-                        key={i}
-                        className={i === captionLines.length - 1 ? styles.captionLineLast : styles.captionLine}
-                      >
-                        {line}
-                      </span>
-                    ))}
-                  </p>
-                )}
-                <div className={styles.captionMeta}>
-                  <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
-                    {dateLabel}
-                  </span>
-                  {timeLabel && (
-                    <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
-                      {timeLabel}
-                    </span>
+          {printImageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className={styles.printFlatImage} src={printImageUrl} alt="Generated dream artwork" />
+          ) : (
+            <div className={styles.imageWrap}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className={styles.image} src={imageUrl} alt="Generated dream artwork" />
+              <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
+              {(captionText || dateLabel) && (
+                <div
+                  className={`${styles.captionOverlay} ${
+                    captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
+                  } ${isHebrew ? styles.captionOverlayRtl : ""}`}
+                >
+                  {captionLines.length > 0 && (
+                    <p className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}>
+                      {captionLines.map((line, i) => (
+                        <span
+                          key={i}
+                          className={i === captionLines.length - 1 ? styles.captionLineLast : styles.captionLine}
+                        >
+                          {line}
+                        </span>
+                      ))}
+                    </p>
                   )}
+                  <div className={styles.captionMeta}>
+                    <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                      {dateLabel}
+                    </span>
+                    {timeLabel && (
+                      <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                        {timeLabel}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
