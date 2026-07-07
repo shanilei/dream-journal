@@ -105,6 +105,17 @@
     clip-path: none;
     filter: none;
   }
+
+  /* On screen, transparent regions of the (alpha-blurred) dream image
+     blend into the app's dark background. On paper there's no such
+     background behind it by default, so give it one explicitly instead
+     of leaving it to composite against whatever the print engine
+     defaults to. */
+  .printCardInner .imageWrap {
+    background: #090a13;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
 }
 
 @keyframes eyeOpen {
