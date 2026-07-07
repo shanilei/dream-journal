@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import styles from "./UserScreen.module.css";
 import BottomNav from "./BottomNav";
-import { UserIcon, BellIcon } from "./Icons";
+import { ArrowLeftIcon } from "./Icons";
 import { useTheme } from "./ThemeProvider";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
@@ -40,13 +41,6 @@ export default function UserScreen() {
   const [notifications, setNotifications] = useState(true);
   const [saveToLibrary, setSaveToLibrary] = useState(true);
 
-  const stats = [
-    { value: "32", label: t.thisMonth },
-    { value: "12 Days in a row", label: t.dreamStreak },
-    { value: "Water", label: t.mostCommonSymbol },
-    { value: "Anxious", label: t.averageMood },
-  ];
-
   return (
     <div className={styles.screen}>
       <div className={styles.glow1} />
@@ -55,25 +49,12 @@ export default function UserScreen() {
 
       <div className={styles.content}>
         <div className={styles.topBar}>
-          <button type="button" className={styles.iconButton} aria-label="Profile">
-            <UserIcon size={16} color="currentColor" />
-          </button>
-          <button type="button" className={styles.iconButton} aria-label="Notifications">
-            <BellIcon size={16} color="currentColor" />
-          </button>
+          <Link href="/user" className={styles.iconButton} aria-label="Back">
+            <ArrowLeftIcon size={18} color="#fff" />
+          </Link>
         </div>
 
-        <p className={styles.title}>{t.userTitle}</p>
-
-        <p className={styles.sectionLabel}>{t.myGoals}</p>
-        <div className={styles.goalsGrid}>
-          {stats.map((stat, i) => (
-            <div key={i} className={styles.goalCard}>
-              <p className={styles.goalValue}>{stat.value}</p>
-              <p className={styles.goalLabel}>{stat.label}</p>
-            </div>
-          ))}
-        </div>
+        <p className={styles.title}>{t.setting}</p>
 
         <p className={styles.sectionLabel}>{t.setting}</p>
         <div className={styles.settingsCard}>
