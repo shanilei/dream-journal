@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { mkdirSync, readFileSync, rmSync } from "node:fs";
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { analyzeDream } from "@/analyze";
@@ -81,10 +81,29 @@ export async function POST(req: NextRequest) {
         dreamText,
         createdAt,
       });
+
+      // Round-trip through disk before uploading, mirroring imageBuffer/
+      // clearBuffer above (readFileSync'd from a generated file) rather than
+      // handing sharp's in-memory Buffer straight to the Supabase client —
+      // a direct in-memory Buffer produced a corrupted upload in production
+      // (every non-UTF-8 byte replaced with U+FFFD, the classic signature of
+      // an accidental binary→string→binary round-trip somewhere in that
+      // path). Writing/reading through fs sidesteps whatever that was.
+      const printOutputPath = join(outDir, `${randomUUID()}-print.png`);
+      writeFileSync(printOutputPath, printImageBuffer);
+      const printImageBufferFromDisk = readFileSync(printOutputPath);
+      rmSync(printOutputPath, { force: true });
+
+      // PNG signature check — never upload a corrupted file silently again.
+      const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+      if (!printImageBufferFromDisk.subarray(0, 8).equals(PNG_SIGNATURE)) {
+        throw new Error("generated print image failed PNG signature check — refusing to upload");
+      }
+
       const printStoragePath = `${randomUUID()}.png`;
       const { error: printUploadError } = await getSupabase().storage
         .from("dream-images")
-        .upload(printStoragePath, printImageBuffer, { contentType: "image/png" });
+        .upload(printStoragePath, printImageBufferFromDisk, { contentType: "image/png" });
       if (printUploadError) throw printUploadError;
       printImageUrl = getSupabase().storage.from("dream-images").getPublicUrl(printStoragePath).data.publicUrl;
     } catch (printErr) {
