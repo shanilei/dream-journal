@@ -263,105 +263,17 @@ export default function DreamResultScreen({
 
   function handlePrint() {
     setShowPrintModal(false);
-
-    const win = window.open("", "_blank");
-    if (!win) {
-      setTimeout(() => window.print(), 50);
-      return;
-    }
-
-    try {
-      // Mirrors DreamResultScreen.module.css so the printed card matches
-      // what's on screen: same border style, scrim, and caption layout.
-      const captionFont = isHebrew
-        ? `'Ploni Print', Arial, serif`
-        : `'Alumni Sans', 'Helvetica Neue', Arial, sans-serif`;
-      const scrimSide = isHebrew ? "to right" : "to left";
-      const scrimGradient =
-        textColor === "white"
-          ? `linear-gradient(${scrimSide}, rgba(0,0,0,0.4), transparent 65%)`
-          : `linear-gradient(${scrimSide}, rgba(255,255,255,0.45), transparent 65%)`;
-      const fg = textColor === "white" ? "#fff" : "#000";
-      const dateColor = fg;
-      const timeColor =
-        textColor === "black" ? "rgba(0,0,0,0.55)" : isHebrew ? "#fff" : "rgba(255,255,255,0.65)";
-      const timeFontSize = isHebrew ? 13 : 11;
-      const captionAlignItems = captionLayout === "center" ? "center" : "flex-end";
-      const captionHtml = captionLines.map((line) => `<span class="cl">${line}</span>`).join("");
-      const origin = window.location.origin;
-
-      win.document.write(`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="utf-8">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alumni+Sans:wght@400;600&display=swap">
-<style>
-@font-face{
-  font-family:'Ploni Print';
-  src:url('${origin}/fonts/ploni-regular-aaa.otf') format('opentype');
-  font-weight:400;
-}
-@font-face{
-  font-family:'Ploni Print';
-  src:url('${origin}/fonts/ploni-demibold-aaa.otf') format('opentype');
-  font-weight:600;
-}
-@page{margin:24px}
-*{margin:0;padding:0;box-sizing:border-box}
-html,body{width:100%;height:100%}
-body{display:flex;align-items:center;justify-content:center;background:#fff}
-.card{
-  width:400px;
-  background:${showBorder ? "#fff" : "transparent"};
-  padding:${showBorder ? "16px 8px 74px" : "0"};
-  print-color-adjust:exact;-webkit-print-color-adjust:exact;
-}
-.wrap{position:relative;width:100%;aspect-ratio:338/475}
-.img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;border-radius:26px}
-.scrim{position:absolute;inset:0;border-radius:26px;background:${scrimGradient}}
-.cap{position:absolute;inset:0;display:flex;flex-direction:${isHebrew ? "row-reverse" : "row"};justify-content:space-between;align-items:${captionAlignItems};gap:16px;padding:20px;direction:${isHebrew ? "rtl" : "ltr"}}
-.ct{flex:1;font-family:${captionFont};font-size:12px;font-weight:400;line-height:1.4;letter-spacing:0.4px;color:${fg}}
-.cl{display:block;text-align:start}
-.cm{display:flex;flex-direction:column;align-items:${isHebrew ? "flex-start" : "flex-end"};gap:2px;flex-shrink:0}
-.cd{font-family:${captionFont};font-size:13px;font-weight:600;line-height:1.3;color:${dateColor};white-space:nowrap}
-.ctm{font-family:${captionFont};font-size:${timeFontSize}px;font-weight:600;line-height:1.3;color:${timeColor};white-space:nowrap}
-</style>
-</head>
-<body>
-<div class="card">
-<div class="wrap">
-<img class="img" id="printImg" src="${imageUrl}">
-<div class="scrim"></div>
-<div class="cap">
-<p class="ct">${captionHtml}</p>
-<div class="cm"><span class="cd">${dateLabel}</span>${timeLabel ? `<span class="ctm">${timeLabel}</span>` : ""}</div>
-</div>
-</div>
-</div>
-<script>
-Promise.all([
-  document.fonts ? document.fonts.ready : Promise.resolve(),
-  new Promise(function (resolve) {
-    var img = document.getElementById('printImg');
-    if (img.complete) resolve();
-    else { img.onload = resolve; img.onerror = resolve; }
-  })
-]).then(function () {
-  window.focus();
-  window.print();
-  setTimeout(function () { window.close(); }, 1000);
-});
-</script>
-</body>
-</html>`);
-      win.document.close();
-    } catch {
-      win.close();
-      setTimeout(() => window.print(), 50);
-    }
+    // A hidden .printCard copy of the image card lives in this same
+    // document and is shown only via @media print (see module.css) — this
+    // avoids popup windows entirely, since window.open()/document.write()
+    // proved unreliable across Safari (image rendered solid black in the
+    // print rasterizer) and Chrome (print dialog never appeared, likely
+    // because printing was deferred out of the click's user-gesture window).
+    window.print();
   }
 
   return (
+    <>
     <div className={styles.screen}>
       <div className={styles.topBar}>
         <button type="button" className={styles.iconButton} onClick={onBack} aria-label={t.back}>
@@ -540,5 +452,54 @@ Promise.all([
         </div>
       )}
     </div>
+
+    {/* Print-only copy of the image card — shown via @media print in
+        DreamResultScreen.module.css. Avoids popup windows entirely, since
+        window.open()/document.write() proved unreliable across browsers
+        (image rendered solid black in Safari's print rasterizer; Chrome
+        never showed a print dialog, likely from losing user-gesture
+        context by the time the popup's async work finished). */}
+    <div className={styles.printCard}>
+      <div className={styles.printCardInner}>
+        <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
+          <div className={styles.imageWrap}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img className={styles.image} src={imageUrl} alt="Generated dream artwork" />
+            <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
+            {(captionText || dateLabel) && (
+              <div
+                className={`${styles.captionOverlay} ${
+                  captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
+                } ${isHebrew ? styles.captionOverlayRtl : ""}`}
+              >
+                {captionLines.length > 0 && (
+                  <p className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}>
+                    {captionLines.map((line, i) => (
+                      <span
+                        key={i}
+                        className={i === captionLines.length - 1 ? styles.captionLineLast : styles.captionLine}
+                      >
+                        {line}
+                      </span>
+                    ))}
+                  </p>
+                )}
+                <div className={styles.captionMeta}>
+                  <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                    {dateLabel}
+                  </span>
+                  {timeLabel && (
+                    <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                      {timeLabel}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+    </>
   );
 }

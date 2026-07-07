@@ -71,6 +71,42 @@
   padding: 0;
 }
 
+/* Hidden print-only copy of the image card (see DreamResultScreen.tsx).
+   Rendered off-screen at all times and revealed only via @media print, so
+   window.print() can fire synchronously in the click handler — no popup
+   window, no waiting on async image/font loads. */
+.printCard {
+  display: none;
+}
+
+@media print {
+  .screen {
+    display: none !important;
+  }
+
+  .printCard {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100vh;
+    background: #fff;
+  }
+
+  .printCardInner {
+    width: 400px;
+  }
+
+  /* Force the reveal-in animation to its resting state — by print time
+     it will have long finished, but this removes any doubt. */
+  .printCardInner .imageCard {
+    animation: none;
+    opacity: 1;
+    clip-path: none;
+    filter: none;
+  }
+}
+
 @keyframes eyeOpen {
   0% {
     opacity: 0;
