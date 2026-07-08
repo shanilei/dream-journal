@@ -101,6 +101,8 @@ export const translations = {
     onboarding1HeadingBefore: "A personal journal for ",
     onboarding1HeadingAccent1: "dreams",
     onboarding1HeadingMiddle: " memories and ",
+    onboarding1HeadingRow2Tail: "",
+    onboarding1HeadingRow3: "",
     onboarding1HeadingAccent2: "reflections",
     onboardingContinue: "Continue",
     // Onboarding — step 2 "Capture"
@@ -110,6 +112,7 @@ export const translations = {
     onboardingSkip: "Skip",
     onboardingBubble1: "It was a nightmare!",
     onboardingBubble2: "I was flying ....",
+    onboardingBubble3: "I dreamed about my mom.....",
     // Onboarding — step 3 "Patterns"
     onboarding3HeadingBefore: "See the ",
     onboarding3HeadingAccent: "patterns",
@@ -220,9 +223,11 @@ export const translations = {
     langNameHebrew: "עברית",
     langPickerCta: "בואו נתחיל",
     // Onboarding — step 1 "Welcome"
-    onboarding1HeadingBefore: "המקום שבו ",
+    onboarding1HeadingBefore: "המקום שבו",
     onboarding1HeadingAccent1: "החלומות",
     onboarding1HeadingMiddle: " שלכם נשארים ",
+    onboarding1HeadingRow2Tail: " שלכם",
+    onboarding1HeadingRow3: "נשארים",
     onboarding1HeadingAccent2: "בחיים",
     onboardingContinue: "המשך",
     // Onboarding — step 2 "Capture"
@@ -231,7 +236,8 @@ export const translations = {
     onboarding2Subtitle: "הקליטו את החלום בקול או כתבו אותו לפני שהוא מתפוגג מהזיכרון.",
     onboardingSkip: "דלג",
     onboardingBubble1: "וואי איזה סיוט!",
-    onboardingBubble2: "חלמתי שאני בשדה של ",
+    onboardingBubble2: "אתה לא מבין!...",
+    onboardingBubble3: "חלמתי שאני בשדה של ",
     // Onboarding — step 3 "Patterns"
     onboarding3HeadingBefore: "גלו את ",
     onboarding3HeadingAccent: "הדפוסים",

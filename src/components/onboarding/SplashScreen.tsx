@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { visualVariants } from "./motion";
 import styles from "./SplashScreen.module.css";
 
 export default function SplashScreen({ onDone }: { onDone: () => void }) {
@@ -17,14 +19,12 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
 
   return (
     <div className={styles.screen}>
-      <div className={styles.glowNavy} />
-      <div className={styles.glowBlue} />
-      <div className={styles.glowPurple} />
-      <div className={styles.starfield} />
-      <div className={`${styles.logoWindow} ${leaving ? styles.logoLeaving : ""}`}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/onboarding/lucid-logo.png" alt="Lucid" className={styles.logo} />
-      </div>
+      <motion.div variants={visualVariants}>
+        <div className={`${styles.logoWindow} ${leaving ? styles.logoLeaving : ""}`}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/onboarding/lucid-logo.png" alt="Lucid" className={styles.logo} />
+        </div>
+      </motion.div>
     </div>
   );
 }

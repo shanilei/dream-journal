@@ -1,16 +1,10 @@
 .screen {
   position: relative;
   width: 100%;
-  max-width: var(--shell-max-width);
-  height: 100vh;
-  height: 100dvh;
-  margin: 0 auto;
-  overflow: hidden;
+  height: 100%;
   display: flex;
   flex-direction: column;
   padding: 46px 24px 48px;
-  background: var(--bg-base);
-  animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 /* Step 1: headline sits just above the footer, no illustration */
@@ -23,39 +17,6 @@
 .screenTop {
   justify-content: flex-start;
 }
-
-@keyframes screenIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-
-/* ── Background stack ─────────────────────────────────────────────────── */
-.starfield {
-  position: absolute;
-  inset: 0;
-  background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
-  mix-blend-mode: plus-lighter;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glowNavy,
-.glowBlue,
-.glowPurple {
-  position: absolute;
-  width: var(--glow-size);
-  height: var(--glow-size);
-  border-radius: 50%;
-  filter: blur(var(--glow-blur));
-  left: 39px;
-  top: 253px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glowNavy { background: var(--glow-navy); opacity: 1; }
-.glowBlue { background: var(--glow-blue-deep); opacity: 0.25; }
-.glowPurple { background: var(--glow-purple); opacity: 0.2; }
 
 /* ── Skip link ────────────────────────────────────────────────────────── */
 .skip {
@@ -184,11 +145,12 @@
   font-family: var(--font-ploni), serif;
 }
 
-.ctaOuter {
-  width: 112px;
-  height: 112px;
+/* Single plain circle per Figma (node 1436:8910) — no outer glass rings */
+.ctaRound {
+  width: 44.571px;
+  height: 44.571px;
   border-radius: 50%;
-  background: var(--glass-white-15);
+  background: var(--text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -196,26 +158,6 @@
   cursor: pointer;
   border: none;
   padding: 0;
-}
-
-.ctaMid {
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  background: var(--glass-white-15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ctaInner {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-pill);
-  background: var(--text-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .ctaIcon {

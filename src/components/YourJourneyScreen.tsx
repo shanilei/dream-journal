@@ -146,7 +146,6 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
               </div>
               <span className={styles.statsNum}>{stats.totalDreams}</span>
             </div>
-            <div className={styles.statsDividerH} />
             <div className={styles.statsTextBlock}>
               <p className={`${styles.statsLabel} ${isHe ? styles.statsLabelHe : ""}`}>{t.dreamsRecord}</p>
               {t.since && <p className={`${styles.statsLabel} ${isHe ? styles.statsLabelHe : ""}`}>{t.since} {sinceDate}</p>}
@@ -193,7 +192,6 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
                     : card.label;
                 return (
                   <div key={i} className={styles.patternCard}>
-                    <div className={styles.patternGlow} />
                     <div className={styles.patternImageWrap}>
                       {card.image ? (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -222,7 +220,6 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
           <div className={styles.trendList}>
             {trendRows.map((row, i) => (
               <div key={i} className={styles.trendCard}>
-                <div className={styles.trendGlow} />
                 <div className={styles.trendIcon}>{row.icon}</div>
                 <div className={styles.trendText}>
                   <p className={`${styles.trendTitle} ${isHe ? styles.trendTitleHe : ""}`}>{row.title}</p>

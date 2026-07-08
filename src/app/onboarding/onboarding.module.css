@@ -1,0 +1,10 @@
+.shell {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell-max-width);
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  background: var(--bg-base);
+}

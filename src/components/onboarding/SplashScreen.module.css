@@ -1,44 +1,11 @@
 .screen {
   position: relative;
   width: 100%;
-  max-width: var(--shell-max-width);
-  height: 100vh;
-  height: 100dvh;
-  margin: 0 auto;
-  overflow: hidden;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-base);
-  animation: fadeIn 0.3s ease both;
 }
-
-.starfield {
-  position: absolute;
-  inset: 0;
-  background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
-  mix-blend-mode: plus-lighter;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glowNavy,
-.glowBlue,
-.glowPurple {
-  position: absolute;
-  width: var(--glow-size);
-  height: var(--glow-size);
-  border-radius: 50%;
-  filter: blur(var(--glow-blur));
-  left: calc(50% - var(--glow-size) / 2);
-  top: calc(50% - var(--glow-size) / 2);
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glowNavy { background: var(--glow-navy); opacity: 1; }
-.glowBlue { background: var(--glow-blue-deep); opacity: 0.25; }
-.glowPurple { background: var(--glow-purple); opacity: 0.2; }
 
 /* The source PNG is a tall sprite sheet with several logo lockups
    stacked in it — Figma crops a single window into it via absolute
@@ -47,11 +14,9 @@
    106.21% x 457.14% of its container, offset top -341.43% / left -0.05%). */
 .logoWindow {
   position: relative;
-  z-index: 1;
   width: 220px;
   height: 72px;
   overflow: hidden;
-  opacity: 1;
   transform: translateY(0);
   transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
               opacity 0.7s ease;
@@ -69,9 +34,4 @@
   width: 106.21%;
   height: 457.14%;
   max-width: none;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }

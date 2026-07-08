@@ -20,7 +20,13 @@ export default function Step2Capture({ onNext, onSkip }: { onNext: () => void; o
         </>
       }
       subtitle={t.onboarding2Subtitle}
-      illustration={<CaptureIllustration bubble1={t.onboardingBubble1} bubble2={t.onboardingBubble2} />}
+      illustration={
+        <CaptureIllustration
+          bubble1={t.onboardingBubble1}
+          bubble2={t.onboardingBubble2}
+          bubble3={t.onboardingBubble3}
+        />
+      }
       dotIndex={1}
       dotCount={4}
       ctaLabel={t.onboardingContinue}

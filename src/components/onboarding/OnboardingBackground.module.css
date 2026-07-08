@@ -1,0 +1,61 @@
+.bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: var(--bg-base);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.glowNavy,
+.glowBlue,
+.glowPurple {
+  position: absolute;
+  width: var(--glow-size);
+  height: var(--glow-size);
+  border-radius: 50%;
+  filter: blur(var(--glow-blur));
+  left: 39px;
+  top: 253px;
+}
+
+.glowNavy { background: var(--glow-navy); opacity: 1; }
+.glowBlue { background: var(--glow-blue-deep); opacity: 0.25; }
+.glowPurple { background: var(--glow-purple); opacity: 0.2; }
+
+/* Two star layers at different scale/speed = a subtle parallax sense of
+   depth, and because this component mounts once for the whole flow, the
+   drift never resets/jumps when screens change underneath it. */
+.starsFar {
+  position: absolute;
+  inset: -20px;
+  background: url("/images/onboarding/starfield.png") 50% 50% / 120% auto no-repeat;
+  mix-blend-mode: plus-lighter;
+  opacity: 0.8;
+  animation: driftFar 48s ease-in-out infinite;
+}
+
+.starsNear {
+  position: absolute;
+  inset: -30px;
+  background: url("/images/onboarding/starfield.png") 50% 50% / 150% auto no-repeat;
+  mix-blend-mode: plus-lighter;
+  opacity: 0.35;
+  animation: driftNear 32s ease-in-out infinite;
+}
+
+@keyframes driftFar {
+  0%   { background-position: 50% 50%; }
+  25%  { background-position: 54% 46%; }
+  50%  { background-position: 50% 42%; }
+  75%  { background-position: 46% 46%; }
+  100% { background-position: 50% 50%; }
+}
+
+@keyframes driftNear {
+  0%   { background-position: 50% 50%; }
+  25%  { background-position: 44% 55%; }
+  50%  { background-position: 50% 60%; }
+  75%  { background-position: 56% 55%; }
+  100% { background-position: 50% 50%; }
+}

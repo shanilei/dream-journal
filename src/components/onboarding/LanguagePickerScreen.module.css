@@ -1,64 +1,34 @@
 .screen {
   position: relative;
   width: 100%;
-  max-width: var(--shell-max-width);
-  height: 100vh;
-  height: 100dvh;
-  margin: 0 auto;
-  overflow: hidden;
+  height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: flex-end;
   padding: 46px 24px 48px;
-  background: var(--bg-base);
-  animation: fadeIn 0.45s ease both;
 }
-
-.starfield {
-  position: absolute;
-  inset: 0;
-  background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
-  mix-blend-mode: plus-lighter;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glowNavy,
-.glowBlue,
-.glowPurple {
-  position: absolute;
-  width: var(--glow-size);
-  height: var(--glow-size);
-  border-radius: 50%;
-  filter: blur(var(--glow-blur));
-  left: 39px;
-  top: 253px;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.glowNavy { background: var(--glow-navy); opacity: 1; }
-.glowBlue { background: var(--glow-blue-deep); opacity: 0.25; }
-.glowPurple { background: var(--glow-purple); opacity: 0.2; }
 
 .content {
   position: relative;
   z-index: 1;
   display: flex;
   flex-direction: column;
-  flex: 1;
+  gap: 26px;
 }
 
 .headingBlock {
   max-width: 320px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .heading {
-  margin: 0 0 12px;
+  margin: 0;
   font-family: var(--font-family);
-  font-size: 40px;
+  font-size: 52px;
   font-weight: var(--heading-weight);
-  line-height: 54px;
-  letter-spacing: -0.5px;
+  line-height: 55px;
   color: var(--text-primary);
 }
 
@@ -74,75 +44,62 @@
 .subtitle {
   margin: 0;
   font-family: var(--font-family);
-  font-size: var(--lang-picker-subtitle-size);
-  line-height: var(--lang-picker-subtitle-line-height);
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 16px;
+  line-height: 24px;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 :global([lang="he"]) .subtitle {
   font-family: var(--font-ploni), serif;
 }
 
+/* Two stacked pill buttons — selected is filled bright purple, the
+   other stays dim. Order is always English-then-Hebrew; selection is
+   shown by fill, not by reordering or resizing. */
 .options {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 48px;
+  gap: 17px;
 }
 
-.optionSelected {
-  margin: 0;
-  display: flex;
-  align-items: baseline;
-  gap: 14px;
-  font-family: var(--font-family);
-  font-size: var(--lang-option-size);
-  font-weight: var(--lang-option-weight);
-  color: var(--text-primary);
-}
-
-.optionSelectedLabel {
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-
-.paren {
-  font-family: var(--font-family);
-  font-size: 60px;
-  font-weight: 500;
-  color: var(--text-primary);
-  opacity: 0.9;
-}
-
-.optionOther {
+.option {
   all: unset;
-  cursor: pointer;
-  font-family: var(--font-family);
-  font-size: var(--lang-option-size);
-  font-weight: var(--lang-option-weight);
+  box-sizing: border-box;
+  width: 100%;
+  padding: 9px 0;
+  border-radius: 24px;
+  border: 0.6px solid rgba(255, 255, 255, 0.35);
+  background: rgba(133, 113, 255, 0.32);
   color: var(--text-primary);
+  text-align: center;
+  font-size: 22px;
+  cursor: pointer;
+  transition: background 0.35s ease;
 }
 
-/* The language-name labels always render in their own native script's
-   font regardless of the app's current language or which position
-   (selected/other) they're in — "English" stays Urbanist, "עברית" stays
-   Ploni, independent of the heading/subtitle/CTA which follow whichever
-   language is currently selected. */
-.ploniWord {
-  font-family: var(--font-ploni), serif;
+.optionActive {
+  background: rgba(133, 113, 255, 0.8);
+}
+
+.optionEnglish {
+  font-family: var(--font-family);
   font-weight: 500;
+}
+
+.optionHebrew {
+  font-family: var(--font-ploni), serif;
+  font-weight: 400;
 }
 
 .cta {
   position: relative;
   z-index: 1;
-  align-self: center;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 14px;
-  padding: 14px 32px;
+  width: 100%;
+  padding: 14px 0;
   border: none;
   border-radius: var(--radius-pill);
   background: var(--text-primary);
@@ -152,7 +109,7 @@
 .ctaLabel {
   font-family: var(--font-family);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 400;
   color: var(--accent-primary);
   white-space: nowrap;
 }
@@ -167,9 +124,4 @@
 
 :global([dir="rtl"]) .ctaIcon {
   transform: scaleX(-1);
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
 }

@@ -11,6 +11,16 @@
   100% { transform: translateX(-50%) translate(0, 0); }
 }
 
+/* glowBlue/glowPurple start their orbit loop with a negative delay so all
+   three shimmer out of phase forever - but that also means at mount they
+   jump straight to an already off-center position. Fading them in (instead
+   of being instantly at full opacity) keeps the recordButton's own
+   scale-from-0 entrance reading as centered, since the glow bias isn't
+   visible yet while the orb is still small. */
+@keyframes glowFadeIn {
+  from { opacity: 0; }
+}
+
 @keyframes twinkle {
   0%, 100% { opacity: 0.4; }
   50%       { opacity: 0.75; }
@@ -81,13 +91,13 @@
   left: 50%;
   top: 28%;
   transform: translateX(-50%);
-  animation: orbit 9s ease-in-out infinite;
+  animation: orbit 9s ease-in-out infinite, glowFadeIn 0.7s ease-out both;
   pointer-events: none;
   z-index: 0;
 }
 .glowNavy  { background: var(--glow-navy);      opacity: 1;    }
-.glowBlue  { background: var(--glow-blue-deep);  opacity: 0.25; animation-delay: -3s; }
-.glowPurple{ background: var(--glow-purple);     opacity: 0.2;  animation-delay: -6s; }
+.glowBlue  { background: var(--glow-blue-deep);  opacity: 0.25; animation-delay: -3s, 0s; }
+.glowPurple{ background: var(--glow-purple);     opacity: 0.2;  animation-delay: -6s, 0s; }
 
 .prompt {
   animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;

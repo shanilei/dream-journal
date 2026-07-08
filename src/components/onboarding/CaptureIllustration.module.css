@@ -22,21 +22,21 @@
   height: 180px;
   border-radius: 50%;
   object-fit: cover;
-  /* the source gif has a solid black backdrop baked in — "screen" blend
-     makes the black disappear against the page's own dark background,
-     leaving just the glowing swirl with no visible circle edge */
   mix-blend-mode: screen;
 }
 
+/* Bubble text/positions match the Figma node exactly (same 3 slots for
+   both languages — only the copy differs). They deliberately bleed past
+   the screen edge; the screen's own overflow:hidden clips them cleanly. */
 .bubble {
   position: absolute;
-  max-width: 200px;
   padding: 12px 21px;
   border-radius: 30px;
   background: rgba(130, 124, 169, 0.8);
   color: #FFFFFF;
   font-family: var(--font-family);
   font-size: 18px;
+  line-height: 24px;
   white-space: nowrap;
 }
 
@@ -44,12 +44,26 @@
   font-family: var(--font-ploni), serif;
 }
 
-.bubbleTopLeft {
-  left: -48px;
-  top: 8px;
+.bubbleSolid {
+  background: #827CA9;
 }
 
-.bubbleBottomRight {
-  right: -48px;
-  bottom: 16px;
+/* "It was a nightmare!" / "וואי איזה סיוט!" */
+.bubble1 {
+  left: calc(50% - 285px);
+  top: calc(50% + 49px);
+}
+
+/* "I was flying ...." / "אתה לא מבין!..." */
+.bubble2 {
+  left: calc(50% + 66px);
+  top: calc(50% + 20px);
+  padding-right: 86px;
+}
+
+/* "I dreamed about my mom....." / "חלמתי שאני בשדה של " */
+.bubble3 {
+  left: calc(50% - 295px);
+  top: calc(50% - 94px);
+  padding-right: 12px;
 }

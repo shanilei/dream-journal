@@ -111,17 +111,15 @@
 
 /* ── Stats card ─────────────────────────────────────────────────────────── */
 .statsCard {
+  position: relative;
   display: flex;
   align-items: stretch;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 8px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    0 5px 10px rgba(0, 0, 0, 0.05),
-    0 15px 30px rgba(0, 0, 0, 0.15),
-    0 20px 40px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
   overflow: hidden;
   min-height: 149px;
 }
@@ -200,7 +198,7 @@
 
 .progressBar {
   height: 3px;
-  background: #fff;
+  background: var(--accent-secondary);
   border-radius: 4px;
   min-width: 8px;
   max-width: 100%;
@@ -245,34 +243,14 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 10px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    0 5px 10px rgba(0, 0, 0, 0.1),
-    0 15px 30px rgba(0, 0, 0, 0.1),
-    0 20px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   padding: 6px;
   overflow: hidden;
-}
-
-.patternGlow {
-  position: absolute;
-  inset: -1px;
-  border-radius: 10px;
-  background: conic-gradient(
-    from 90deg at 50% 50%,
-    transparent 20%,
-    rgba(95, 197, 255, 0.18) 40%,
-    rgba(255, 172, 137, 0.18) 55%,
-    rgba(129, 85, 255, 0.22) 70%,
-    transparent 85%
-  );
-  filter: blur(20px);
-  pointer-events: none;
-  z-index: 0;
 }
 
 .patternImageWrap {
@@ -283,7 +261,7 @@
   min-height: 97px;
   border-radius: 6px;
   overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
 }
@@ -349,32 +327,13 @@
   padding-block: 0;
   padding-inline-start: 9px;
   padding-inline-end: 16px;
-  background: rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow:
-    0 5px 10px rgba(0, 0, 0, 0.1),
-    0 15px 30px rgba(0, 0, 0, 0.1),
-    0 20px 40px rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
   overflow: hidden;
-}
-
-.trendGlow {
-  position: absolute;
-  inset: -1px;
-  border-radius: 10px;
-  background: conic-gradient(
-    from 90deg at 50% 50%,
-    transparent 20%,
-    rgba(95, 197, 255, 0.07) 40%,
-    rgba(255, 172, 137, 0.07) 55%,
-    rgba(129, 85, 255, 0.09) 70%,
-    transparent 85%
-  );
-  filter: blur(20px);
-  pointer-events: none;
 }
 
 .trendIcon {
