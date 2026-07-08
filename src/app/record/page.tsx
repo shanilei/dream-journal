@@ -49,6 +49,7 @@ export default function RecordPage() {
 
       const audioForm = new FormData();
       audioForm.append("audio", audio, "dream.webm");
+      audioForm.append("lang", lang);
       const transcribeRes = await fetch("/api/transcribe", { method: "POST", body: audioForm });
       if (!transcribeRes.ok) throw new Error("transcription failed");
       const { text } = await transcribeRes.json();
@@ -57,7 +58,7 @@ export default function RecordPage() {
       const dreamRes = await fetch("/api/dream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, lang }),
       });
       if (!dreamRes.ok) throw new Error("dream processing failed");
       const data = await dreamRes.json();

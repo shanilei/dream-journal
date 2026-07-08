@@ -7,14 +7,20 @@ const client = new Anthropic(); // קורא את ANTHROPIC_API_KEY מהסביב�
 
 const MODEL = "claude-sonnet-4-6";
 
+export type DreamLang = "en" | "he";
+
 // ===== המסגרת הפרשנית — זה ה-DNA של המוצר. ערוך כאן בחופשיות. =====
-const FRAMEWORK_SYSTEM_PROMPT = `
+function frameworkSystemPrompt(lang: DreamLang): string {
+  const languageLine =
+    lang === "en" ? "Write every text field in English." : "כתוב כל שדה טקסט בעברית.";
+  return `
 אתה מנתח חלומות שעובד דרך עדשה רגשית-סימבולית.
 חלץ אך ורק את מה שמופיע בחלום עצמו — אל תמציא פרטים שלא נאמרו.
-נתח בשפה שבה נכתב החלום.
+${languageLine}
 היה מכבד וזהיר, לא קליני ולא מאבחן.
 החזר את הניתוח אך ורק דרך הכלי record_dream_analysis.
 `.trim();
+}
 
 // סכימת הניתוח. כל שדה כאן הוא מה שיאפשר בהמשך לזהות דפוסים חוזרים.
 const analysisTool: Anthropic.Tool = {
@@ -73,11 +79,11 @@ export interface DreamAnalysis {
   palette?: string[]; // Explicit named colors for abstract image styles — more reliable than deriving color from mood text
 }
 
-export async function analyzeDream(dreamText: string): Promise<DreamAnalysis> {
+export async function analyzeDream(dreamText: string, lang: DreamLang = "he"): Promise<DreamAnalysis> {
   const response = await client.messages.create({
     model: MODEL,
     max_tokens: 1024,
-    system: FRAMEWORK_SYSTEM_PROMPT,
+    system: frameworkSystemPrompt(lang),
     tools: [analysisTool],
     tool_choice: { type: "tool", name: "record_dream_analysis" },
     messages: [{ role: "user", content: `הנה החלום לניתוח:\n\n${dreamText}` }],

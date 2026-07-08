@@ -1,0 +1,175 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell-max-width);
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 46px 24px 48px;
+  background: var(--bg-base);
+  animation: fadeIn 0.45s ease both;
+}
+
+.starfield {
+  position: absolute;
+  inset: 0;
+  background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
+  mix-blend-mode: plus-lighter;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glowNavy,
+.glowBlue,
+.glowPurple {
+  position: absolute;
+  width: var(--glow-size);
+  height: var(--glow-size);
+  border-radius: 50%;
+  filter: blur(var(--glow-blur));
+  left: 39px;
+  top: 253px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glowNavy { background: var(--glow-navy); opacity: 1; }
+.glowBlue { background: var(--glow-blue-deep); opacity: 0.25; }
+.glowPurple { background: var(--glow-purple); opacity: 0.2; }
+
+.content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.headingBlock {
+  max-width: 320px;
+}
+
+.heading {
+  margin: 0 0 12px;
+  font-family: var(--font-family);
+  font-size: 40px;
+  font-weight: var(--heading-weight);
+  line-height: 54px;
+  letter-spacing: -0.5px;
+  color: var(--text-primary);
+}
+
+:global([lang="he"]) .heading {
+  font-family: var(--font-ploni), serif;
+  font-weight: 400;
+}
+
+.accent {
+  color: var(--accent-secondary);
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--lang-picker-subtitle-size);
+  line-height: var(--lang-picker-subtitle-line-height);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+:global([lang="he"]) .subtitle {
+  font-family: var(--font-ploni), serif;
+}
+
+.options {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 48px;
+}
+
+.optionSelected {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-family: var(--font-family);
+  font-size: var(--lang-option-size);
+  font-weight: var(--lang-option-weight);
+  color: var(--text-primary);
+}
+
+.optionSelectedLabel {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.paren {
+  font-family: var(--font-family);
+  font-size: 60px;
+  font-weight: 500;
+  color: var(--text-primary);
+  opacity: 0.9;
+}
+
+.optionOther {
+  all: unset;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--lang-option-size);
+  font-weight: var(--lang-option-weight);
+  color: var(--text-primary);
+}
+
+/* The language-name labels always render in their own native script's
+   font regardless of the app's current language or which position
+   (selected/other) they're in — "English" stays Urbanist, "עברית" stays
+   Ploni, independent of the heading/subtitle/CTA which follow whichever
+   language is currently selected. */
+.ploniWord {
+  font-family: var(--font-ploni), serif;
+  font-weight: 500;
+}
+
+.cta {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 32px;
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--text-primary);
+  cursor: pointer;
+}
+
+.ctaLabel {
+  font-family: var(--font-family);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--accent-primary);
+  white-space: nowrap;
+}
+
+:global([lang="he"]) .ctaLabel {
+  font-family: var(--font-ploni), serif;
+}
+
+.ctaIcon {
+  display: flex;
+}
+
+:global([dir="rtl"]) .ctaIcon {
+  transform: scaleX(-1);
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

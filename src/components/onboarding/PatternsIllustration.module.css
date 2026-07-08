@@ -1,0 +1,156 @@
+.wrap {
+  position: relative;
+  width: 100%;
+  height: 320px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(16px);
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1), 0px 15px 30px rgba(0, 0, 0, 0.1), 0px 20px 40px rgba(0, 0, 0, 0.15);
+}
+
+/* Sizes/offsets below are scaled directly from the Figma node (1446:8309):
+   Water 105x154 @ (4,-60), Home 108x172 @ (65,-30), filler 83x126 @ (77,-66)
+   — Home is deliberately a bit taller than Water, not an identical size. */
+.cardFiller {
+  width: 95px;
+  height: 145px;
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: none;
+  transform: translate(49px, -25px) rotate(3deg);
+  opacity: 0.7;
+}
+
+.cardBack {
+  width: 121px;
+  height: 177px;
+  transform: translate(-35px, -18px);
+  opacity: 0.85;
+}
+
+.cardFront {
+  width: 124px;
+  height: 198px;
+  transform: translate(35px, 17px);
+}
+
+/* Colored glow blur sitting behind each card — matches the Figma "Glow"
+   layer (a blurred conic gradient), approximated here as a soft
+   multi-color radial blend. Negative z-index keeps it behind the card's
+   own background without needing a separate stacking wrapper. */
+.cardGlow {
+  position: absolute;
+  inset: -14px;
+  z-index: -1;
+  border-radius: 16px;
+  filter: blur(24px);
+  opacity: 0.7;
+  background:
+    radial-gradient(circle at 25% 30%, rgba(159, 115, 241, 0.8) 0%, transparent 55%),
+    radial-gradient(circle at 75% 35%, rgba(95, 197, 255, 0.7) 0%, transparent 55%),
+    radial-gradient(circle at 50% 80%, rgba(255, 172, 137, 0.6) 0%, transparent 55%);
+}
+
+.cardImg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.85;
+}
+
+/* soft dark fade at the bottom so the caption stays legible over the photo */
+.cardScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.55) 0%, transparent 55%);
+}
+
+.cardCaption {
+  position: relative;
+  padding: 8px 10px 10px;
+  margin-top: auto;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+:global([lang="he"]) .cardTitle {
+  font-family: var(--font-ploni), serif;
+}
+
+.cardSub {
+  margin: 0;
+  font-family: var(--font-ploni), serif;
+  font-weight: 300;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.tag {
+  position: absolute;
+  padding: 12px;
+  border-radius: 30px;
+  background: rgba(130, 124, 169, 0.8);
+  color: #FFFFFF;
+  font-family: var(--font-family);
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+:global([lang="he"]) .tag {
+  font-family: var(--font-ploni), serif;
+}
+
+.tagLeft {
+  left: -30px;
+  bottom: 30px;
+}
+
+.tagRight {
+  right: -30px;
+  top: 10px;
+}
+
+.arrow {
+  position: absolute;
+  width: 60px;
+  height: auto;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* curves up from the "Symbol" tag, staying clear of both the tag pill
+   and the card frame — sits in the open gap between them */
+.arrowLeft {
+  left: 34px;
+  bottom: 78px;
+  width: 40px;
+  transform: scaleY(-1) rotate(-8deg);
+}
+
+/* curves down to the "Words" tag, staying clear of both the tag pill
+   and the card frame */
+.arrowRight {
+  right: 62px;
+  top: 34px;
+  width: 40px;
+  transform: scaleX(-1) rotate(-10deg);
+}

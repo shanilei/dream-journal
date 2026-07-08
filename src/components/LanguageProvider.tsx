@@ -7,6 +7,7 @@ const STORAGE_KEY = "dream-journal-lang";
 
 const LanguageContext = createContext<{
   lang: Lang;
+  setLang: (lang: Lang) => void;
   toggleLang: () => void;
   t: Record<TranslationKey, string>;
 } | null>(null);
@@ -17,11 +18,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   // beforeInteractive init script already set the real dir/lang
   // attributes on <html>, so this effect just syncs React's state to
   // match what's already on screen, right after mount.
-  const [lang, setLang] = useState<Lang>("en");
+  const [lang, setLangState] = useState<Lang>("en");
 
   useEffect(() => {
     const initial = document.documentElement.getAttribute("dir") === "rtl" ? "he" : "en";
-    setLang(initial);
+    setLangState(initial);
   }, []);
 
   useEffect(() => {
@@ -31,11 +32,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, [lang]);
 
   function toggleLang() {
-    setLang((l) => (l === "en" ? "he" : "en"));
+    setLangState((l) => (l === "en" ? "he" : "en"));
   }
 
   return (
-    <LanguageContext.Provider value={{ lang, toggleLang, t: translations[lang] }}>
+    <LanguageContext.Provider value={{ lang, setLang: setLangState, toggleLang, t: translations[lang] }}>
       {children}
     </LanguageContext.Provider>
   );

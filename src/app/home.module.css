@@ -102,6 +102,7 @@
   justify-content: space-between;
   padding-top: 42px;
   padding-bottom: 0;
+  margin-bottom: 16px;
   height: 90px;
 }
 
@@ -139,26 +140,67 @@
   color: #000000;
 }
 
-/* ===================== SEARCH BAR ===================== */
-.searchBar {
+/* ===================== EXPANDING SEARCH ===================== */
+@keyframes searchTextIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.searchToggle {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-top: 40px;
-  padding: 8px 16px;
-  height: 40px;
-  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.1) 100%);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border-radius: 99px;
-  border: 1px solid rgba(255,255,255,0.3);
-  box-shadow: 0px 1px 0px rgba(0,0,0,0.05), 0px 4px 4px rgba(0,0,0,0.05), 0px 10px 10px rgba(0,0,0,0.1);
+  gap: 8px;
+  flex-shrink: 0;
+  height: 32px;
+  max-width: 110px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10.28px);
+  -webkit-backdrop-filter: blur(10.28px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
   box-sizing: border-box;
+  overflow: hidden;
+  cursor: pointer;
+  transition: max-width 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+              flex-grow 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+              padding 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+              background 0.3s ease;
+}
+
+.searchToggleOpen {
+  flex: 1 1 auto;
+  max-width: 2000px;
+  padding: 0 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(255,255,255,0.1) 100%);
+  box-shadow: 0px 1px 0px rgba(0,0,0,0.05), 0px 4px 4px rgba(0,0,0,0.05), 0px 10px 10px rgba(0,0,0,0.1);
+  cursor: default;
+}
+
+.searchIconBtn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
   color: #FFFFFF;
+  cursor: pointer;
+}
+
+.searchLabel {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  color: #FFFFFF;
+  white-space: nowrap;
 }
 
 .searchInput {
   flex: 1;
+  min-width: 0;
   background: none;
   border: none;
   outline: none;
@@ -167,6 +209,7 @@
   font-weight: 500;
   line-height: 24px;
   color: #FFFFFF;
+  animation: searchTextIn 0.35s ease 0.2s both;
 }
 
 .searchInput::placeholder {
@@ -182,7 +225,8 @@
 .filterRow {
   display: flex;
   gap: 10px;
-  padding: 10px 0;
+  padding: 0;
+  margin-bottom: 20px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -234,6 +278,11 @@
   font-weight: 500;
   line-height: 24px;
   color: #FFFFFF;
+}
+
+/* directly below .filterRow, which already supplies the 20px gap */
+.sectionLabelTight {
+  margin-top: 0;
 }
 
 /* ===================== SHARED CARD STRUCTURE ===================== */
@@ -728,6 +777,7 @@
 
 /* Filter pills + search — Ploni Regular */
 :global([lang="he"]) .filterPill,
+:global([lang="he"]) .searchLabel,
 :global([lang="he"]) .searchInput {
   font-family: var(--font-ploni), serif;
 }

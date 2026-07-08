@@ -20,14 +20,15 @@ function shortSymbol(symbol: string): string {
 export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const dreamText = body?.text;
+  const lang = body?.lang === "en" ? "en" : "he";
 
   if (typeof dreamText !== "string" || !dreamText.trim()) {
     return NextResponse.json({ error: "Missing dream text" }, { status: 400 });
   }
 
   try {
-    const analysis = await analyzeDream(dreamText);
-    const interpretation = await interpretDream(dreamText, analysis);
+    const analysis = await analyzeDream(dreamText, lang);
+    const interpretation = await interpretDream(dreamText, analysis, lang);
 
     const outDir = join(process.env.TMPDIR ?? "/tmp", "dream-journal");
     mkdirSync(outDir, { recursive: true });

@@ -1,0 +1,55 @@
+.wrap {
+  position: relative;
+  width: 100%;
+  height: 260px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.orbGlow {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(104, 113, 255, 0.35) 0%, transparent 70%);
+  filter: blur(20px);
+}
+
+.orb {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  /* the source gif has a solid black backdrop baked in — "screen" blend
+     makes the black disappear against the page's own dark background,
+     leaving just the glowing swirl with no visible circle edge */
+  mix-blend-mode: screen;
+}
+
+.bubble {
+  position: absolute;
+  max-width: 200px;
+  padding: 12px 21px;
+  border-radius: 30px;
+  background: rgba(130, 124, 169, 0.8);
+  color: #FFFFFF;
+  font-family: var(--font-family);
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+:global([lang="he"]) .bubble {
+  font-family: var(--font-ploni), serif;
+}
+
+.bubbleTopLeft {
+  left: -48px;
+  top: 8px;
+}
+
+.bubbleBottomRight {
+  right: -48px;
+  bottom: 16px;
+}

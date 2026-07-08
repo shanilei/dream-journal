@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import DreamTypeScreen from "@/components/DreamTypeScreen";
 import DreamResultScreen from "@/components/DreamResultScreen";
 import DreamLoadingScreen from "@/components/DreamLoadingScreen";
+import { useLanguage } from "@/components/LanguageProvider";
 
 type DreamResult = {
   id: string;
@@ -30,6 +31,7 @@ function shortSymbol(symbol: string): string {
 
 export default function TypeDreamPage() {
   const router = useRouter();
+  const { lang } = useLanguage();
   const [text, setText] = useState("");
   const [status, setStatus] = useState<"typing" | "loading" | "result" | "error">("typing");
   const [result, setResult] = useState<DreamResult | null>(null);
@@ -40,7 +42,7 @@ export default function TypeDreamPage() {
       const res = await fetch("/api/dream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ text, lang }),
       });
       if (!res.ok) throw new Error("request failed");
       const data = await res.json();

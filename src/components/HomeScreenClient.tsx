@@ -318,6 +318,7 @@ export default function HomeScreenClient({
   const [filter, setFilter] = useState<FilterMode>("all");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   const isSearching = searchQuery.trim().length > 0;
   const searchResults = isSearching ? gridCards.filter((c) => matchesSearch(c, searchQuery)) : [];
@@ -412,24 +413,42 @@ export default function HomeScreenClient({
           </div>
         </div>
 
-        {/* Search */}
-        <div className={styles.searchBar}>
-          <SearchIcon />
-          <input
-            className={styles.searchInput}
-            type="search"
-            dir="auto"
-            placeholder={t.searchPlaceholder}
-            aria-label={t.searchPlaceholder}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
+        {/* Filter pills + expanding search — combined row */}
+        <div className={styles.filterRow}>
+          <div className={`${styles.searchToggle} ${isSearchOpen ? styles.searchToggleOpen : ""}`}>
+            <button
+              type="button"
+              className={styles.searchIconBtn}
+              onClick={() => {
+                if (isSearchOpen) {
+                  if (!searchQuery) setIsSearchOpen(false);
+                } else {
+                  setIsSearchOpen(true);
+                }
+              }}
+              aria-label={t.searchPlaceholder}
+            >
+              <SearchIcon />
+            </button>
+            {!isSearchOpen && <span className={styles.searchLabel}>{t.searchPlaceholder}</span>}
+            {isSearchOpen && (
+              <input
+                autoFocus
+                className={styles.searchInput}
+                type="search"
+                dir="auto"
+                placeholder={t.searchPlaceholder}
+                aria-label={t.searchPlaceholder}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onBlur={() => { if (!searchQuery) setIsSearchOpen(false); }}
+              />
+            )}
+          </div>
 
-        {/* Filter pills — hidden while searching */}
-        {!isSearching && (
-          <div className={styles.filterRow}>
-            {filters.map((f) => (
+          {filters
+            .filter((f) => f.key === "all" || !isSearchOpen)
+            .map((f) => (
               <button
                 key={f.key}
                 type="button"
@@ -440,13 +459,12 @@ export default function HomeScreenClient({
                 {f.key !== "all" && f.key !== "favorite" && <ChevronIcon />}
               </button>
             ))}
-          </div>
-        )}
+        </div>
 
         {/* ── LIST VIEW ── */}
         {!isSearching && viewMode === "list" && (
           <div className={styles.listView}>
-            <p className={styles.sectionLabel}>{t.recentDream}</p>
+            <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.recentDream}</p>
             {categories.map((cat) => (
               <Link
                 key={cat.label}
@@ -512,7 +530,7 @@ export default function HomeScreenClient({
           <>
             {recentDream && (
               <>
-                <p className={styles.sectionLabel}>{t.recentDream}</p>
+                <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.recentDream}</p>
                 <Link href={`/dream/${recentDream.id}`} className={styles.heroCard}>
                   <div className={styles.heroImgWrap}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}

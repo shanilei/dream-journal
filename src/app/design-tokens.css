@@ -87,6 +87,39 @@
 }
 
 /* ============================================
+   LANGUAGE PICKER — additional tokens
+   ============================================ */
+
+:root {
+  /* Two stacked language options: selected = large + underlined + first,
+     other = plain + second. Sizes vary slightly per language in Figma
+     (Urbanist 70/80px vs Ploni 70px) — treat 70px as the shared baseline. */
+  --lang-option-size: 70px;
+  --lang-option-weight: 500;
+  --lang-picker-subtitle-size: 12px;
+  --lang-picker-subtitle-line-height: 20px;
+}
+
+/* ============================================
+   ONBOARDING ILLUSTRATIONS (steps 2 & 3) — reference notes
+   ============================================ */
+
+/*
+STEP 2 "Capture" — floating orb:
+- public/images/orb-anim.gif (320x320), centered, soft outer glow ring
+- 2-3 chat-bubble tags floating around it: rgba(130,124,169,0.8) bg,
+  radius 30px, Urbanist/Ploni 18px white text, positioned bleeding off
+  the left/right screen edges
+
+STEP 3 "Patterns" — stacked template cards:
+- 2 offset "Template Card" rectangles (public/images/cards/dream-1.png,
+  dream-2.png), each: bg rgba(0,0,0,0.5), border 1px white,
+  backdrop-blur 10px, radius 10px, soft colored glow blurred(35px) behind,
+  label caption below image (e.g. "Water"/"Home" + "Recurring symbol/location")
+- 2 pill tag bubbles ("Symbol"/"Words") + curved connector arrows (SVG)
+*/
+
+/* ============================================
    REFERENCE COMPONENT SHAPES (from Figma spec)
    Not meant to be used as literal classes —
    Claude Code should reproduce this structure.

@@ -1,23 +1,27 @@
 import "dotenv/config";
 import Anthropic from "@anthropic-ai/sdk";
 import { readFileSync } from "node:fs";
-import { analyzeDream, type DreamAnalysis } from "./analyze";
+import { analyzeDream, type DreamAnalysis, type DreamLang } from "./analyze";
 
 const client = new Anthropic(); // קורא את ANTHROPIC_API_KEY מהסביבה
 
 const MODEL = "claude-sonnet-4-6";
 
 // ===== שלב 2: פרשנות כתובה — ראה כללי הברזל ב-CLAUDE.md =====
-const INTERPRETATION_SYSTEM_PROMPT = `
+function interpretationSystemPrompt(lang: DreamLang): string {
+  const languageLine =
+    lang === "en" ? "Write the interpretation in English." : "כתוב בעברית.";
+  return `
 אתה כותב פרשנות לחלום, בהתבסס על ניתוח מובנה שבוצע עליו מראש.
 התבסס אך ורק על מה שמופיע בניתוח ובחלום עצמו — אל תמציא פרטים שלא נאמרו.
 נסח את הפרשנות כהזמנה לרפלקציה, לא כאבחנה: השתמש בניסוחים כמו "אולי", "יכול להיות ש...", "מה אם" — ולא בקביעות מוחלטות.
 היה מכבד וזהיר, לא קליני ולא פסיכואנליטי.
 
 כתוב פרשנות בת 100 מילים בדיוק או פחות — לעולם לא יותר מ-100 מילים. גע בקצרה בכמה מהסמלים או הרגשות המרכזיים, וסגור במשפט שמזמין רפלקציה.
-כתוב בשפה שבה נכתב החלום.
+${languageLine}
 החזר את הפרשנות אך ורק דרך הכלי record_dream_interpretation.
 `.trim();
+}
 
 const interpretationTool: Anthropic.Tool = {
   name: "record_dream_interpretation",
@@ -51,12 +55,13 @@ export interface DreamInterpretation {
 
 export async function interpretDream(
   dreamText: string,
-  analysis: DreamAnalysis
+  analysis: DreamAnalysis,
+  lang: DreamLang = "he"
 ): Promise<DreamInterpretation> {
   const response = await client.messages.create({
     model: MODEL,
     max_tokens: 1024,
-    system: INTERPRETATION_SYSTEM_PROMPT,
+    system: interpretationSystemPrompt(lang),
     tools: [interpretationTool],
     tool_choice: { type: "tool", name: "record_dream_interpretation" },
     messages: [

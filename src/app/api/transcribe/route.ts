@@ -9,6 +9,8 @@ const MODEL = "gemini-2.5-flash";
 export async function POST(req: NextRequest) {
   const formData = await req.formData().catch(() => null);
   const audio = formData?.get("audio");
+  const lang = formData?.get("lang") === "en" ? "en" : "he";
+  const languageName = lang === "en" ? "English" : "Hebrew";
 
   if (!(audio instanceof Blob) || audio.size === 0) {
     return NextResponse.json({ error: "Missing audio" }, { status: 400 });
@@ -25,7 +27,7 @@ export async function POST(req: NextRequest) {
           role: "user",
           parts: [
             {
-              text: "Transcribe this audio recording of someone describing a dream out loud. Return ONLY the spoken words as plain text — no commentary, no formatting, no quotation marks. Transcribe in whatever language the speaker is using.",
+              text: `Transcribe this audio recording of someone describing a dream out loud. Return ONLY the spoken words as plain text — no commentary, no formatting, no quotation marks. The speaker is recording in ${languageName}; transcribe it in ${languageName}.`,
             },
             { inlineData: { mimeType, data: buffer.toString("base64") } },
           ],

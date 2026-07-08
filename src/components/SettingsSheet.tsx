@@ -201,6 +201,8 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
       <div className={`${styles.sheet} ${isClosing ? styles.sheetClosing : ""}`}>
         <div className={styles.glow1} />
         <div className={styles.glow2} />
+        <div className={styles.glow3} />
+        <div className={styles.grain} />
 
         {/* Header */}
         <div className={styles.header}>

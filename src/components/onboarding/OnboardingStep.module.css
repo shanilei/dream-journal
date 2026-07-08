@@ -1,0 +1,246 @@
+.screen {
+  position: relative;
+  width: 100%;
+  max-width: var(--shell-max-width);
+  height: 100vh;
+  height: 100dvh;
+  margin: 0 auto;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 46px 24px 48px;
+  background: var(--bg-base);
+  animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+/* Step 1: headline sits just above the footer, no illustration */
+.screenBottom {
+  justify-content: flex-end;
+  gap: 40px;
+}
+
+/* Steps 2/3: headline pinned top, illustration fills the middle */
+.screenTop {
+  justify-content: flex-start;
+}
+
+@keyframes screenIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── Background stack ─────────────────────────────────────────────────── */
+.starfield {
+  position: absolute;
+  inset: 0;
+  background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
+  mix-blend-mode: plus-lighter;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glowNavy,
+.glowBlue,
+.glowPurple {
+  position: absolute;
+  width: var(--glow-size);
+  height: var(--glow-size);
+  border-radius: 50%;
+  filter: blur(var(--glow-blur));
+  left: 39px;
+  top: 253px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.glowNavy { background: var(--glow-navy); opacity: 1; }
+.glowBlue { background: var(--glow-blue-deep); opacity: 0.25; }
+.glowPurple { background: var(--glow-purple); opacity: 0.2; }
+
+/* ── Skip link ────────────────────────────────────────────────────────── */
+.skip {
+  all: unset;
+  position: relative;
+  z-index: 1;
+  align-self: flex-end;
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 600;
+  color: #D5D3D3;
+  text-decoration: underline;
+  margin-bottom: 16px;
+}
+
+:global([lang="he"]) .skip {
+  font-family: var(--font-ploni), serif;
+}
+
+/* ── Headline ─────────────────────────────────────────────────────────── */
+.headlineBlock {
+  position: relative;
+  z-index: 1;
+  max-width: 320px;
+}
+
+.headline {
+  margin: 0 0 10px;
+  font-family: var(--font-family);
+  font-size: var(--heading-size);
+  font-weight: var(--heading-weight);
+  line-height: var(--heading-line-height);
+  color: var(--text-primary);
+}
+
+.headlineHe {
+  font-family: var(--font-ploni), serif;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 44px;
+  letter-spacing: -0.5px;
+}
+
+.accent {
+  background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: 18px;
+  line-height: 28px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([lang="he"]) .subtitle {
+  font-family: var(--font-ploni), serif;
+}
+
+/* ── Illustration slot ────────────────────────────────────────────────── */
+/* No z-index here on purpose — giving this a stacking context would trap
+   any mix-blend-mode used inside it (e.g. the orb illustration) so it can
+   only blend against its own transparent siblings instead of the real
+   starfield/glow background behind the screen. */
+.illustration {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+/* ── Footer row ───────────────────────────────────────────────────────── */
+.footer {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.dots {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-dot);
+  background: var(--text-inactive);
+}
+
+.dotActive {
+  width: 40px;
+  height: 8px;
+  border-radius: var(--radius-dot);
+  background: var(--text-primary);
+}
+
+/* Round-arrow CTA (steps 1 & 2) */
+.cta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.ctaLabel {
+  font-family: var(--font-family);
+  font-size: var(--button-text-size);
+  font-weight: var(--button-text-weight);
+  line-height: var(--button-text-line-height);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+:global([lang="he"]) .ctaLabel {
+  font-family: var(--font-ploni), serif;
+}
+
+.ctaOuter {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  background: var(--glass-white-15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  border: none;
+  padding: 0;
+}
+
+.ctaMid {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  background: var(--glass-white-15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ctaInner {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ctaIcon {
+  display: flex;
+}
+
+:global([dir="rtl"]) .ctaIcon {
+  transform: scaleX(-1);
+}
+
+/* Final full-width CTA pill (step 3) */
+.ctaFinal {
+  flex: 1;
+  max-width: 241px;
+  padding: 13px 0;
+  border: none;
+  border-radius: 40px;
+  background: var(--text-primary);
+  color: var(--accent-secondary);
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+:global([lang="he"]) .ctaFinal {
+  font-family: var(--font-ploni), serif;
+}
