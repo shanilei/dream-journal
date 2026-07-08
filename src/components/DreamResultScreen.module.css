@@ -79,22 +79,30 @@
   display: none;
 }
 
+@page {
+  size: auto;
+  margin: 24px;
+}
+
 @media print {
   .screen {
     display: none !important;
   }
 
+  /* min-height: 100vh here (to flex-center the card) previously caused the
+     print output to paginate onto a blank second page on iOS Safari — vh
+     doesn't resolve reliably in print contexts. Center via auto margins on
+     the fixed-width inner card instead, which doesn't depend on viewport
+     height at all. */
   .printCard {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
+    display: block !important;
     width: 100%;
-    min-height: 100vh;
     background: #fff;
   }
 
   .printCardInner {
-    width: 400px;
+    width: 320px;
+    margin: 0 auto;
   }
 
   /* Force the reveal-in animation to its resting state — by print time
