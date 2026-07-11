@@ -39,7 +39,7 @@ type Category = {
 };
 
 type ViewMode = "list" | "grid";
-type FilterMode = "all" | "type" | "date" | "emotion" | "favorite";
+type FilterMode = "all" | "type" | "date" | "favorite";
 
 function SearchIcon() {
   return (
@@ -320,6 +320,7 @@ export default function HomeScreenClient({
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [gridColumns, setGridColumns] = useState<2 | 3>(3);
 
   // Loaded on mount (not lazy useState init) since localStorage isn't
   // available during server render — matches DreamResultScreen's pattern
@@ -336,7 +337,6 @@ export default function HomeScreenClient({
     { key: "all",      label: t.filterAll },
     { key: "date",     label: t.filterDate },
     { key: "type",     label: t.filterType },
-    { key: "emotion",  label: t.filterEmotion },
     { key: "favorite", label: t.filterFavorite },
   ];
 
@@ -529,7 +529,7 @@ export default function HomeScreenClient({
       <div className={styles.contentWrapper}>
         {/* ── SEARCH RESULTS ── */}
         {isSearching && (
-          <div className={styles.collectionGrid} style={{ paddingTop: 36 }}>
+          <div className={styles.collectionGrid} style={{ paddingTop: 36, gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}>
             {searchResults.length === 0 ? (
               <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.searchNoResults}</p>
             ) : (
@@ -542,7 +542,7 @@ export default function HomeScreenClient({
 
         {/* ── GRID + FAVORITE ── */}
         {!isSearching && viewMode === "grid" && filter === "favorite" && (
-          <div className={styles.collectionGrid} style={{ paddingTop: 8 }}>
+          <div className={styles.collectionGrid} style={{ paddingTop: 8, gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}>
             {favoriteCards.length === 0 ? (
               <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.noFavorites}</p>
             ) : (
@@ -554,7 +554,7 @@ export default function HomeScreenClient({
         )}
 
         {/* ── GRID + ALL (default) ── */}
-        {!isSearching && viewMode === "grid" && (filter === "all" || filter === "emotion") && (
+        {!isSearching && viewMode === "grid" && filter === "all" && (
           <>
             {recentDream && (
               <>
@@ -580,8 +580,27 @@ export default function HomeScreenClient({
 
             {collectionCards.length > 0 && (
               <>
-                <p className={styles.sectionLabel}>{t.moreCollection}</p>
-                <div className={styles.collectionGrid}>
+                <div className={styles.sectionHeaderRow}>
+                  <p className={`${styles.sectionLabel} ${styles.sectionLabelInRow}`}>{t.moreCollection}</p>
+                  <div className={styles.columnToggle}>
+                    <span>{t.galleryColumnsLabel}</span>
+                    <button
+                      type="button"
+                      className={gridColumns === 2 ? styles.columnToggleActive : ""}
+                      onClick={() => setGridColumns(2)}
+                    >
+                      2
+                    </button>
+                    <button
+                      type="button"
+                      className={gridColumns === 3 ? styles.columnToggleActive : ""}
+                      onClick={() => setGridColumns(3)}
+                    >
+                      3
+                    </button>
+                  </div>
+                </div>
+                <div className={styles.collectionGrid} style={{ gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}>
                   {collectionCards.map((card, i) =>
                     renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading, i)
                   )}

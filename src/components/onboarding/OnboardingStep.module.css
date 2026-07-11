@@ -4,7 +4,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 46px 24px 48px;
+  padding: 46px var(--shell-padding) 48px;
 }
 
 /* The footer bar is now mounted once (see OnboardingFooter.tsx) and
@@ -136,8 +136,8 @@
    .screen's padding box. */
 .footerBar {
   position: absolute;
-  left: 24px;
-  right: 24px;
+  left: var(--shell-padding);
+  right: var(--shell-padding);
   bottom: 48px;
   z-index: 2;
 }

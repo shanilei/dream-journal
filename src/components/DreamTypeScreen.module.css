@@ -71,7 +71,7 @@
   animation: fadeIn 0.4s ease both;
   position: absolute;
   z-index: 2;
-  left: 24px;
+  left: var(--shell-padding);
   top: 50px;
   width: 48px;
   height: 48px;
@@ -93,7 +93,7 @@
 
 :global([dir="rtl"]) .backButton {
   left: auto;
-  right: 24px;
+  right: var(--shell-padding);
 }
 
 .backIcon {
@@ -107,8 +107,8 @@
 .errorText {
   position: absolute;
   z-index: 1;
-  left: 16px;
-  right: 16px;
+  left: var(--shell-padding);
+  right: var(--shell-padding);
   bottom: 96px;
   margin: 0;
   font-size: 13px;
@@ -120,8 +120,8 @@
   animation: fadeSlideUp 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) 0.08s both;
   position: absolute;
   z-index: 1;
-  left: 16px;
-  right: 16px;
+  left: var(--shell-padding);
+  right: var(--shell-padding);
   bottom: 32px;
   display: flex;
   align-items: flex-end;

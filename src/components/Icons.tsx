@@ -311,6 +311,20 @@ export function WaterDropIcon({ size = 24, color = "#fff" }: { size?: number; co
   );
 }
 
+export function FlameIcon({ size = 24, color = "#fff" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M12 2.5c1.2 2.4-0.6 3.8-1.6 5.2C9 9.4 8.5 11 9.3 12.4c-1.1-.5-1.9-1.7-1.9-3.1C5.7 10.9 5 13 5 14.8 5 18.8 8.1 22 12 22s7-3.2 7-7.2c0-2.6-1-5-2.8-6.8.2 1.6-.4 2.6-1.2 3.3-.1-3.2-1.3-6.1-3-6.8Z"
+        stroke={color}
+        strokeWidth={1.6}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function InfoIcon({ size = 16, color = "rgba(255,255,255,0.6)" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

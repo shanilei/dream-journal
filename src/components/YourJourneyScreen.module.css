@@ -1,3 +1,12 @@
+@keyframes gradientFade {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+/* Same background system as Gallery/Record/Type: solid base + a diagonal
+   gradient on ::before whose opacity pulses, plus the same three static
+   nebula blobs — instead of this screen's old flat background + 3 large
+   centered glow blobs. */
 .screen {
   animation: screenIn 0.65s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   position: relative;
@@ -6,7 +15,7 @@
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 auto;
-  background: #090a13;
+  background: #050A1A;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-x: none;
@@ -14,45 +23,49 @@
   padding-bottom: 140px;
 }
 
-/* ── Decorative glow blobs ──────────────────────────────────────────────── */
-.glow1 {
-  position: absolute;
-  width: 302px;
-  height: 302px;
-  top: -44px;
-  left: calc(50% + 2.5px);
-  background: radial-gradient(circle, rgba(90, 75, 255, 0.55) 0%, transparent 70%);
+.screen::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
+  animation: gradientFade 12s ease-in-out infinite;
   pointer-events: none;
-  filter: blur(50px);
 }
 
-.glow2 {
-  position: absolute;
-  width: 302px;
-  height: 302px;
-  top: calc(30.77% + 24px);
-  left: calc(50% - 8.5px);
-  background: radial-gradient(circle, rgba(120, 60, 210, 0.4) 0%, transparent 70%);
+/* ── Nebula blobs ──────────────────────────────────────────────────────── */
+.nebula {
+  position: fixed;
+  border-radius: 50%;
   pointer-events: none;
-  filter: blur(60px);
+  z-index: 0;
 }
-
-.glow3 {
-  position: absolute;
-  width: 302px;
-  height: 302px;
-  top: calc(46% - 9px);
-  left: -120px;
-  background: radial-gradient(circle, rgba(50, 80, 200, 0.35) 0%, transparent 70%);
-  pointer-events: none;
-  filter: blur(60px);
+.nebulaBlue {
+  width: 260px; height: 260px;
+  left: -80px; top: -60px;
+  background: #3B82F6;
+  opacity: 0.18;
+  filter: blur(45px);
+}
+.nebulaPurple {
+  width: 200px; height: 200px;
+  left: 220px; top: 120px;
+  background: #8B5CF6;
+  opacity: 0.14;
+  filter: blur(40px);
+}
+.nebulaCyan {
+  width: 180px; height: 180px;
+  left: -40px; top: 420px;
+  background: #06B6D4;
+  opacity: 0.10;
+  filter: blur(35px);
 }
 
 /* ── Main content ───────────────────────────────────────────────────────── */
 .content {
   position: relative;
   z-index: 1;
-  padding: 0 18px;
+  padding: 0 var(--shell-padding);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -135,19 +148,23 @@
   min-width: 0;
 }
 
-.statsTopRow {
+/* Icon + label sit together in a small row above the big number (Figma
+   1501:10823) — no more big badge beside the number. */
+.statsLabelRow {
   display: flex;
   align-items: center;
-  gap: 17px;
+  gap: 8px;
 }
 
-.statsIconWrap {
-  width: 44px;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.statsColLabel {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 22px;
+  color: rgba(255, 255, 255, 0.7);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .statsNum {
@@ -165,17 +182,13 @@
   flex-shrink: 0;
 }
 
-.statsTextBlock {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-}
-
-.statsLabel {
+/* "Since July 2026" caption under the divider (Dreams-record column only
+   — the streak column shows the progress bar there instead). */
+.statsCaption {
   margin: 0;
   font-size: 12px;
-  font-weight: 600;
-  line-height: 20px;
+  font-weight: 300;
+  line-height: 16px;
   color: rgba(255, 255, 255, 0.7);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -293,9 +306,9 @@
 
 .patternLabel {
   margin: 0;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 400;
-  line-height: 24px;
+  line-height: 28px;
   color: rgba(255, 255, 255, 0.7);
   white-space: nowrap;
   overflow: hidden;
@@ -317,9 +330,12 @@
 .trendList {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 12px;
 }
 
+/* Figma 1494:10394 — a glossier card than the rest of the app's flat-glass
+   cards: a visible border, and an inset highlight (light catching the
+   top-left inside edge) layered under the usual soft outer shadow. */
 .trendCard {
   position: relative;
   display: flex;
@@ -329,13 +345,24 @@
   padding-block: 0;
   padding-inline-start: 9px;
   padding-inline-end: 16px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: -11px -10px 24px rgba(0, 0, 0, 0.15),
+              -2px -2px 6px rgba(0, 0, 0, 0.15),
+              inset 2px 2px 10px rgba(255, 255, 255, 0.13),
+              inset 1px 1px 5px rgba(255, 255, 255, 0.13);
   overflow: hidden;
+}
+
+/* The first row ("Dreams in this month") reads as the primary/emphasized
+   stat in the design — brighter text where the other three stay muted. */
+.trendCardPrimary .trendTitle,
+.trendCardPrimary .trendSubtitle,
+.trendCardPrimary .trendValue {
+  color: #ffffff;
 }
 
 .trendIcon {
@@ -344,8 +371,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
 }
 

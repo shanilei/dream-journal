@@ -87,12 +87,14 @@
 }
 
 /* ===================== SINGLE CONTENT WRAPPER ===================== */
-/* Fix #1 + #2: all content inside one wrapper with consistent 20px side padding.
-   No individual horizontal margins/paddings on children. */
+/* All content inside one wrapper with the app-wide side gutter (see
+   --shell-padding in globals.css — every screen's outer horizontal
+   margin standardizes to this one variable). No individual horizontal
+   margins/paddings on children. */
 .contentWrapper {
   position: relative;
   z-index: 1;
-  padding: 0 20px;
+  padding: 0 var(--shell-padding);
 }
 
 /* ===================== HEADER ===================== */
@@ -291,6 +293,53 @@
   font-weight: 500;
   line-height: 24px;
   color: #FFFFFF;
+}
+
+/* "More of your collection" + the 2/3-column toggle (Figma 1489:10215) —
+   the row carries the margin that .sectionLabel normally owns on its
+   own, since the label is no longer the row's only child. */
+.sectionHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 27px 0 10px;
+}
+
+.sectionLabelInRow {
+  margin: 0;
+}
+
+.columnToggle {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 22px;
+  color: rgba(255, 255, 255, 0.7);
+  white-space: nowrap;
+}
+
+.columnToggle button {
+  all: unset;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 15px;
+  line-height: 22px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.columnToggle button.columnToggleActive {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+:global([lang="he"]) .columnToggle,
+:global([lang="he"]) .columnToggle button {
+  font-family: var(--font-ploni), serif;
 }
 
 /* directly below .filterRow, which already supplies the 20px gap */
@@ -524,6 +573,11 @@
 :global([dir="rtl"]) .gridHeartBtn {
   right: auto;
   left: 6px;
+}
+
+:global([dir="rtl"]) .heartBtn {
+  right: auto;
+  left: 8px;
 }
 
 .gridCardHeading {

@@ -5,7 +5,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-end;
-  padding: 46px 24px 48px;
+  padding: 46px var(--shell-padding) 48px;
 }
 
 .content {

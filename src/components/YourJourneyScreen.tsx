@@ -9,7 +9,7 @@ import { translateMood } from "@/i18n/translations";
 import {
   SettingsIcon,
   BoltIcon,
-  WaterDropIcon,
+  FlameIcon,
   InfoIcon,
   TrendIcon,
   CloudMoonIcon,
@@ -71,25 +71,27 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
 
   const trendRows = [
     {
-      icon: <TrendIcon size={22} color="rgba(255,255,255,0.7)" />,
+      // First row reads as the primary/emphasized stat in the design
+      // (Figma 1494:10394) — brighter icon to match its brighter text.
+      icon: <TrendIcon size={18} color="#ffffff" />,
       title: t.dreamsThisMonth,
       subtitle: monthDeltaSubtitle(stats.dreamsThisMonthDelta, "month"),
       value: String(stats.dreamsThisMonth),
     },
     {
-      icon: <CloudMoonIcon size={22} color="rgba(255,255,255,0.7)" />,
+      icon: <CloudMoonIcon size={18} color="rgba(255,255,255,0.7)" />,
       title: t.dreamsThisWeek,
       subtitle: monthDeltaSubtitle(stats.dreamsThisWeekDelta, "week"),
       value: String(stats.dreamsThisWeek),
     },
     {
-      icon: <SmileIcon size={22} color="rgba(255,255,255,0.7)" />,
+      icon: <SmileIcon size={18} color="rgba(255,255,255,0.7)" />,
       title: t.avgMood,
       subtitle: t.morePositive,
       value: `${stats.avgMoodPercent}%`,
     },
     {
-      icon: <NightmareIcon size={22} color="rgba(255,255,255,0.7)" />,
+      icon: <NightmareIcon size={18} color="rgba(255,255,255,0.7)" />,
       title: t.nightmares,
       subtitle: t.decreased,
       value: `${stats.nightmarePercent}%`,
@@ -100,10 +102,10 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
 
   return (
     <div className={styles.screen}>
-      {/* Background glow blobs */}
-      <div className={styles.glow1} />
-      <div className={styles.glow2} />
-      <div className={styles.glow3} />
+      {/* Background — same nebula system as Gallery/Record/Type */}
+      <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
+      <div className={`${styles.nebula} ${styles.nebulaPurple}`} />
+      <div className={`${styles.nebula} ${styles.nebulaCyan}`} />
 
       <div className={styles.content}>
         {/* Header: gear icon aligned to edge, then title full-width */}
@@ -136,21 +138,21 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
           </div>
         </div>
 
-        {/* Stats card */}
+        {/* Stats card — Figma 1494:10499 / 1501:10823: icon+label sit
+            together in a small row above the big number, instead of a
+            big badge beside it. */}
         <div className={styles.statsCard}>
           {/* First column: total dreams */}
           <div className={styles.statsCol}>
-            <div className={styles.statsTopRow}>
-              <div className={styles.statsIconWrap}>
-                <BoltIcon size={28} color="#fff" />
-              </div>
-              <span className={styles.statsNum}>{stats.totalDreams}</span>
+            <div className={styles.statsLabelRow}>
+              <BoltIcon size={15} color="rgba(255,255,255,0.7)" />
+              <span className={`${styles.statsColLabel} ${isHe ? styles.statsLabelHe : ""}`}>{t.dreamsRecord}</span>
             </div>
-            <div className={styles.statsTextBlock}>
-              <p className={`${styles.statsLabel} ${isHe ? styles.statsLabelHe : ""}`}>{t.dreamsRecord}</p>
-              {t.since && <p className={`${styles.statsLabel} ${isHe ? styles.statsLabelHe : ""}`}>{t.since} {sinceDate}</p>}
-              {!t.since && <p className={`${styles.statsLabel} ${isHe ? styles.statsLabelHe : ""}`}>{sinceDate}</p>}
-            </div>
+            <span className={styles.statsNum}>{stats.totalDreams}</span>
+            <div className={styles.statsDividerH} />
+            <p className={`${styles.statsCaption} ${isHe ? styles.statsLabelHe : ""}`}>
+              {t.since ? `${t.since} ${sinceDate}` : sinceDate}
+            </p>
           </div>
 
           {/* Vertical divider */}
@@ -158,13 +160,11 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
 
           {/* Second column: streak */}
           <div className={styles.statsCol}>
-            <div className={styles.statsTopRow}>
-              <div className={styles.statsIconWrap}>
-                <WaterDropIcon size={28} color="#fff" />
-              </div>
-              <span className={styles.statsNum}>{stats.streak}</span>
+            <div className={styles.statsLabelRow}>
+              <FlameIcon size={16} color="rgba(255,255,255,0.7)" />
+              <span className={`${styles.statsColLabel} ${isHe ? styles.statsLabelHe : ""}`}>{t.dayStreak}</span>
             </div>
-            <p className={`${styles.statsLabel} ${isHe ? styles.statsLabelHe : ""}`}>{t.dayStreak}</p>
+            <span className={styles.statsNum}>{stats.streak}</span>
             <div className={styles.statsDividerH} />
             <div className={styles.progressTrack}>
               <div
@@ -219,7 +219,7 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
           </div>
           <div className={styles.trendList}>
             {trendRows.map((row, i) => (
-              <div key={i} className={styles.trendCard}>
+              <div key={i} className={`${styles.trendCard} ${i === 0 ? styles.trendCardPrimary : ""}`}>
                 <div className={styles.trendIcon}>{row.icon}</div>
                 <div className={styles.trendText}>
                   <p className={`${styles.trendTitle} ${isHe ? styles.trendTitleHe : ""}`}>{row.title}</p>

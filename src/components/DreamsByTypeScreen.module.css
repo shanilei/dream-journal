@@ -32,7 +32,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 37px 18px 12px;
+  padding: 37px var(--shell-padding) 12px;
 }
 
 .iconBtn {
@@ -70,7 +70,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
-  padding: 0 18px;
+  padding: 0 var(--shell-padding);
 }
 
 .card {
