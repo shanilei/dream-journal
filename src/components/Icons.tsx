@@ -271,8 +271,17 @@ export function ActivityIcon({ size = 24, color = "#fff" }: { size?: number; col
 
 export function HeartIcon({ size = 20, color = "#fff", filled = false }: { size?: number; color?: string; filled?: boolean }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? color : "none"} stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" xmlns="http://www.w3.org/2000/svg">
+      {/* fill-opacity (not the fill/none swap the old version used) so the
+          transition below can actually animate — "none" isn't an
+          interpolatable paint value, so toggling straight to/from it always
+          hard-cuts regardless of any CSS transition. */}
+      <path
+        d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+        fill={color}
+        fillOpacity={filled ? 1 : 0}
+        style={{ transition: "fill-opacity 0.25s ease" }}
+      />
     </svg>
   );
 }

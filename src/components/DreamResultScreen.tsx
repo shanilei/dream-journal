@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, ShareIcon, PrinterIcon, HeartIcon } from "./Icons";
+import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
+import FavoriteButton from "./FavoriteButton";
 import BottomNav from "./BottomNav";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
@@ -351,9 +352,13 @@ export default function DreamResultScreen({
         <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-start", width: "100%" } : undefined}>
           <div className={styles.titleRow}>
             <p className={styles.title}>{dreamTitle}</p>
-            <button type="button" className={styles.titleHeartBtn} aria-label="Favourite" onClick={toggleFavorite}>
-              <HeartIcon size={22} color="#ffffff" filled={favorited} />
-            </button>
+            <FavoriteButton
+              filled={favorited}
+              onToggle={toggleFavorite}
+              size={22}
+              color="#ffffff"
+              className={styles.titleHeartBtn}
+            />
           </div>
           <div className={styles.metaRow} style={lang === "he" ? { justifyContent: "flex-start", width: "100%" } : undefined}>
             <span className={styles.moodPill}>{translateMood(mood, lang)}</span>

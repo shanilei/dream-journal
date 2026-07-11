@@ -1,3 +1,13 @@
+@keyframes gradientFade {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+/* Exactly the Gallery/Record/Type system: solid base + a diagonal
+   gradient on ::before whose opacity pulses (that's the "moving
+   gradient" elsewhere in the app — not blobs translating around) plus
+   the same three static nebula blobs, instead of this screen's old
+   static pastel gradient. */
 .screen {
   animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   position: relative;
@@ -6,7 +16,7 @@
   height: 100vh;
   height: 100dvh;
   margin: 0 auto;
-  background: linear-gradient(180deg, #d0d9f5 0%, #fffdf5 100%);
+  background: #050A1A;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -15,15 +25,49 @@
   overflow: hidden;
 }
 
-:global([data-theme="dark"]) .screen {
-  background: radial-gradient(circle at 0% 30%, rgba(86, 129, 240, 0.35), transparent 40%),
-    radial-gradient(circle at 60% 0%, rgba(138, 92, 246, 0.3), transparent 40%),
-    radial-gradient(circle at 100% 30%, rgba(86, 129, 240, 0.3), transparent 40%),
-    var(--dark-bg-deep);
+.screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
+  /* Same 2.4s rate as the moon ring's own chase (see CHASE_DURATION_MS in
+     DreamLoadingScreen.tsx) instead of an unrelated 12s, so the gradient
+     pulse and the loader feel like one connected rhythm. */
+  animation: gradientFade 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.nebulaBlue {
+  width: 260px; height: 260px;
+  left: -80px; top: -60px;
+  background: #3B82F6;
+  opacity: 0.18;
+  filter: blur(45px);
+}
+.nebulaPurple {
+  width: 200px; height: 200px;
+  left: 220px; top: 120px;
+  background: #8B5CF6;
+  opacity: 0.14;
+  filter: blur(40px);
+}
+.nebulaCyan {
+  width: 180px; height: 180px;
+  left: -40px; top: 420px;
+  background: #06B6D4;
+  opacity: 0.10;
+  filter: blur(35px);
 }
 
 .orbWrap {
   position: relative;
+  z-index: 1;
   width: 170px;
   height: 170px;
   display: flex;
@@ -37,10 +81,6 @@
   position: relative;
   width: 100%;
   height: 100%;
-  color: #4f6df0;
-}
-
-:global([data-theme="dark"]) .moonRing {
   color: rgba(255, 255, 255, 0.85);
 }
 
@@ -60,6 +100,8 @@
 }
 
 .messages {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -80,12 +122,8 @@
   width: 100%;
   justify-content: center;
   gap: 10px;
-  color: #333;
+  color: #ffffff;
   animation: messageIn 0.4s ease;
-}
-
-:global([data-theme="dark"]) .messageRow {
-  color: var(--dark-text-primary);
 }
 
 .messageText {
@@ -101,6 +139,7 @@
 
 .noteBar {
   position: absolute;
+  z-index: 1;
   bottom: calc(32px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
@@ -110,10 +149,6 @@
   justify-content: center;
   padding: 0 24px;
   color: rgba(255, 255, 255, 0.7);
-}
-
-:global([data-theme="dark"]) .noteBar {
-  color: rgba(255, 255, 255, 0.6);
 }
 
 .noteBarHe {

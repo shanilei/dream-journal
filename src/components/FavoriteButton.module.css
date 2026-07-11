@@ -1,0 +1,59 @@
+/* Deliberately NOT `all: unset` and no `position`/`color` here — this
+   class combines with a page-specific class (.gridHeartBtn/.heartBtn/
+   .titleHeartBtn in the consuming stylesheet) that sets position/size/
+   color for that particular spot; resetting those properties here made
+   the outcome depend on which CSS module happened to bundle last (broke
+   the heart's placement, then its color). Only reset what this class
+   actually needs to own. */
+.heartBtn {
+  background: none;
+  border: none;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Positioning anchor for the rising-heart particles — kept as an inner
+   wrapper (not on .heartBtn itself) specifically so it never has to touch
+   .heartBtn's own `position`, which the page-specific class already
+   owns. */
+.iconAnchor {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* A handful of small hearts rise and fade over 3s when favoriting (not
+   un-favoriting) — calm and slow rather than a quick confetti-style
+   burst. Each one's horizontal drift/delay/scale is randomized per-tap
+   via CSS custom properties set inline. */
+.risingHeart {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  color: inherit;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 0) scale(var(--scale, 1));
+  animation: heartRise 3s ease-out both;
+  animation-delay: var(--delay, 0ms);
+}
+
+@keyframes heartRise {
+  0%   { opacity: 0; transform: translate(-50%, 0) scale(var(--scale, 1)); }
+  12%  { opacity: 0.85; }
+  100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), -60px) scale(var(--scale, 1)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .risingHeart {
+    display: none;
+  }
+}

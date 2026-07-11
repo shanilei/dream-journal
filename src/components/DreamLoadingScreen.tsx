@@ -57,6 +57,10 @@ export default function DreamLoadingScreen() {
 
   return (
     <div className={`${styles.screen} lockedScreen`}>
+      <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
+      <div className={`${styles.nebula} ${styles.nebulaPurple}`} />
+      <div className={`${styles.nebula} ${styles.nebulaCyan}`} />
+
       <div className={styles.orbWrap}>
         <div className={styles.moonRing}>
           {moonRingIcons.map((icon, i) => (
