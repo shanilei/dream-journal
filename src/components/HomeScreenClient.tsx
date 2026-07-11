@@ -3,7 +3,6 @@
 import Link from "next/link";
 import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
-import OnboardingGate from "@/components/OnboardingGate";
 import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
@@ -405,8 +404,6 @@ export default function HomeScreenClient({
       <span className={styles.star} style={{ width:1,   height:1,   left:88,  top:520, opacity:0.18 }} />
       <span className={styles.star} style={{ width:2,   height:2,   left:320, top:620, opacity:0.26 }} />
       <span className={styles.star} style={{ width:1.5, height:1.5, left:18,  top:680, opacity:0.24 }} />
-
-      <OnboardingGate />
 
       <div className={styles.contentWrapper}>
         {/* Header */}

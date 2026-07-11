@@ -69,13 +69,20 @@ export async function saveDream(entry: DreamEntry): Promise<void> {
   if (error) throw error;
 }
 
+// Only the columns every list view (Gallery, Insights, Type-filtered list)
+// actually reads — dream_text/interpretation_text/image_prompt can be
+// large and are only needed on a single dream's detail page (getDream
+// below still selects "*" for that). Fetching them for every row in a
+// list was pure wasted payload that got slower as the table grew.
+const LIST_COLUMNS = "id, created_at, image_url, mood, name, summary_text, symbols, keywords";
+
 export async function listDreams(): Promise<DreamEntry[]> {
   const { data, error } = await getSupabase()
     .from("dreams")
-    .select("*")
+    .select(LIST_COLUMNS)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []).map(fromRow);
+  return (data ?? []).map((row) => fromRow(row as DreamRow));
 }
 
 export async function getDream(id: string): Promise<DreamEntry | undefined> {
