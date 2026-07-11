@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import { ONBOARDING_SESSION_KEY } from "@/components/OnboardingScreen";
+import { markOnboarded } from "@/lib/onboarding";
 import OnboardingBackground from "@/components/onboarding/OnboardingBackground";
 import OnboardingFooter, { OnboardingFooterProvider } from "@/components/onboarding/OnboardingFooter";
 import { screenVariants } from "@/components/onboarding/motion";
@@ -26,6 +27,7 @@ export default function OnboardingPage() {
     } catch {
       // private browsing or storage disabled — just continue
     }
+    markOnboarded();
     router.push("/record");
   }
 
