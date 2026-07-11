@@ -3,6 +3,11 @@
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 4px;
+  /* Opts back into horizontal touch dragging — see .filterRow in
+     home.module.css for why this is needed against the global
+     touch-action:pan-y lockdown. */
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
 }
 
 .chip {

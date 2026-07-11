@@ -30,7 +30,7 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className={styles.shell}>
+    <div className={`${styles.shell} lockedScreen`}>
       {/* Mounted once for the whole flow — the starfield/glow never resets
           or hard-cuts as `phase` changes underneath it. */}
       <OnboardingBackground />

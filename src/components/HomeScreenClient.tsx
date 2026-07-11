@@ -140,10 +140,12 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
                 ))}
               </div>
               {weeks.map((wk, wi) => {
-                const isFirst = wi === 0 && startDow > 0;
                 return (
-                  <div key={wi} className={`${styles.calWeek} ${isFirst ? styles.calWeekFirst : ""}`}>
-                    {wk.filter((d): d is number => d !== null).map((day) => {
+                  <div key={wi} className={styles.calWeek}>
+                    {wk.map((day, di) => {
+                      if (day === null) {
+                        return <div key={`empty-${di}`} className={styles.calCellSpacer} aria-hidden="true" />;
+                      }
                       const dateKey = `${year}-${String(m + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
                       const dream = dreamsByDate[dateKey];
                       const isToday = dateKey === now.toISOString().slice(0, 10);

@@ -9,6 +9,8 @@
   margin: 0 auto;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior-x: none;
+  touch-action: pan-y;
   background: #0B1020;
   background-image: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
   padding-bottom: 120px;

@@ -56,7 +56,7 @@ export default function DreamLoadingScreen() {
   const noteLabel = isHe ? "הערה:" : "Note:";
 
   return (
-    <div className={styles.screen}>
+    <div className={`${styles.screen} lockedScreen`}>
       <div className={styles.orbWrap}>
         <div className={styles.moonRing}>
           {moonRingIcons.map((icon, i) => (

@@ -124,7 +124,7 @@ export default function RecordPage() {
   }
 
   return (
-    <div className={styles.screen}>
+    <div className={`${styles.screen} lockedScreen`}>
       <div className={styles.glowNavy} />
       <div className={styles.glowBlue} />
       <div className={styles.glowPurple} />
