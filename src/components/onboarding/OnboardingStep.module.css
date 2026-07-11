@@ -7,15 +7,33 @@
   padding: 46px 24px 48px;
 }
 
+/* The footer bar is now mounted once (see OnboardingFooter.tsx) and
+   overlaid via position: absolute instead of sitting in this flex column,
+   so both variants below reserve extra bottom padding for its footprint
+   (~45px tall, sitting 48px from the shell's bottom edge) to avoid content
+   sliding underneath it. */
+
 /* Step 1: headline sits just above the footer, no illustration */
 .screenBottom {
   justify-content: flex-end;
   gap: 40px;
+  padding-bottom: 133px; /* 48 (original padding) + ~45 (footer) + 40 (gap) */
 }
 
-/* Steps 2/3: headline pinned top, illustration fills the middle */
+/* Steps 2/3: headline pinned top, illustration fills the middle. */
 .screenTop {
   justify-content: flex-start;
+  padding-bottom: 93px; /* 48 (original padding) + ~45 (footer) */
+}
+
+/* Guarantees a fixed minimum breathing room between the subtitle and
+   whatever's inside the illustration (bubbles/cards) — without it, that
+   spacing was purely whatever percentage math left over inside the
+   illustration itself, which could shrink to near zero on some viewports.
+   Scoped to .illustration specifically (not a container `gap`) so it
+   doesn't also push the Skip link away from the headline above it. */
+.screenTop .illustration {
+  margin-top: 65px;
 }
 
 /* ── Skip link ────────────────────────────────────────────────────────── */
@@ -27,6 +45,7 @@
   cursor: pointer;
   font-family: var(--font-family);
   font-size: 12px;
+  line-height: 20px;
   font-weight: 600;
   color: #D5D3D3;
   text-decoration: underline;
@@ -61,6 +80,15 @@
   letter-spacing: -0.5px;
 }
 
+/* Steps 2/3 (variant="top") use the full 52px/50px Heading scale per Figma
+   (nodes 1437:7846, 1437:8309 area) — step 1 (variant="bottom") keeps the
+   smaller size above since its Hebrew copy runs 4 lines and would overflow
+   its shorter, footer-adjacent slot at 52px. */
+.screenTop .headlineHe {
+  font-size: 52px;
+  line-height: 50px;
+}
+
 .accent {
   background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary));
   -webkit-background-clip: text;
@@ -78,6 +106,7 @@
 
 :global([lang="he"]) .subtitle {
   font-family: var(--font-ploni), serif;
+  line-height: 24px;
 }
 
 /* ── Illustration slot ────────────────────────────────────────────────── */
@@ -96,12 +125,21 @@
 
 /* ── Footer row ───────────────────────────────────────────────────────── */
 .footer {
-  position: relative;
-  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+}
+
+/* Positions the persistent footer (mounted once in OnboardingPage) over
+   the same spot the in-flow footer used to occupy at the bottom of
+   .screen's padding box. */
+.footerBar {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 48px;
+  z-index: 2;
 }
 
 .dots {
@@ -109,6 +147,19 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+/* Bigger invisible tap target around each dot — the dot itself is only
+   8px, too small to comfortably hit. Negative margin keeps the extra
+   padding from widening the visible row's layout/gap. */
+.dotHit {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  margin: -12px -8px;
+  cursor: pointer;
 }
 
 .dot {

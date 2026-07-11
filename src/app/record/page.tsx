@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./record.module.css";
@@ -9,6 +9,7 @@ import DreamLoadingScreen from "@/components/DreamLoadingScreen";
 import DreamResultScreen from "@/components/DreamResultScreen";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
+import { CloseIcon, MicIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
 
 type DreamResult = {
   id: string;
@@ -39,10 +40,42 @@ export default function RecordPage() {
   const { t, lang } = useLanguage();
   const [status, setStatus] = useState<Status>("idle");
   const [result, setResult] = useState<DreamResult | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const [restartToken, setRestartToken] = useState(0);
+  // Set right before tearing down the recorder for a reason other than
+  // "the user is done, submit it" (cancel or restart) — the teardown
+  // still fires VoiceRecordCircle's onRecordingComplete with whatever was
+  // captured so far, so this tells the handler below to throw that away
+  // instead of sending it off for transcription.
+  const pendingActionRef = useRef<"submit" | "discard">("submit");
 
   const isRecording = status === "recording";
 
+  function handleStop() {
+    setStatus("loading");
+  }
+
+  function handleCancel() {
+    pendingActionRef.current = "discard";
+    setIsPaused(false);
+    setStatus("idle");
+  }
+
+  function handleRepeat() {
+    pendingActionRef.current = "discard";
+    setIsPaused(false);
+    setRestartToken((n) => n + 1);
+  }
+
+  function handleTogglePause() {
+    setIsPaused((p) => !p);
+  }
+
   async function handleRecordingComplete(audio: Blob) {
+    if (pendingActionRef.current === "discard") {
+      pendingActionRef.current = "submit";
+      return;
+    }
     setStatus("loading");
     try {
       if (audio.size === 0) throw new Error("recorded audio was empty");
@@ -97,11 +130,24 @@ export default function RecordPage() {
       <div className={styles.glowPurple} />
       <div className={styles.starfield} />
 
+      {isRecording && (
+        <button
+          type="button"
+          className={`${styles.closeButton} ${lang === "he" ? styles.closeButtonHe : ""}`}
+          onClick={handleCancel}
+          aria-label={t.recordClose}
+        >
+          <CloseIcon size={16} />
+        </button>
+      )}
+
       <p className={`${styles.prompt} ${lang === "he" ? styles.promptHe : ""}`}>
         {status === "error"
           ? t.recordError
           : isRecording
-          ? t.recordingPrompt
+          ? t.recordingPrompt.split("\n").map((line, i) => (
+              <span key={i} className={styles.promptLine}>{line}</span>
+            ))
           : lang === "he"
           ? t.recordPrompt.split("\n").map((line, i) => (
               <span key={i} className={styles.promptLine}>{line}</span>
@@ -111,6 +157,8 @@ export default function RecordPage() {
 
       <VoiceRecordCircle
         isRecording={isRecording}
+        isPaused={isPaused}
+        restartToken={restartToken}
         onPermissionDenied={() => setStatus("idle")}
         onRecordingComplete={handleRecordingComplete}
         onTranscriptUpdate={() => {}}
@@ -118,8 +166,8 @@ export default function RecordPage() {
 
       <button
         type="button"
-        className={`${styles.recordButton} ${isRecording ? styles.recordButtonActive : ""}`}
-        onClick={() => setStatus(isRecording ? "loading" : "recording")}
+        className={`${styles.recordButton} ${isRecording ? styles.recordButtonActive : ""} ${isPaused ? styles.recordButtonPaused : ""}`}
+        onClick={isRecording ? handleStop : () => setStatus("recording")}
         aria-pressed={isRecording}
         aria-label="Record dream"
       >
@@ -127,14 +175,45 @@ export default function RecordPage() {
         <img src="/images/orb-anim.gif" alt="" className={styles.orbGif} />
       </button>
 
-      <div className={styles.typeFallback}>
-        <span className={`${styles.typeFallbackOr} ${lang === "he" ? styles.typeFallbackOrHe : ""}`}>{t.recordOr}</span>
-        <Link className={`${styles.typeFallbackLink} ${lang === "he" ? styles.typeFallbackLinkHe : ""}`} href="/record/type">
-          {t.recordTypeIt}
-        </Link>
-      </div>
+      {!isRecording && (
+        <div className={styles.typeFallback}>
+          <span className={`${styles.typeFallbackOr} ${lang === "he" ? styles.typeFallbackOrHe : ""}`}>{t.recordOr}</span>
+          <Link className={`${styles.typeFallbackLink} ${lang === "he" ? styles.typeFallbackLinkHe : ""}`} href="/record/type">
+            {t.recordTypeIt}
+          </Link>
+        </div>
+      )}
 
-      <BottomNav active="record" />
+      {isRecording && (
+        <div className={styles.controlRow}>
+          <button
+            type="button"
+            className={styles.controlBtn}
+            onClick={handleTogglePause}
+            aria-label={isPaused ? t.recordResume : t.recordPause}
+          >
+            {isPaused ? <PlayIcon size={16} /> : <PauseIcon size={16} />}
+          </button>
+          <button
+            type="button"
+            className={`${styles.controlBtn} ${styles.controlBtnMic}`}
+            onClick={handleStop}
+            aria-label={t.recordStop}
+          >
+            <MicIcon size={22} />
+          </button>
+          <button
+            type="button"
+            className={styles.controlBtn}
+            onClick={handleRepeat}
+            aria-label={t.recordRepeat}
+          >
+            <RepeatIcon size={16} />
+          </button>
+        </div>
+      )}
+
+      <BottomNav active="record" hidden={isRecording} />
     </div>
   );
 }

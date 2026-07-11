@@ -5,12 +5,17 @@ import styles from "./VoiceRecordCircle.module.css";
 
 type Props = {
   isRecording: boolean;
+  isPaused?: boolean;
+  /* Bump this to discard the in-progress recording and start capturing a
+     fresh one — the effect below tears down and re-runs, which naturally
+     resets its local `chunks` array. */
+  restartToken?: number;
   onPermissionDenied?: () => void;
   onRecordingComplete?: (audio: Blob) => void;
   onTranscriptUpdate?: (text: string) => void;
 };
 
-export default function VoiceRecordCircle({ isRecording, onPermissionDenied, onRecordingComplete, onTranscriptUpdate }: Props) {
+export default function VoiceRecordCircle({ isRecording, isPaused = false, restartToken = 0, onPermissionDenied, onRecordingComplete, onTranscriptUpdate }: Props) {
   const streamRef = useRef<MediaStream | null>(null);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const recognitionRef = useRef<{ stop(): void } | null>(null);
@@ -32,6 +37,17 @@ export default function VoiceRecordCircle({ isRecording, onPermissionDenied, onR
   useEffect(() => {
     onTranscriptUpdateRef.current = onTranscriptUpdate;
   }, [onTranscriptUpdate]);
+
+  useEffect(() => {
+    const recorder = recorderRef.current;
+    if (!recorder) return;
+    if (isPaused && recorder.state === "recording") {
+      recorder.pause();
+      recognitionRef.current?.stop();
+    } else if (!isPaused && recorder.state === "paused") {
+      recorder.resume();
+    }
+  }, [isPaused]);
 
   useEffect(() => {
     if (!isRecording) return;
@@ -114,7 +130,7 @@ export default function VoiceRecordCircle({ isRecording, onPermissionDenied, onR
       streamRef.current = null;
       recorderRef.current = null;
     };
-  }, [isRecording]);
+  }, [isRecording, restartToken]);
 
   return null;
 }

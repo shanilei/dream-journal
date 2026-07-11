@@ -33,7 +33,20 @@
 
 @keyframes breathe {
   0%, 100% { scale: 1; }
-  50%       { scale: 1.06; }
+  50%       { scale: 1.18; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Slides up from below the fold instead of scaling in from its own
+   center — the translateX(-50%) centering has to be folded into the
+   keyframe itself since `transform` is a single property. */
+@keyframes controlRowIn {
+  from { opacity: 0; transform: translateX(-50%) translateY(40px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
 .screen {
@@ -134,6 +147,7 @@
   -webkit-tap-highlight-color: transparent;
   -webkit-mask-image: radial-gradient(circle, #000 45%, transparent 72%);
   mask-image: radial-gradient(circle, #000 45%, transparent 72%);
+  transition: transform 0.15s ease;
   z-index: 1;
 }
 
@@ -144,8 +158,18 @@
   outline: none;
 }
 
+.recordButton:active {
+  transform: scale(0.94);
+}
+
 .recordButtonActive {
   animation: breathe 2s ease-in-out infinite;
+}
+
+/* Paused recording freezes the orb's own motion instead of just leaving it
+   breathing while nothing is actually being captured. */
+.recordButtonPaused {
+  animation-play-state: paused;
 }
 
 .orbGif {
@@ -171,6 +195,72 @@
 
 .typeFallbackOr   { font-size: 12px; color: rgba(255, 255, 255, 0.4); }
 .typeFallbackLink { font-size: 12px; color: var(--text-primary); text-decoration: underline; }
+
+/* ── Recording-active controls (close button + pause/stop/repeat row) ─── */
+.closeButton {
+  all: unset;
+  position: absolute;
+  top: 50px;
+  left: 24px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-primary);
+  -webkit-tap-highlight-color: transparent;
+  animation: fadeIn 0.4s ease both;
+  z-index: 2;
+}
+
+/* Mirrors to the opposite side in Hebrew, matching the Figma RTL layout
+   (the close button swaps sides; the control row below does not — Figma
+   keeps pause/stop/repeat in the same physical order in both languages). */
+.closeButtonHe {
+  left: auto;
+  right: 24px;
+}
+
+.controlRow {
+  animation: controlRowIn 0.5s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  position: absolute;
+  left: 50%;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  z-index: 2;
+}
+
+.controlBtn {
+  all: unset;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--text-primary);
+  -webkit-tap-highlight-color: transparent;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.controlBtn:active {
+  transform: scale(0.9);
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.controlBtnMic {
+  width: 63px;
+  height: 63px;
+}
 
 .promptHe {
   font-family: var(--font-ploni), serif;

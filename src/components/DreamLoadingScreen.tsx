@@ -73,20 +73,13 @@ export default function DreamLoadingScreen() {
         </div>
       </div>
 
-      <div className={`${styles.messages} ${isHe ? styles.messagesHe : ""}`}>
+      <div className={styles.messages}>
         {messages.slice(0, visibleCount).map((message, i) => (
-          <div key={i} className={`${styles.messageRow} ${isHe ? styles.messageRowHe : ""}`}>
-            {isHe ? (
-              <>
-                <p className={`${styles.messageText} ${styles.messageTextHe}`}>{message}</p>
-                <SparkleIcon size={12} color="currentColor" />
-              </>
-            ) : (
-              <>
-                <SparkleIcon size={12} color="currentColor" />
-                <p className={styles.messageText}>{message}</p>
-              </>
-            )}
+          <div key={i} className={styles.messageRow}>
+            <SparkleIcon size={12} color="currentColor" />
+            <p className={`${styles.messageText} ${isHe ? styles.messageTextHe : ""}`} dir={isHe ? "rtl" : undefined}>
+              {message}
+            </p>
           </div>
         ))}
       </div>

@@ -30,7 +30,7 @@ export default function Step3Patterns({ onFinish }: { onFinish: () => void }) {
         />
       }
       dotIndex={2}
-      dotCount={4}
+      dotCount={3}
       ctaLabel={t.onboardingStartDreaming}
       onCta={onFinish}
       final

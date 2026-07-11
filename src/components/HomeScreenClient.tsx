@@ -56,6 +56,14 @@ function SearchIcon() {
   );
 }
 
+function CloseIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+    </svg>
+  );
+}
+
 function ChevronIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -415,21 +423,24 @@ export default function HomeScreenClient({
 
         {/* Filter pills + expanding search — combined row */}
         <div className={styles.filterRow}>
-          <div className={`${styles.searchToggle} ${isSearchOpen ? styles.searchToggleOpen : ""}`}>
-            <button
-              type="button"
-              className={styles.searchIconBtn}
-              onClick={() => {
-                if (isSearchOpen) {
-                  if (!searchQuery) setIsSearchOpen(false);
-                } else {
-                  setIsSearchOpen(true);
-                }
-              }}
-              aria-label={t.searchPlaceholder}
-            >
-              <SearchIcon />
-            </button>
+          <div
+            className={`${styles.searchToggle} ${isSearchOpen ? styles.searchToggleOpen : ""}`}
+            onClick={() => { if (!isSearchOpen) setIsSearchOpen(true); }}
+          >
+            {isSearchOpen ? (
+              <span className={styles.searchIconBtn} aria-hidden="true">
+                <SearchIcon />
+              </span>
+            ) : (
+              <button
+                type="button"
+                className={styles.searchIconBtn}
+                onClick={() => setIsSearchOpen(true)}
+                aria-label={t.searchPlaceholder}
+              >
+                <SearchIcon />
+              </button>
+            )}
             {!isSearchOpen && <span className={styles.searchLabel}>{t.searchPlaceholder}</span>}
             {isSearchOpen && (
               <input
@@ -441,8 +452,21 @@ export default function HomeScreenClient({
                 aria-label={t.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                onBlur={() => { if (!searchQuery) setIsSearchOpen(false); }}
               />
+            )}
+            {isSearchOpen && (
+              <button
+                type="button"
+                className={styles.searchCloseBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSearchQuery("");
+                  setIsSearchOpen(false);
+                }}
+                aria-label={t.searchClose}
+              >
+                <CloseIcon />
+              </button>
             )}
           </div>
 
@@ -456,7 +480,8 @@ export default function HomeScreenClient({
                 onClick={() => setFilter(f.key)}
               >
                 {f.label}
-                {f.key !== "all" && f.key !== "favorite" && <ChevronIcon />}
+                {/* Chevron hidden for now — re-enable by restoring the condition below. */}
+                {false && f.key !== "all" && f.key !== "favorite" && <ChevronIcon />}
               </button>
             ))}
         </div>

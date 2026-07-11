@@ -222,6 +222,45 @@ export function MicIcon({ size = 28, color = "#fff" }: { size?: number; color?: 
   );
 }
 
+export function PauseIcon({ size = 16, color = "#fff" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="6" y="4" width="4" height="16" rx="1" fill={color} />
+      <rect x="14" y="4" width="4" height="16" rx="1" fill={color} />
+    </svg>
+  );
+}
+
+export function PlayIcon({ size = 16, color = "#fff" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M7 4.5v15l14-7.5-14-7.5z" fill={color} />
+    </svg>
+  );
+}
+
+export function CloseIcon({ size = 16, color = "#fff" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 5l14 14M19 5L5 19" stroke={color} strokeWidth={1.8} strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function RepeatIcon({ size = 16, color = "#fff" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M4 12a8 8 0 0113.66-5.66M20 4v5h-5M20 12a8 8 0 01-13.66 5.66M4 20v-5h5"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function ActivityIcon({ size = 24, color = "#fff" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -6,7 +6,7 @@ import styles from "./OnboardingStep.module.css";
 import CaptureIllustration from "./CaptureIllustration";
 
 export default function Step2Capture({ onNext, onSkip }: { onNext: () => void; onSkip: () => void }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   return (
     <OnboardingStep
@@ -14,10 +14,18 @@ export default function Step2Capture({ onNext, onSkip }: { onNext: () => void; o
       skipLabel={t.onboardingSkip}
       onSkip={onSkip}
       headline={
-        <>
-          {t.onboarding2HeadingBefore}
-          <span className={styles.accent}>{t.onboarding2HeadingAccent}</span>
-        </>
+        lang === "he" ? (
+          <>
+            {t.onboarding2HeadingBefore}
+            <br />
+            <span className={styles.accent}>{t.onboarding2HeadingAccent}</span>
+          </>
+        ) : (
+          <>
+            {t.onboarding2HeadingBefore}
+            <span className={styles.accent}>{t.onboarding2HeadingAccent}</span>
+          </>
+        )
       }
       subtitle={t.onboarding2Subtitle}
       illustration={
@@ -28,7 +36,7 @@ export default function Step2Capture({ onNext, onSkip }: { onNext: () => void; o
         />
       }
       dotIndex={1}
-      dotCount={4}
+      dotCount={3}
       ctaLabel={t.onboardingContinue}
       onCta={onNext}
     />

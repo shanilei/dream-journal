@@ -1,33 +1,54 @@
+/* container-type:size turns `cqh` into "1% of .wrap's actual rendered
+   height" — used only for the orb, so it stays perfectly circular no
+   matter how short .wrap gets (a plain height:100%/width:100% pair would
+   stretch it into an oval, since .wrap's width and height don't shrink at
+   the same rate on a narrow-but-short phone). */
 .wrap {
   position: relative;
   width: 100%;
-  height: 260px;
+  height: 100%;
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  container-type: size;
+  container-name: capture;
 }
 
 .orbGlow {
   position: absolute;
-  width: 220px;
-  height: 220px;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  width: clamp(150px, 62cqh, 250px);
+  height: clamp(150px, 62cqh, 250px);
   border-radius: 50%;
   background: radial-gradient(circle, rgba(104, 113, 255, 0.35) 0%, transparent 70%);
   filter: blur(20px);
 }
 
 .orb {
-  position: relative;
-  width: 180px;
-  height: 180px;
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  width: clamp(120px, 50cqh, 200px);
+  height: clamp(120px, 50cqh, 200px);
   border-radius: 50%;
   object-fit: cover;
   mix-blend-mode: screen;
 }
 
-/* Bubble text/positions match the Figma node exactly (same 3 slots for
-   both languages — only the copy differs). They deliberately bleed past
-   the screen edge; the screen's own overflow:hidden clips them cleanly. */
+/* Bubble positions are percentages of .wrap's own box (not fixed px), so
+   they scale down together with .wrap instead of overflowing into the
+   headline/footer on short viewports (e.g. iPhone XR) — a fixed-height
+   .wrap with fixed-px offsets doesn't shrink at all, so on a shorter
+   screen the bubbles just spill out over neighboring text. Percentages
+   were derived from the original px offsets against a 344x440 reference
+   box, so proportions match the original Figma-derived layout exactly;
+   only the sizing model changed, not the composition. The Hebrew layout
+   is a distinct composition (not a mirror — see below), so it keeps its
+   own per-bubble overrides. */
 .bubble {
   position: absolute;
   padding: 12px 21px;
@@ -48,22 +69,40 @@
   background: #827CA9;
 }
 
-/* "It was a nightmare!" / "וואי איזה סיוט!" */
+/* "It was a nightmare!" */
 .bubble1 {
-  left: calc(50% - 285px);
-  top: calc(50% + 49px);
+  left: calc(50% - 41.6%);
+  top: calc(50% + 28%);
 }
 
-/* "I was flying ...." / "אתה לא מבין!..." */
+/* "I was flying abroad" — bleeds off the right edge */
 .bubble2 {
-  left: calc(50% + 66px);
-  top: calc(50% + 20px);
+  left: calc(50% + 12.8%);
+  top: calc(50% - 2.3%);
   padding-right: 86px;
 }
 
-/* "I dreamed about my mom....." / "חלמתי שאני בשדה של " */
+/* "I dreamed about my mom....." */
 .bubble3 {
-  left: calc(50% - 295px);
-  top: calc(50% - 94px);
+  left: calc(50% - 51.2%);
+  top: calc(50% - 47.7%);
   padding-right: 12px;
+}
+
+/* Hebrew is a distinct composition, not a mirror: the solid "nightmare"
+   bubble sits bottom-right, the bleeding bubble moves to the left edge,
+   and the "field" bubble tucks in tight under the headline instead of
+   bleeding. */
+:global([dir="rtl"]) .bubble1 {
+  left: calc(50% + 10.2%);
+}
+
+:global([dir="rtl"]) .bubble2 {
+  left: calc(50% - 71.5%);
+  padding-right: 21px;
+  padding-left: 20px;
+}
+
+:global([dir="rtl"]) .bubble3 {
+  left: calc(50% - 20.3%);
 }

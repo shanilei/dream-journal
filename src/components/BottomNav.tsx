@@ -6,8 +6,10 @@ type NavKey = "record" | "user" | "dreams";
 
 export default function BottomNav({
   active,
+  hidden = false,
 }: {
   active: NavKey;
+  hidden?: boolean;
 }) {
   const items: { key: NavKey; href: string; icon: (color: string) => React.ReactNode }[] = [
     { key: "user", href: "/user", icon: (c) => <UserIcon color={c} size={22} /> },
@@ -16,7 +18,7 @@ export default function BottomNav({
   ];
 
   return (
-    <nav className={styles.nav}>
+    <nav className={`${styles.nav} ${hidden ? styles.navHidden : ""}`} aria-hidden={hidden} inert={hidden || undefined}>
       {items.map((item) => {
         const isActive = item.key === active;
         return (

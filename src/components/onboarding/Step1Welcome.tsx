@@ -32,7 +32,7 @@ export default function Step1Welcome({ onNext }: { onNext: () => void }) {
         )
       }
       dotIndex={0}
-      dotCount={4}
+      dotCount={3}
       ctaLabel={t.onboardingContinue}
       onCta={onNext}
     />

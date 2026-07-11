@@ -5,6 +5,59 @@
 
 ---
 
+## 2026-07-08
+
+### Decisions
+- Onboarding background (glow blobs + starfield) is now mounted **once** at the page level instead of per-screen, so it never hard-cuts or resets when `phase` changes — screens crossfade over a continuous backdrop.
+- Standardized onboarding transition choreography: exiting title fades out first, then the illustration/visual moves, then the next screen's content fades+slides in (`opacity 0, y:16px → opacity 1, y:0`), using `cubic-bezier(0.22, 1, 0.36, 1)` everywhere. Centralized in `src/components/onboarding/motion.ts` instead of ad-hoc per-screen values.
+- Established (and then explicitly *rejected*) a heavier glassmorphism direction for the Insights ("Your Journey") screen — reverted to the app's existing flat-glass idiom on explicit feedback. See UX/Design system decisions below.
+- Root-caused and fixed the record-screen orb "growing from a side" complaint: the background glow blobs use negative `animation-delay` for an eternal desynced shimmer, which meant they were already off-center at full opacity the instant the orb (scaling in from 0) mounted. Fix: glows now fade in from `opacity: 0` instead of snapping to full brightness, so the bias isn't visible while the orb is still small.
+- Confirmed (via `getBoundingClientRect` tracking over the real entrance animation, not just screenshots) that the orb's own `scale` box-model was always dead-center — the bug was purely the glow layer, not the button/mask itself.
+
+### Files modified
+- `src/app/onboarding/page.tsx` — single `AnimatePresence` across all phases (was: instant swap for steps 1–3, separate handling for splash/language).
+- `src/app/onboarding/onboarding.module.css` **(new)** — page-level shell (box model moved out of individual screens).
+- `src/components/onboarding/OnboardingBackground.tsx` + `.module.css` **(new)** — persistent glow + two-layer parallax starfield.
+- `src/components/onboarding/motion.ts` **(new)** — shared `screenVariants` / `titleVariants` / `visualVariants` / `illustrationVariants` / `footerVariants`.
+- `src/components/onboarding/SplashScreen.tsx` / `.module.css`
+- `src/components/onboarding/LanguagePickerScreen.tsx` / `.module.css`
+- `src/components/onboarding/OnboardingStep.tsx` / `.module.css` (shared by Steps 1–3)
+- `src/components/onboarding/CaptureIllustration.tsx` / `.module.css`
+- `src/components/onboarding/Step1Welcome.tsx`, `Step2Capture.tsx`
+- `src/app/record/record.module.css` — glow fade-in fix for the orb entrance.
+- `src/components/YourJourneyScreen.tsx` + `.module.css` — Insights screen restyle (see below), divider removal, icon colors reverted to white.
+- `src/i18n/translations.ts` — minor onboarding copy touch-ups.
+- Committed as `47a1a4e`, pushed to `origin/main`.
+
+### Remaining TODOs
+- Unused leftover SVG assets from an earlier bubble-illustration experiment are still on disk, untracked: `public/images/onboarding/Frame 1171275486/487/488.svg`, `capture-bubble1/2/3.svg`, `capture-orb.svg`, `circle 3.svg`. Safe to delete — nothing in code references them anymore.
+- No Hebrew-specific Figma frame has been provided yet for a couple of onboarding sub-states (flagged as open in an earlier session) — waiting on the user if/when they send it.
+
+### Known bugs
+- None currently open. Previously-open items from this session are resolved and verified via Playwright:
+  - Orb "black circle" behind the blend-mode illustration (Step 2) — fixed earlier, and re-verified to still hold after the transition refactor.
+  - Orb entrance appearing to grow from a side — fixed today (see Decisions).
+- **Watch item, not a bug**: the Step 2 illustration slot can only animate `opacity` (no `y`/`scale`) because any transform on an ancestor of a `mix-blend-mode` element re-traps the blend and reintroduces the black-circle bug. Documented in `motion.ts`; keep in mind if a future illustration needs a "move" entrance.
+
+### UX decisions
+- No hard cuts anywhere in onboarding — every screen change is a soft crossfade over a continuous, gently parallaxing background.
+- Insights screen should read "Apple Health meets a dreamy journal" — calm, flat, minimal; the dream artwork (pattern cards) is the focal point, not the containers.
+- All icons on the Insights screen are white (explicit correction — an earlier pass color-coded icons per row/card, user asked to revert to white-only).
+- Removed a horizontal divider under the "Dreams record" stat (between the number and the label) — kept the equivalent divider in the streak column since it still separates the number from the progress bar.
+
+### Design system decisions
+- Formalized the app's existing "flat glass" card recipe (reverse-engineered from `GalleryNavBar`'s pill and `DreamResultScreen`'s icon buttons/chips) as the standard for any new card: `background: rgba(255,255,255,0.05–0.06)`, `border: 1px solid rgba(255,255,255,0.1–0.12)`, `backdrop-filter: blur(20px)`, soft shadow only (`0 8px 20–32px rgba(0,0,0,0.2–0.25)`) — **no gradients, no colored borders, no glow halos behind icons/cards**.
+- Color is only ever introduced via small details (a single icon, a progress bar fill) — never as a full-card tint or per-card accent theme.
+- Onboarding motion system: `cubic-bezier(0.22, 1, 0.36, 1)` easing everywhere, new text always enters `opacity: 0, y: 16px → opacity: 1, y: 0`, staggered via a shared `screenVariants` container so timing stays consistent across all 5 onboarding screens.
+
+### Next steps for tomorrow
+- Clean up (delete) the unused onboarding SVG assets listed above.
+- If the user provides the outstanding Hebrew Figma frame(s), implement and verify against it.
+- Consider promoting the newly-formalized "flat glass" card recipe into a shared CSS class/token (e.g. in `design-tokens.css`) so future screens don't have to hand-roll the same three declarations.
+- Keep an eye out for any other screen that might benefit from the same continuous-background/layered-transition treatment now proven out in onboarding.
+
+---
+
 ## 2026-07-07
 
 **מה עשינו:**

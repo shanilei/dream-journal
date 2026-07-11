@@ -668,9 +668,12 @@
   align-self: flex-end;
 }
 
-/* Symbol chips: Ploni, right-aligned row */
+/* Symbol chips: Ploni, right-aligned row. `flex-start` (not `flex-end`) is
+   correct here — the page inherits `direction: rtl` from <html>, which
+   flips what "end" means for a flex container's main axis, so `flex-end`
+   would actually push the chips to the physical left. */
 :global([lang="he"]) .symbolsRow {
-  justify-content: flex-end;
+  justify-content: flex-start;
   width: 100%;
 }
 

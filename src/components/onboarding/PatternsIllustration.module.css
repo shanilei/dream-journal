@@ -28,21 +28,21 @@
   background: rgba(255, 255, 255, 0.06);
   border-color: rgba(255, 255, 255, 0.25);
   box-shadow: none;
-  transform: translate(49px, -25px) rotate(3deg);
+  transform: translate(49px, -55px) rotate(3deg);
   opacity: 0.7;
 }
 
 .cardBack {
   width: 121px;
   height: 177px;
-  transform: translate(-35px, -18px);
+  transform: translate(-35px, -48px);
   opacity: 0.85;
 }
 
 .cardFront {
   width: 124px;
   height: 198px;
-  transform: translate(35px, 17px);
+  transform: translate(35px, -13px);
 }
 
 /* Colored glow blur sitting behind each card — matches the Figma "Glow"
@@ -120,13 +120,13 @@
 }
 
 .tagLeft {
-  left: -30px;
-  bottom: 30px;
+  left: 0;
+  bottom: 60px;
 }
 
 .tagRight {
-  right: -30px;
-  top: 10px;
+  right: 0;
+  top: -20px;
 }
 
 .arrow {
@@ -137,20 +137,23 @@
   pointer-events: none;
 }
 
-/* curves up from the "Symbol" tag, staying clear of both the tag pill
-   and the card frame — sits in the open gap between them */
+/* arrow.svg points right by default (arrowhead at its high-x end) — for
+   arrowLeft it needs to point left/down at the "Symbol" tag, so it's
+   flipped horizontally (not vertically, which leaves the head pointing
+   right/away from the tag) and tilted down toward it. */
 .arrowLeft {
-  left: 34px;
-  bottom: 78px;
+  left: 64px;
+  bottom: 108px;
   width: 40px;
-  transform: scaleY(-1) rotate(-8deg);
+  transform: scaleX(-1) rotate(28deg);
 }
 
-/* curves down to the "Words" tag, staying clear of both the tag pill
-   and the card frame */
+/* Points right/up at the "Words" tag — keeps the SVG's natural rightward
+   arrowhead (the old scaleX(-1) sent it pointing left, away from the
+   tag) and just tilts it up toward the tag. */
 .arrowRight {
-  right: 62px;
-  top: 34px;
+  right: 92px;
+  top: 4px;
   width: 40px;
-  transform: scaleX(-1) rotate(-10deg);
+  transform: rotate(-28deg);
 }

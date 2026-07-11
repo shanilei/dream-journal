@@ -111,7 +111,7 @@ export default function DreamResultScreen({
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [revealed, setRevealed] = useState(false);
 
-  const REVEAL_RADIUS = 40; // 80px spotlight
+  const REVEAL_RADIUS = 45; // 90px spotlight
   const targetMaskRef = useRef({ x: 0, y: 0, r: 0 });
   const displayMaskRef = useRef({ x: 0, y: 0, r: 0 });
   // Trails behind the main circle with slower easing and a larger target
@@ -344,14 +344,14 @@ export default function DreamResultScreen({
           </div>
         </div>
 
-        <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
+        <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-start", width: "100%" } : undefined}>
           <div className={styles.titleRow}>
             <p className={styles.title}>{dreamTitle}</p>
             <button type="button" className={styles.titleHeartBtn} aria-label="Favourite" onClick={toggleFavorite}>
               <HeartIcon size={22} color="#ffffff" filled={favorited} />
             </button>
           </div>
-          <div className={styles.metaRow} style={lang === "he" ? { justifyContent: "flex-end", width: "100%" } : undefined}>
+          <div className={styles.metaRow} style={lang === "he" ? { justifyContent: "flex-start", width: "100%" } : undefined}>
             <span className={styles.moodPill}>{translateMood(mood, lang)}</span>
             <span className={styles.metaText}>{dateLabel}</span>
             {timeLabel && <span className={styles.metaText}>{timeLabel}</span>}
@@ -366,9 +366,9 @@ export default function DreamResultScreen({
         )}
 
         {symbols.length > 0 && (
-          <div className={styles.block} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
+          <div className={styles.block} style={lang === "he" ? { alignItems: "flex-start", width: "100%" } : undefined}>
             <p className={styles.blockHeading}>{t.symbolsInYourDream}</p>
-            <div className={styles.symbolsRow} style={lang === "he" ? { justifyContent: "flex-end", width: "100%" } : undefined}>
+            <div className={styles.symbolsRow} style={lang === "he" ? { justifyContent: "flex-start", width: "100%" } : undefined}>
               {symbols.map((symbol, i) => (
                 <span key={i} className={styles.symbolChip}>
                   {symbol}
