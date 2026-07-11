@@ -91,8 +91,12 @@
   outline: none;
   background: transparent;
   font-family: inherit;
-  font-size: 14px;
-  line-height: 18px;
+  /* iOS Safari auto-zooms the whole page on focus for any input/textarea
+     with font-size under 16px (to make tiny text legible) — that zoom is
+     exactly what was pushing the submit button out of reach. 16px is the
+     threshold that keeps Safari from zooming at all. */
+  font-size: 16px;
+  line-height: 20px;
   color: rgba(30, 41, 59, 0.9);
   max-height: 120px;
   padding: 6px 0;
