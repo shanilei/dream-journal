@@ -5,8 +5,12 @@ SURREAL MINIMALIST & ANALOG DREAMSCAPE STYLE SYSTEM
 
 Create a striking, polished surreal photograph — never a vague atmospheric blur, never an illustration or collage. Treat the dream's central image as a literal, sharply-rendered surreal scene staged against a bold, flat, color-blocked backdrop.
 
-NO TEXT RULE — ABSOLUTE:
-No text, letters, words, numbers, labels, captions, watermarks, symbols, or typographic elements of any kind anywhere in the image. Not on objects, not in the background, not as texture. Visual content only.
+NO TEXT RULE — ABSOLUTE, HIGHEST PRIORITY, OVERRIDES EVERYTHING ELSE BELOW:
+This image must contain ZERO text, letters, numbers, or symbols of any kind — not one character, anywhere, at any size, in focus or blurred, foreground or background. This is the single most important rule in this entire brief and takes priority over realism, literalism, or any other instruction.
+
+This applies even when a listed dream element would realistically carry text — render such objects with their surfaces blank, worn smooth, turned away from camera, or angled so no markings are visible, rather than adding any: a book has a blank or textureless cover, its pages (if visible) show no legible marks; a newspaper or letter shows only blank or crumpled paper; a clock or watch face has no numerals, only plain marks or a bare dial; a sign, plaque, or storefront is blank or its face is unreadable/turned away; a screen or monitor is off, blank, or shows only abstract light; a phone shows a blank or dark screen; clothing, packaging, and product labels are plain and unbranded; no license plates, no street signs, no graffiti, no tattoos with lettering, no embroidered or printed words on fabric, no book spines with titles, no newspaper headlines, no digital displays with readable numbers.
+
+If you are unsure whether a rendered mark would be legible as a letter or number, do not render it — leave the surface blank instead.
 
 COMPOSITION:
 Vertical format. Do NOT always center the subject — actively seek off-center, asymmetric compositions. Options: a large figure placed at one side of the frame with numerous smaller elements filling the rest of the space; a monumental form occupying a lower corner while the backdrop dominates above; or a wide expansive environment with the subject small and solitary at an unexpected position. The subject may be ONE combined form OR a dominant large figure surrounded by many secondary elements — scattered, layered, and filling the frame with detail. Avoid a plain, centered single object floating in an empty void as the default. Surprise the viewer with the placement.

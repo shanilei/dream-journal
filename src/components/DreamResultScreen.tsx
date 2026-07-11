@@ -9,6 +9,7 @@ import { usePhotoBorder } from "./PhotoBorderProvider";
 import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translations";
 
 import { CAPTION_MAX_WORDS, getCaptionWords, pickCaptionLayout, isHebrewText } from "@/lib/caption";
+import { loadFavorites, saveFavorites } from "@/lib/favorites";
 
 function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
   const { t } = useLanguage();
@@ -39,25 +40,6 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
       )}
     </div>
   );
-}
-
-const FAVORITES_KEY = "dream-favorites";
-
-function loadFavorites(): Set<string> {
-  try {
-    const raw = localStorage.getItem(FAVORITES_KEY);
-    return raw ? new Set(JSON.parse(raw)) : new Set();
-  } catch {
-    return new Set();
-  }
-}
-
-function saveFavorites(set: Set<string>) {
-  try {
-    localStorage.setItem(FAVORITES_KEY, JSON.stringify([...set]));
-  } catch {
-    // ignore
-  }
 }
 
 export default function DreamResultScreen({
@@ -107,9 +89,31 @@ export default function DreamResultScreen({
   }
   const imgRef = useRef<HTMLImageElement>(null);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [revealed, setRevealed] = useState(false);
+  const [navHidden, setNavHidden] = useState(false);
+
+  // Hide the bottom nav while scrolling down (more room to read), bring it
+  // back the moment the user scrolls back up — same slide-down/fade
+  // `hidden` prop BottomNav already uses during recording.
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let lastY = el.scrollTop;
+    function onScroll() {
+      if (!el) return;
+      const y = el.scrollTop;
+      const delta = y - lastY;
+      if (Math.abs(delta) > 4) {
+        setNavHidden(delta > 0 && y > 80);
+        lastY = y;
+      }
+    }
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, []);
 
   const REVEAL_RADIUS = 45; // 90px spotlight
   const targetMaskRef = useRef({ x: 0, y: 0, r: 0 });
@@ -230,7 +234,7 @@ export default function DreamResultScreen({
 
   return (
     <>
-    <div className={styles.screen}>
+    <div className={styles.screen} ref={scrollRef}>
       <div className={styles.topBar}>
         <button type="button" className={styles.iconButton} onClick={onBack} aria-label={t.back}>
           <span className={styles.backIcon}>
@@ -386,7 +390,7 @@ export default function DreamResultScreen({
         )}
       </div>
 
-      <BottomNav active="dreams" />
+      <BottomNav active="dreams" hidden={navHidden} />
 
       {copied && (
         <div className={styles.toast}>{t.linkCopied}</div>

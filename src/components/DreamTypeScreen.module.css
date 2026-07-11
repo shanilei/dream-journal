@@ -1,3 +1,22 @@
+@keyframes gradientFade {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1;   }
+}
+
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Matches home.module.css's Gallery screen: same dark base + animated
+   gradient + nebula blobs, instead of this screen's old light pastel
+   gradient (with a separate dark-mode override) — one consistent dark
+   cosmic look across Record / Gallery / Type, not a per-screen theme. */
 .screen {
   animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   position: relative;
@@ -7,39 +26,74 @@
   height: 100dvh;
   margin: 0 auto;
   overflow: hidden;
-  background: linear-gradient(
-    to bottom,
-    rgba(234, 243, 255, 0.7),
-    rgba(86, 129, 240, 0.7)
-  );
+  background: #050A1A;
 }
 
-:global([data-theme="dark"]) .screen {
-  background: radial-gradient(
-    circle at 50% 40%,
-    var(--dark-bg-highlight) 0%,
-    var(--dark-bg) 45%,
-    var(--dark-bg-deep) 100%
-  );
+.screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
+  animation: gradientFade 12s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+.nebulaBlue {
+  width: 260px; height: 260px;
+  left: -80px; top: -60px;
+  background: #3B82F6;
+  opacity: 0.18;
+  filter: blur(45px);
+}
+.nebulaPurple {
+  width: 200px; height: 200px;
+  left: 220px; top: 120px;
+  background: #8B5CF6;
+  opacity: 0.14;
+  filter: blur(40px);
+}
+.nebulaCyan {
+  width: 180px; height: 180px;
+  left: -40px; top: 420px;
+  background: #06B6D4;
+  opacity: 0.10;
+  filter: blur(35px);
 }
 
 .backButton {
+  all: unset;
+  animation: fadeIn 0.4s ease both;
   position: absolute;
-  left: 31px;
-  top: calc(7.69% - 13px);
-  width: 37px;
-  height: 37px;
+  z-index: 2;
+  left: 24px;
+  top: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
-  background: rgba(214, 230, 254, 0.5);
-  color: #000624;
+  /* Matches the close button on the record screen exactly. */
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.12s ease;
+}
+
+.backButton:active {
+  transform: scale(0.9);
 }
 
 :global([dir="rtl"]) .backButton {
   left: auto;
-  right: 31px;
+  right: 24px;
 }
 
 .backIcon {
@@ -50,37 +104,35 @@
   transform: scaleX(-1);
 }
 
-:global([data-theme="dark"]) .backButton {
-  background: var(--dark-glass);
-  color: var(--dark-text-primary);
-}
-
 .errorText {
   position: absolute;
+  z-index: 1;
   left: 16px;
   right: 16px;
   bottom: 96px;
   margin: 0;
   font-size: 13px;
-  color: #c93638;
+  color: #ff8b8d;
   text-align: center;
 }
 
 .inputPill {
+  animation: fadeSlideUp 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) 0.08s both;
   position: absolute;
+  z-index: 1;
   left: 16px;
   right: 16px;
   bottom: 32px;
   display: flex;
   align-items: flex-end;
   gap: 12px;
-  background: rgba(0, 0, 0, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
   border-radius: 32px;
   padding: 9px 9px 9px 16px;
-}
-
-:global([data-theme="dark"]) .inputPill {
-  background: var(--dark-glass);
 }
 
 .textarea {
@@ -97,21 +149,13 @@
      threshold that keeps Safari from zooming at all. */
   font-size: 16px;
   line-height: 20px;
-  color: rgba(30, 41, 59, 0.9);
+  color: #ffffff;
   max-height: 120px;
   padding: 6px 0;
 }
 
-:global([data-theme="dark"]) .textarea {
-  color: var(--dark-text-primary);
-}
-
 .textarea::placeholder {
-  color: rgba(30, 41, 59, 0.65);
-}
-
-:global([data-theme="dark"]) .textarea::placeholder {
-  color: var(--dark-text-secondary);
+  color: rgba(255, 255, 255, 0.5);
 }
 
 .submitButton {
@@ -119,13 +163,20 @@
   width: 32px;
   height: 32px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.5);
-  color: #000624;
+  /* Accent enters only through this one small element, per the flat-glass
+     rule — not as a tint on the whole pill. */
+  background: #ffffff;
+  color: var(--accent-primary, #6871FF);
   display: flex;
   align-items: center;
   justify-content: center;
   border: none;
   cursor: pointer;
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+
+.submitButton:active {
+  transform: scale(0.92);
 }
 
 .submitButton:disabled {

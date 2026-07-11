@@ -7,7 +7,8 @@ import OnboardingGate from "@/components/OnboardingGate";
 import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
-import { useState, useRef } from "react";
+import { loadFavorites, saveFavorites } from "@/lib/favorites";
+import { useState, useRef, useEffect } from "react";
 
 type Card = {
   id: string;
@@ -328,6 +329,14 @@ export default function HomeScreenClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
 
+  // Loaded on mount (not lazy useState init) since localStorage isn't
+  // available during server render — matches DreamResultScreen's pattern
+  // so both screens read/write the same "dream-favorites" key and stay
+  // in sync with each other.
+  useEffect(() => {
+    setFavorites(loadFavorites());
+  }, []);
+
   const isSearching = searchQuery.trim().length > 0;
   const searchResults = isSearching ? gridCards.filter((c) => matchesSearch(c, searchQuery)) : [];
 
@@ -355,6 +364,7 @@ export default function HomeScreenClient({
     setFavorites((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
+      saveFavorites(next);
       return next;
     });
   }
@@ -365,6 +375,7 @@ export default function HomeScreenClient({
         <div className={styles.gridImgWrap}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={card.image} alt="" className={imgClass} />
+          <span className={styles.gridMoodTag} dir="auto">{translateMood(card.mood, lang)}</span>
           <button type="button" className={styles.gridHeartBtn} aria-label="Favourite" onClick={(e) => toggleFavorite(card.id, e)}>
             <HeartIcon filled={favorites.has(card.id)} />
           </button>
@@ -560,6 +571,7 @@ export default function HomeScreenClient({
                   <div className={styles.heroImgWrap}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={recentDream.image} alt="" className={styles.heroImg} />
+                    <span className={styles.gridMoodTag} dir="auto">{translateMood(recentDream.mood, lang)}</span>
                     <button type="button" className={styles.heartBtn} aria-label="Favourite" onClick={(e) => toggleFavorite(recentDream.id, e)}>
                       <HeartIcon filled={favorites.has(recentDream.id)} />
                     </button>

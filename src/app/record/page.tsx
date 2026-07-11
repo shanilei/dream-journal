@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./record.module.css";
@@ -9,7 +9,7 @@ import DreamLoadingScreen from "@/components/DreamLoadingScreen";
 import DreamResultScreen from "@/components/DreamResultScreen";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
-import { CloseIcon, MicIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
+import { CloseIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
 
 type DreamResult = {
   id: string;
@@ -35,6 +35,14 @@ function shortSymbol(symbol: string): string {
   return symbol.split(" - ")[0].trim();
 }
 
+const AUDIO_BAR_COUNT = 5;
+
+function formatElapsed(totalSeconds: number): string {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 export default function RecordPage() {
   const router = useRouter();
   const { t, lang } = useLanguage();
@@ -42,6 +50,8 @@ export default function RecordPage() {
   const [result, setResult] = useState<DreamResult | null>(null);
   const [isPaused, setIsPaused] = useState(false);
   const [restartToken, setRestartToken] = useState(0);
+  const [elapsedSec, setElapsedSec] = useState(0);
+  const [audioLevels, setAudioLevels] = useState<number[]>(() => Array(AUDIO_BAR_COUNT).fill(0));
   // Set right before tearing down the recorder for a reason other than
   // "the user is done, submit it" (cancel or restart) — the teardown
   // still fires VoiceRecordCircle's onRecordingComplete with whatever was
@@ -50,6 +60,19 @@ export default function RecordPage() {
   const pendingActionRef = useRef<"submit" | "discard">("submit");
 
   const isRecording = status === "recording";
+
+  // Ticks once a second while actively recording; pausing freezes it in
+  // place instead of continuing to count silent time.
+  useEffect(() => {
+    if (!isRecording || isPaused) return;
+    const interval = setInterval(() => setElapsedSec((s) => s + 1), 1000);
+    return () => clearInterval(interval);
+  }, [isRecording, isPaused]);
+
+  // Resets to 0 whenever a fresh recording starts (including "repeat").
+  useEffect(() => {
+    if (isRecording) setElapsedSec(0);
+  }, [isRecording, restartToken]);
 
   function handleStop() {
     setStatus("loading");
@@ -162,6 +185,8 @@ export default function RecordPage() {
         onPermissionDenied={() => setStatus("idle")}
         onRecordingComplete={handleRecordingComplete}
         onTranscriptUpdate={() => {}}
+        onAudioLevels={setAudioLevels}
+        audioBarCount={AUDIO_BAR_COUNT}
       />
 
       <button
@@ -196,11 +221,21 @@ export default function RecordPage() {
           </button>
           <button
             type="button"
-            className={`${styles.controlBtn} ${styles.controlBtnMic}`}
+            className={styles.recordingPill}
             onClick={handleStop}
             aria-label={t.recordStop}
+            aria-live="polite"
           >
-            <MicIcon size={22} />
+            <span className={styles.recordingWaveform} aria-hidden="true">
+              {audioLevels.map((level, i) => (
+                <span
+                  key={i}
+                  className={styles.recordingBar}
+                  style={{ height: `${4 + Math.round(level * 32)}px` }}
+                />
+              ))}
+            </span>
+            <span className={styles.recordingTime}>{formatElapsed(elapsedSec)}</span>
           </button>
           <button
             type="button"

@@ -38,6 +38,10 @@ export default function DreamTypeScreen({
 
   return (
     <div className={`${styles.screen} lockedScreen`}>
+      <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
+      <div className={`${styles.nebula} ${styles.nebulaPurple}`} />
+      <div className={`${styles.nebula} ${styles.nebulaCyan}`} />
+
       <Link href="/record" className={styles.backButton} aria-label="Back">
         <span className={styles.backIcon}>
           <ArrowLeftIcon size={20} color="currentColor" />
