@@ -5,6 +5,7 @@ import styles from "./SettingsSheet.module.css";
 import { useTheme } from "./ThemeProvider";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
+import { clearOnboarded } from "@/lib/onboarding";
 import {
   AlarmIcon,
   LanguageAIcon,
@@ -104,9 +105,9 @@ function ValueRow({
   );
 }
 
-function ActionRow({ label, flip }: { label: string; flip?: boolean }) {
+function ActionRow({ label, flip, onClick }: { label: string; flip?: boolean; onClick?: () => void }) {
   return (
-    <button type="button" className={styles.row}>
+    <button type="button" className={styles.row} onClick={onClick}>
       <span className={styles.rowLabel}>{label}</span>
       <span style={flip ? { transform: "scaleX(-1)", display: "inline-flex" } : undefined}>
         <ChevronRightIcon size={18} color="rgba(255,255,255,0.45)" />
@@ -276,6 +277,25 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
               <ActionRow label={t.settingsContact} flip={isHe} />
             </div>
           </section>
+
+          {/* ── Developer (QA only) ──────────────────────────────────────
+              Not user-facing copy, so no translation keys — hidden outside
+              non-production builds so real users never see it. */}
+          {process.env.NODE_ENV !== "production" && (
+            <section className={styles.section}>
+              <p className={sectionLabelClass}>Developer</p>
+              <div className={styles.rowGroup}>
+                <ActionRow
+                  label="Reset onboarding"
+                  flip={isHe}
+                  onClick={() => {
+                    clearOnboarded();
+                    window.location.href = "/";
+                  }}
+                />
+              </div>
+            </section>
+          )}
 
         </div>
       </div>

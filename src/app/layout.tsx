@@ -5,7 +5,6 @@ import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { PhotoBorderProvider } from "@/components/PhotoBorderProvider";
-import OnboardingGate from "@/components/OnboardingGate";
 import "./globals.css";
 
 const THEME_INIT_SCRIPT = `
@@ -68,13 +67,11 @@ export default function RootLayout({
       <body className={`${urbanist.variable} ${alumniSans.variable} ${ploni.variable}`}>
         <ThemeProvider>
           <LanguageProvider>
-            {/* Runs on every route, independent of any page's own data
-                fetching — checking this only inside the Gallery screen
-                meant it didn't fire until Gallery's (slow) data finished
-                loading and hydrating, so unonboarded users saw a flash of
-                Gallery before the redirect instead of landing on
-                /onboarding immediately. */}
-            <OnboardingGate />
+            {/* Onboarding gating now happens in middleware.ts (server-side,
+                before any page renders) instead of a client-side effect
+                here — that used to leave a window between paint and the
+                redirect firing where an unonboarded user could see/touch
+                the real app underneath. */}
             <PhotoBorderProvider>{children}</PhotoBorderProvider>
           </LanguageProvider>
         </ThemeProvider>

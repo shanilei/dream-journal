@@ -1,9 +1,8 @@
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { ONBOARDING_COOKIE } from "@/lib/onboarding";
 
-export default async function HomePage() {
-  const store = await cookies();
-  const onboarded = store.get(ONBOARDING_COOKIE)?.value === "1";
-  redirect(onboarded ? "/record" : "/onboarding");
+// middleware.ts already redirects unonboarded visitors to /onboarding
+// before this ever runs, so by the time we're here onboarding is
+// guaranteed complete — this route is just a landing pad to /record.
+export default function HomePage() {
+  redirect("/record");
 }

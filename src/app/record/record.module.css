@@ -41,6 +41,14 @@
   50%       { scale: 1.18; }
 }
 
+/* Idle-state breathing — subtler and slower than the recording-active
+   .breathe above, just enough motion for the orb to feel alive while
+   waiting for a tap, without it looking like it's actively listening. */
+@keyframes idleBreathe {
+  0%, 100% { scale: 1; }
+  50%       { scale: 1.035; }
+}
+
 /* Slides up from below the fold instead of scaling in from its own
    center — the translateX(-50%) centering has to be folded into the
    keyframe itself since `transform` is a single property. */
@@ -93,7 +101,13 @@
   z-index: 0;
 }
 
-.glowNavy,
+/* .glowNavy used to sit here too (background: var(--glow-navy), opacity: 1)
+   — a fully-opaque dark-navy blurred blob, meant as an ambient base glow,
+   but it's darker than the surrounding page gradient at the orb's
+   position, so it read as a dark halo/shadow behind the orb rather than
+   light. Removed outright instead of just recoloring it — .glowBlue/
+   .glowPurple already cover the "ambient presence" job with actual glow
+   colors. */
 .glowBlue,
 .glowPurple {
   position: absolute;
@@ -108,9 +122,29 @@
   pointer-events: none;
   z-index: 0;
 }
-.glowNavy  { background: var(--glow-navy);      opacity: 1;    }
 .glowBlue  { background: var(--glow-blue-deep);  opacity: 0.25; animation-delay: -3s, 0s; }
 .glowPurple{ background: var(--glow-purple);     opacity: 0.2;  animation-delay: -6s, 0s; }
+
+/* The idle "come tap me" cue lives entirely here now — no visible rings
+   around the orb (that read as tight notification-style circles, not a
+   calm invitation). Instead a big, soft blue/violet wash — spread far
+   past the orb itself — grows and brightens slightly with each heartbeat
+   pulse, like the whole screen is breathing with it, then settles back.
+   Low base alpha in the gradient stops themselves, not just the opacity
+   keyframe, keeps it genuinely subtle at every point in the cycle. */
+.ambientBreath {
+  position: absolute;
+  inset: -60%;
+  background: radial-gradient(
+    circle at 50% 45%,
+    rgba(104, 113, 255, 0.10) 0%,
+    rgba(139, 92, 246, 0.06) 28%,
+    rgba(104, 113, 255, 0) 60%
+  );
+  animation: orbHeartbeatBg 4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 0;
+}
 
 .prompt {
   animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
@@ -127,13 +161,23 @@
   z-index: 1;
 }
 
-.recordButton {
-  animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+/* Owns positioning only (mobile: absolute at these coordinates; tablet:
+   a relatively-positioned flex item, see the tablet media blocks below)
+   — .recordButton is absolute:inset:0 inside this. */
+.recordButtonWrap {
   position: absolute;
   left: calc(50% - 130px);
   top: calc(30.77% + 20px);
   width: 260px;
   height: 260px;
+  z-index: 1;
+}
+
+.recordButton {
+  animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both,
+             idleBreathe 6s ease-in-out 0.75s infinite;
+  position: absolute;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,12 +187,22 @@
   outline: none;
   border-radius: 0;
   padding: 0;
-  mix-blend-mode: screen;
   -webkit-tap-highlight-color: transparent;
-  -webkit-mask-image: radial-gradient(circle, #000 45%, transparent 72%);
-  mask-image: radial-gradient(circle, #000 45%, transparent 72%);
   transition: transform 0.15s ease;
-  z-index: 1;
+}
+
+/* Two quick beats (0-500ms), a slow settle back to rest (500ms-2000ms),
+   then a 2s held pause (2000ms-4000ms) before the cycle repeats — same
+   rhythm as before, now driving only .ambientBreath's spread (scale) and
+   brightness (opacity), never a hard-edged ring. */
+@keyframes orbHeartbeatBg {
+  0%     { transform: scale(1);    opacity: 0.35; }
+  3.75%  { transform: scale(1.12); opacity: 0.7;  }
+  8.75%  { transform: scale(1.03); opacity: 0.3;  }
+  12.5%  { transform: scale(1.18); opacity: 0.8;  }
+  18.75% { transform: scale(1.05); opacity: 0.4;  }
+  50%    { transform: scale(1);    opacity: 0.35; }
+  100%   { transform: scale(1);    opacity: 0.35; }
 }
 
 .recordButton:hover,
@@ -172,15 +226,45 @@
   animation-play-state: paused;
 }
 
-.orbGif {
+.orbLayers {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.orbRings,
+.orbCore {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
-  pointer-events: none;
   display: block;
-  /* Slight nudge toward the gallery's cooler blue-violet, without
-     flattening the orb's color variety into a single tone. */
-  filter: saturate(1.2) hue-rotate(-8deg);
+}
+
+.orbRings {
+  animation: orbRotate 22s linear infinite;
+}
+
+/* Same image as .orbRings, but clipped down to just the solid inner
+   sphere and never rotated — sitting on top, it hides whatever part of
+   the spinning layer would otherwise show through the middle, so the
+   core reads as a fixed, centered sphere the rings orbit around. */
+.orbCore {
+  clip-path: circle(29% at 50% 50%);
+}
+
+@keyframes orbRotate {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Recording paused freezes every layer of motion, not just the button's
+   own breathe scale — nothing should look "alive" while capture is
+   actually stopped. */
+.recordButtonPaused .orbRings {
+  animation-play-state: paused;
 }
 
 /* Sits in the control row in place of the round mic button — the orb
@@ -411,8 +495,14 @@
     line-height: 46px;
   }
 
-  .recordButton {
-    position: static;
+  .recordButtonWrap {
+    /* Not "static": this still needs to be the positioning context for
+       the absolutely-positioned .recordButton/.pulseRing children, just
+       without being taken out of the tablet flex column's normal flow
+       (which "absolute" — the mobile value — would do). */
+    position: relative;
+    left: auto;
+    top: auto;
     width: 400px;
     height: 400px;
   }
@@ -473,7 +563,7 @@
     padding-bottom: 140px;
   }
 
-  .recordButton {
+  .recordButtonWrap {
     width: 340px;
     height: 340px;
   }

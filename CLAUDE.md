@@ -64,3 +64,40 @@ TypeScript, Next.js, Supabase (Postgres + auth + storage + pgvector), Anthropic 
   desync בין כמה גופים) חייבים להיכנס עם `opacity: 0 → 1` (fade-in),
   לא להופיע מיד ב-opacity מלא — אחרת הם כבר יהיו לא-ממורכזים ברגע
   שמשהו אחר (למשל ה-orb) מתחיל לגדול מ-0, ונוצרת אשליה של "גדילה מהצד".
+
+## Content & Tone of Voice
+Applies to every screen, button, and message — EN and HE alike (translate
+the *feeling*, not just the words).
+
+**Personality**: calm, warm, human. Lucid is a personal dream journal, not
+an AI assistant. Copy should feel simple, natural, emotionally safe — like
+"a quiet place to remember your dreams," never "an AI tool that analyzes
+dreams."
+
+**Tone**: calm, curious, gentle, personal, modern, minimal.
+
+**Writing principles**:
+- Keep text short — headings prefer 2–6 words.
+- One clear action per screen.
+- Everyday language, written like a person, not software.
+- Let the visuals carry the emotion; don't overexplain in text.
+
+**Never use**: Analyze, Generate, AI, Algorithm, Unlock, "Discover hidden
+meanings", Decode, Transform, Magic, "Journey into your subconscious",
+Powerful, Revolutionary. No marketing language, nothing mystical, nothing
+clinical.
+
+**Prefer**: Dream, Listen, Remember, Notice, Explore, Reflect, Story,
+Pattern, Record, Today.
+
+**Headlines** — short, clear, calm, actionable when needed. Good: "What
+did you dream today?", "Tap to record", "I'm listening...", "Latest
+Dream". Bad: "Unlock Your Dream Potential", "AI Dream Analysis", "Decode
+Your Subconscious".
+
+**Buttons** — verbs only. Good: Record, Continue, Save, Share. Bad:
+Proceed, Execute, Generate, "Analyze Dream".
+
+Before shipping any new copy: if it sounds like marketing, rewrite it; if
+it sounds like software, simplify it; if it sounds like a calm
+conversation, keep it.

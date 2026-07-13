@@ -299,7 +299,7 @@ export default function DreamResultScreen({
               ref={imgRef}
               className={styles.image}
               src={imageUrl}
-              alt="Generated dream artwork"
+              alt="Dream artwork"
               onLoad={sampleBrightness}
             />
             {clearImageUrl && (
@@ -433,11 +433,11 @@ export default function DreamResultScreen({
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
           {printImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className={styles.printFlatImage} src={printImageUrl} alt="Generated dream artwork" />
+            <img className={styles.printFlatImage} src={printImageUrl} alt="Dream artwork" />
           ) : (
             <div className={styles.imageWrap}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className={styles.image} src={imageUrl} alt="Generated dream artwork" />
+              <img className={styles.image} src={imageUrl} alt="Dream artwork" />
               <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
               {(captionText || dateLabel) && (
                 <div

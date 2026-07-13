@@ -65,7 +65,7 @@ export default function DreamTypeScreen({
         <button
           type="submit"
           className={styles.submitButton}
-          aria-label="Analyze dream"
+          aria-label="Save dream"
           disabled={!value.trim()}
         >
           <ArrowUpIcon size={18} color="currentColor" />

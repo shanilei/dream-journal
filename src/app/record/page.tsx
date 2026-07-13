@@ -154,10 +154,14 @@ export default function RecordPage() {
 
   return (
     <div className={`${styles.screen} lockedScreen`} data-tablet={isTablet || undefined}>
-      <div className={styles.glowNavy} />
       <div className={styles.glowBlue} />
       <div className={styles.glowPurple} />
       <div className={styles.starfield} />
+      {/* Idle "come tap me" cue lives here, not as rings around the orb —
+          a big, soft blue/violet wash (see @keyframes orbHeartbeatBg)
+          that spreads and brightens slightly with each heartbeat pulse,
+          like the whole screen breathing with the orb. */}
+      {!isRecording && <div className={styles.ambientBreath} />}
 
       {isRecording && (
         <button
@@ -195,22 +199,28 @@ export default function RecordPage() {
         audioBarCount={AUDIO_BAR_COUNT}
       />
 
-      <button
-        type="button"
-        className={`${styles.recordButton} ${isRecording ? styles.recordButtonActive : ""} ${isPaused ? styles.recordButtonPaused : ""}`}
-        onClick={isRecording ? handleStop : () => setStatus("recording")}
-        aria-pressed={isRecording}
-        aria-label="Record dream"
-      >
-        {/* GIFs can't be paused via CSS, so idle/paused uses a static frame
-            and only active recording swaps in the looping animation. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={isRecording && !isPaused ? "/images/orb-anim.gif" : "/images/orb-static.png"}
-          alt=""
-          className={styles.orbGif}
-        />
-      </button>
+      <div className={styles.recordButtonWrap}>
+        <button
+          type="button"
+          className={`${styles.recordButton} ${isRecording ? styles.recordButtonActive : ""} ${isPaused ? styles.recordButtonPaused : ""}`}
+          onClick={isRecording ? handleStop : () => setStatus("recording")}
+          aria-pressed={isRecording}
+          aria-label="Record dream"
+        >
+          {/* Two stacked copies of the same static orb image instead of the
+              GIF: .orbRings rotates continuously (CSS, so it's smooth and
+              fully controllable), .orbCore sits on top clipped to just the
+              solid inner sphere and never moves — so only the outer swirl
+              appears to orbit while the core stays put, centered and
+              unchanged. */}
+          <div className={styles.orbLayers}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/orb-static-keyed.png" alt="" className={styles.orbRings} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/images/orb-static-keyed.png" alt="" className={styles.orbCore} />
+          </div>
+        </button>
+      </div>
 
       {!isRecording && (
         <div className={styles.typeFallback}>

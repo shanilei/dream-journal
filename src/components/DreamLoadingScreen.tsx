@@ -21,14 +21,14 @@ const moonRingIcons = Array.from({ length: MOON_RING_COUNT }, (_, i) => {
 // Three stages, random wording each time.
 const MESSAGE_STAGES: string[][] = [
   ["Thinking about you....", "Settling into your dream...", "Drifting into your memory..."],
-  ["Start analysing your dream", "Mapping the symbols...", "Tracing the feeling..."],
-  ["What a dream!", "There it is.", "Dream decoded."],
+  ["Looking closely...", "Mapping the symbols...", "Tracing the feeling..."],
+  ["What a dream!", "There it is.", "All done."],
 ];
 
 const MESSAGE_STAGES_HE: string[][] = [
   ["נכנסים לחלום שלך...", "שוקעים לתוך הזיכרון...", "מתחברים לחלום..."],
-  ["מנתחים את הסמלים", "מפענחים את התחושה...", "קוראים את הדפוסים..."],
-  ["איזה חלום!", "הנה זה.", "החלום פוענח."],
+  ["מתבוננים בסמלים...", "מתחברים לתחושה...", "קוראים את הדפוסים..."],
+  ["איזה חלום!", "הנה זה.", "הכל מוכן."],
 ];
 
 function pickMessages(he: boolean): string[] {
@@ -50,9 +50,13 @@ export default function DreamLoadingScreen() {
     return () => clearTimeout(timer);
   }, [visibleCount, messages.length]);
 
+  // "AI" stays here even though the tone guide otherwise bans it — this is
+  // a disclosure, not marketing copy, so softening the wording around it
+  // is fine but dropping the word itself isn't a copy decision to make
+  // unilaterally.
   const noteText = isHe
-    ? "פרשנות זו מיועדת כהצעה בלבד ונוצרת בחלקה באמצעות AI."
-    : "This interpretation is intended as a suggestion only and is partially generated using AI.";
+    ? "פרשנות זו היא הצעה בלבד, שנכתבה בעזרת AI."
+    : "This interpretation is a suggestion, written with the help of AI.";
   const noteLabel = isHe ? "הערה:" : "Note:";
 
   return (

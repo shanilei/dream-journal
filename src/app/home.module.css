@@ -538,6 +538,10 @@
   padding: 4px 4px 0;
 }
 
+.heroBody {
+  padding: 0 4px;
+}
+
 .cardHeading,
 .gridCardHeading {
   flex: 1;
@@ -948,6 +952,10 @@
   gap: 2px;
   flex: 1 0 0;
   min-width: 0;
+  /* 4px before the headline and the date — both are children of this
+     column, so a single leading-edge inset covers both lines. LTR: left.
+     RTL mirror below. */
+  padding-left: 4px;
 }
 
 .dreamRowTop {
@@ -999,6 +1007,8 @@
    thumbnail back on the left. */
 :global([dir="rtl"]) .dreamRowBody {
   align-items: flex-end;
+  padding-left: 0;
+  padding-right: 4px;
 }
 
 :global([dir="rtl"]) .dreamRowTitle,
@@ -1190,11 +1200,11 @@
   font-weight: 600;
 }
 
-/* Section labels — Ploni Regular, 22px */
+/* Section labels — Ploni Regular, 16px */
 :global([lang="he"]) .sectionLabel {
   font-family: var(--font-ploni), serif;
   font-weight: 400;
-  font-size: 22px;
+  font-size: 16px;
   line-height: 24px;
 }
 
@@ -1205,17 +1215,32 @@
   font-family: var(--font-ploni), serif;
 }
 
-/* Card headings + subheadings — Ploni + right-aligned in Hebrew */
+/* Card headings + subheadings — Ploni + right-aligned in Hebrew.
+   No `width: 100%` here — .cardHeading/.gridCardHeading are flex:1 row
+   items (see the flex:1 rule above, "Hero card body is a row now"); a
+   leftover width:100% from when these cards were a stacked column
+   fought that flex:1 sizing and pushed the heading's text out of the
+   card's visible/clipped area in Hebrew, rendering it invisible. */
 :global([lang="he"]) .cardHeading,
 :global([lang="he"]) .gridCardHeading {
   font-family: var(--font-ploni), serif;
   font-weight: 400;
   text-align: right;
-  width: 100%;
 }
 
+/* .cardSubheading/.gridCardSubheading are flex-shrink:0 row items (date
+   sits beside the flex:1 heading, like .cardHeading above) — width:100%
+   here made the date claim almost the whole row, leaving 0 leftover
+   space for the heading to flex-grow into (it collapsed invisibly).
+   .listRowCategory/.listRowSub are still a stacked column, where
+   width:100% is correct, so they keep it. */
 :global([lang="he"]) .cardSubheading,
-:global([lang="he"]) .gridCardSubheading,
+:global([lang="he"]) .gridCardSubheading {
+  font-family: var(--font-ploni), serif;
+  font-weight: 400;
+  text-align: right;
+}
+
 :global([lang="he"]) .listRowCategory,
 :global([lang="he"]) .listRowSub {
   font-family: var(--font-ploni), serif;
