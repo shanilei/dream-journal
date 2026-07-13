@@ -142,15 +142,20 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
               {weeks.map((wk, wi) => {
                 const isFirst = wi === 0 && startDow > 0;
                 return (
-                  <div key={wi} className={`${styles.calWeek} ${isFirst ? styles.calWeekFirst : ""}`}>
-                    {wk.filter((d): d is number => d !== null).map((day) => {
+                  <div key={wi} className={styles.calWeek}>
+                    {wk.filter((d): d is number => d !== null).map((day, idx) => {
+                      // Only the first week can have leading empty days
+                      // (the month not starting on Sunday) — instead of
+                      // rendering placeholder cells, offset its first
+                      // real cell directly into the correct grid column.
+                      const gridColumnStart = isFirst && idx === 0 ? startDow + 1 : undefined;
                       const dateKey = `${year}-${String(m + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
                       const dream = dreamsByDate[dateKey];
                       const isToday = dateKey === now.toISOString().slice(0, 10);
 
                       if (dream) {
                         return (
-                          <Link key={day} href={`/dream/${dream.id}`} className={`${styles.calCell} ${isToday ? styles.calCellSelected : ""}`}>
+                          <Link key={day} href={`/dream/${dream.id}`} className={`${styles.calCell} ${isToday ? styles.calCellSelected : ""}`} style={{ gridColumnStart }}>
                             {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={dream.image} alt="" className={styles.calCellImg} />
                             <span className={`${styles.calCellNum} ${styles.calCellNumLight}`}>{day}</span>
@@ -161,6 +166,7 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
                         <div
                           key={day}
                           className={`${styles.calCell} ${isToday ? styles.calCellSelected : styles.calCellEmpty}`}
+                          style={{ gridColumnStart }}
                         >
                           <span className={`${styles.calCellNum} ${isToday ? styles.calCellNumLight : styles.calCellNumDark}`}>
                             {day}

@@ -1013,9 +1013,23 @@
   z-index: 1;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  /* stretch (not center): each month's plain wrapper <div> has no
+     explicit width of its own, so with align-items:center it falls back
+     to shrink-to-fit — and since .calMonth's width is a % of that same
+     wrapper, the two compounded into a circular sizing collapse for any
+     month with no sibling to anchor a real width against. It only
+     "worked" for months after the first because .calDivider's old
+     hardcoded 375px width accidentally gave their wrapper something
+     concrete to size against. Both bugs, fixed together: stretch makes
+     the wrapper's width determinate up front (no circularity), and
+     .calDivider below no longer needs a magic-number width either. */
+  align-items: stretch;
   gap: 23px;
-  padding: 20px 0 120px;
+  /* Horizontal side gutter matches every other screen's --shell-padding —
+     previously 0, which combined with .calMonth's old fixed 394px width
+     let the grid overflow past the viewport edge on narrower phones. */
+  padding: 20px var(--shell-padding) 120px;
+  box-sizing: border-box;
   /* own scroll container so we can set scrollTop directly */
   height: calc(100dvh - 210px);
   overflow-y: auto;
@@ -1030,7 +1044,11 @@
   flex-direction: column;
   align-items: center;
   gap: 15px;
-  width: 394px;
+  /* Was a hardcoded 394px — overflowed any viewport narrower than that
+     (e.g. iPhone SE/mini at 375px). Fluid width now; column sizing comes
+     from .calWeek's own grid below, not from this wrapper. */
+  width: 100%;
+  max-width: 394px;
 }
 
 .calMonthName {
@@ -1044,13 +1062,13 @@
 }
 
 .calDayHeaders {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   gap: 12px;
   width: 100%;
 }
 
 .calDayHeader {
-  flex: 1;
   font-size: 12px;
   font-weight: 400;
   color: #FFFFFF;
@@ -1058,22 +1076,27 @@
   line-height: 20px;
 }
 
+/* CSS Grid (not flex) so every week row — including a partial first/last
+   week with fewer rendered cells — resolves to the exact same 7 column
+   widths, and each cell fluidly shrinks/grows with the viewport instead
+   of overflowing at a fixed size. The first week's leading empty days
+   are skipped in JS (no placeholder cells rendered) and instead offset
+   via `gridColumnStart` on its first real cell — see CalendarView in
+   HomeScreenClient.tsx — so .calWeekFirst's old flex justify-content
+   trick is no longer needed. */
 .calWeek {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
   gap: 12px;
   width: 100%;
 }
 
-.calWeekFirst {
-  justify-content: flex-end;
-}
-
-/* Each day cell — 46×46px, border-radius 12px */
+/* Each day cell — fluid width (1fr of its .calWeek/.calDayHeaders grid
+   column), kept square via aspect-ratio instead of a fixed 46×46px. */
 .calCell {
-  width: 46px;
-  height: 46px;
+  width: 100%;
+  aspect-ratio: 1;
   border-radius: 12px;
-  flex-shrink: 0;
   position: relative;
   display: flex;
   align-items: center;
@@ -1145,7 +1168,7 @@
 }
 
 .calDivider {
-  width: 375px;
+  width: 100%;
   height: 1px;
   background: rgba(255, 255, 255, 0.15);
   margin-bottom: 16px;

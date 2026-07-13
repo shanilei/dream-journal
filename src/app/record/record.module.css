@@ -380,6 +380,20 @@
     box-sizing: border-box;
   }
 
+  /* .screen itself stays capped at --shell-max-width (same shared shell
+     pattern every screen uses) and centered, but on an iPad that's
+     narrower than the viewport, so the background gradient/starfield —
+     normally sized to .screen's own box via `inset: 0` — left plain
+     page-background (#090a13, near black) showing on both sides. Fixed
+     positioning paints them across the full viewport instead, while the
+     actual content (prompt/orb/nav) stays exactly where it was, still
+     shell-width-constrained. */
+  .screen::before,
+  .screen::after,
+  .starfield {
+    position: fixed;
+  }
+
   .prompt,
   .promptHe {
     position: static;
