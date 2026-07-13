@@ -335,3 +335,132 @@
 .promptLine         { display: block; text-align: center; }
 .typeFallbackOrHe   { font-family: var(--font-ploni), serif; color: rgba(255,255,255,0.6); }
 .typeFallbackLinkHe { font-family: var(--font-ploni), serif; font-size: 12px; }
+
+/* ===================== TABLET / IPAD ===================== */
+/* Large touch devices only — never matches a phone, and independent of
+   the app-wide --shell-max-width breakpoints in globals.css (which only
+   widen the shared container; they're untouched here). Two comma-branches
+   cover both iPad orientations: portrait (short side >= 768, long side
+   >= 900) and landscape (the same two thresholds with width/height
+   swapped) — a plain min-width/min-height pair alone would fail
+   landscape, since e.g. a 1024x768 iPad has a height under 900.
+   `any-pointer: coarse` (not `pointer: coarse`) so an iPad with an
+   attached trackpad/keyboard — which makes the trackpad the *primary*
+   pointer and reports `pointer: fine` — still matches, since its
+   touchscreen remains present as a secondary pointer. No UA sniffing.
+   Keep this block in sync with TABLET_QUERY in src/lib/useIsTablet.ts.
+
+   This is a dedicated composition, not the mobile layout scaled up: the
+   idle-state content (prompt / orb / "type it" fallback) switches from
+   the mobile's hand-placed absolute-position soup to a real centered
+   flex column with its own rhythm, so spacing comes from one `gap`
+   instead of three independently hand-tuned calc() offsets. The
+   recording-only overlays (close button, pause/stop/repeat row) stay
+   absolutely positioned — they're already screen-edge-anchored controls,
+   which is the right pattern at any size — just retuned for the larger
+   canvas and safe areas. Mobile rules above are untouched. */
+@media
+  (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
+  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
+{
+  .screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Figma's iPad reference (node 1258:7054) sits the content group in
+       the upper portion of the screen, not vertically centered — title
+       top edge lands at ~28% of the frame height, leaving generous empty
+       space below before BottomNav rather than splitting it evenly
+       above/below the orb. */
+    justify-content: flex-start;
+    padding-top: 22dvh;
+    gap: 56px;
+    padding-left: 64px;
+    padding-right: 64px;
+    box-sizing: border-box;
+  }
+
+  .prompt,
+  .promptHe {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    width: auto;
+    max-width: 520px;
+    font-size: 36px;
+    line-height: 46px;
+  }
+
+  .promptHe {
+    font-size: 38px;
+    line-height: 46px;
+  }
+
+  .recordButton {
+    position: static;
+    width: 400px;
+    height: 400px;
+  }
+
+  .typeFallback {
+    position: static;
+    left: auto;
+    top: auto;
+    transform: none;
+    gap: 6px;
+  }
+
+  .typeFallbackOr,
+  .typeFallbackLink {
+    font-size: 15px;
+  }
+
+  .closeButton {
+    top: 64px;
+    left: max(var(--shell-padding), env(safe-area-inset-left));
+    width: 56px;
+    height: 56px;
+  }
+
+  .closeButtonHe {
+    left: auto;
+    right: max(var(--shell-padding), env(safe-area-inset-right));
+  }
+
+  .controlRow {
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    gap: 72px;
+  }
+
+  .controlBtn {
+    width: 56px;
+    height: 56px;
+  }
+
+  .recordingPill {
+    padding: 12px 20px 11px 12px;
+  }
+}
+
+/* Height-constrained refinement, layered on top of the block above — only
+   ever matches the *landscape* branch in practice (portrait's long side
+   is always >= 900px there, so `max-height: 900px` can't also hold), i.e.
+   real landscape iPads with a short side in the ~768-900px range (11"
+   class; the 12.9" Pro's landscape height is 1024px and correctly keeps
+   the roomier default above). Without this, the centered content's
+   bottom edge lands underneath BottomNav on those shorter heights. */
+@media
+  (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse) and (max-height: 900px),
+  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse) and (max-height: 900px)
+{
+  .screen {
+    gap: 32px;
+    padding-bottom: 140px;
+  }
+
+  .recordButton {
+    width: 340px;
+    height: 340px;
+  }
+}

@@ -69,3 +69,28 @@
     display: none;
   }
 }
+
+/* ===================== TABLET / IPAD ===================== */
+/* Same condition as record.module.css's tablet block (kept in sync with
+   src/lib/useIsTablet.ts's TABLET_QUERY) — large touch devices only,
+   both orientations, never a phone. BottomNav is shared across screens,
+   so this widens/enlarges it everywhere it renders; that's intentional
+   ("keep bottom navigation centered and reachable" applies regardless of
+   which screen is adapting its own tablet layout yet) and is a size/
+   spacing tweak only, not a redesign of the bar itself. */
+@media
+  (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
+  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
+{
+  .nav {
+    bottom: calc(36px + env(safe-area-inset-bottom));
+    gap: 20px;
+    padding: 12px 28px;
+  }
+
+  .circle {
+    width: 76px;
+    height: 76px;
+    border-radius: 38px;
+  }
+}

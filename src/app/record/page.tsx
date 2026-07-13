@@ -10,6 +10,7 @@ import DreamResultScreen from "@/components/DreamResultScreen";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CloseIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
+import { useIsTablet } from "@/lib/useIsTablet";
 
 type DreamResult = {
   id: string;
@@ -46,6 +47,11 @@ function formatElapsed(totalSeconds: number): string {
 export default function RecordPage() {
   const router = useRouter();
   const { t, lang } = useLanguage();
+  // CSS media query drives the actual tablet layout (see the "TABLET /
+  // IPAD" block in record.module.css) — this is just a prepared `data-`
+  // hook for any future logic that genuinely needs JS, not CSS, to branch
+  // (kept for other screens to reuse as they get their own tablet pass).
+  const isTablet = useIsTablet();
   const [status, setStatus] = useState<Status>("idle");
   const [result, setResult] = useState<DreamResult | null>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -147,7 +153,7 @@ export default function RecordPage() {
   }
 
   return (
-    <div className={`${styles.screen} lockedScreen`}>
+    <div className={`${styles.screen} lockedScreen`} data-tablet={isTablet || undefined}>
       <div className={styles.glowNavy} />
       <div className={styles.glowBlue} />
       <div className={styles.glowPurple} />
