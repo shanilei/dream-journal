@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     const storagePath = `${randomUUID()}.png`;
     const { error: uploadError } = await getSupabase().storage
       .from("dream-images")
-      .upload(storagePath, imageBuffer, { contentType: "image/png" });
+      .upload(storagePath, imageBuffer, { contentType: "image/png", cacheControl: "31536000" });
     if (uploadError) throw uploadError;
     const { data: publicUrlData } = getSupabase().storage.from("dream-images").getPublicUrl(storagePath);
     const imageUrl = publicUrlData.publicUrl;
