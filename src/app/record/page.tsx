@@ -196,8 +196,14 @@ export default function RecordPage() {
         aria-pressed={isRecording}
         aria-label="Record dream"
       >
+        {/* GIFs can't be paused via CSS, so idle/paused uses a static frame
+            and only active recording swaps in the looping animation. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/orb-anim.gif" alt="" className={styles.orbGif} />
+        <img
+          src={isRecording && !isPaused ? "/images/orb-anim.gif" : "/images/orb-static.png"}
+          alt=""
+          className={styles.orbGif}
+        />
       </button>
 
       {!isRecording && (

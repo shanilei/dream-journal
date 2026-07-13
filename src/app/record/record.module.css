@@ -178,6 +178,9 @@
   object-fit: contain;
   pointer-events: none;
   display: block;
+  /* Slight nudge toward the gallery's cooler blue-violet, without
+     flattening the orb's color variety into a single tone. */
+  filter: saturate(1.2) hue-rotate(-8deg);
 }
 
 /* Sits in the control row in place of the round mic button — the orb

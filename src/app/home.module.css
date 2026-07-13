@@ -619,118 +619,93 @@
   gap: 14px;
 }
 
-/* ===================== TYPE CAROUSEL ===================== */
+/* ===================== TYPE GRID ===================== */
+/* 2-column grid of glass pill cards, each with a small fanned stack of up
+   to 3 dream thumbnails poking above the card, and a centered
+   "{mood} (N dreams)" label below — matches Figma "Gallery screen-type". */
 
-/* Outer container — clips to screen edges */
-.typeCarousel {
-  position: relative;
-  overflow: hidden;
-  width: 100%;
-  /* 36 label-top + 24 label-h + 24 gap + 340 cards = 424 — leaving room for nav */
-  height: 480px;
-  cursor: grab;
-  touch-action: pan-y;
-  user-select: none;
+.typeGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  padding: 16px 0 100px;
 }
 
-.typeLabel {
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 24px;
-  color: #FFFFFF;
-  text-align: center;
-  white-space: nowrap;
+.typeGridCard {
   position: relative;
-  z-index: 5;
-}
-
-/* Stack container — fixed card dimensions matching Figma */
-.typeStack {
-  position: relative;
-  width: 174px;
-  height: 390px;
-  flex-shrink: 0;
-}
-
-/* Shared base for all 3 stack cards */
-.typeFront,
-.typeBackLeft,
-.typeBackRight {
-  position: absolute;
-  inset: 0;
-  background: #D9D9D9;
-  border-radius: 20px;
-  overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: 8px;
-  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  padding: 14px 8px 16px;
+  min-height: 130px;
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
   text-decoration: none;
 }
 
-/* Front card — straight, highest z-index, tappable */
-.typeFront {
-  z-index: 3;
-  transform: none;
+/* Thumbnails sit fully in-flow inside the card (no negative offsets
+   poking past its edge), so nothing needs clipping and the 10px grid gap
+   is never encroached on by a neighboring card's photos. */
+.typeGridStack {
+  position: relative;
+  width: 158px;
+  height: 88px;
+  margin: 0 auto;
 }
 
-/* Back-left card — rotated -5.24deg as per Figma */
-.typeBackLeft {
-  z-index: 2;
-  transform: rotate(-5.24deg) translate(-14px, 6px);
-  transform-origin: center bottom;
-}
-
-/* Back-right card — rotated +1.37deg as per Figma */
-.typeBackRight {
-  z-index: 1;
-  transform: rotate(1.37deg) translate(12px, 4px);
-  transform-origin: center bottom;
-}
-
-.typeCardImg {
-  width: 100%;
-  flex: 1;
-  object-fit: cover;
-  border-radius: 10px;
-  display: block;
-  min-height: 0;
-}
-
-.typeHeartBtn {
+.typeStackImg {
   position: absolute;
-  top: 14px;
-  right: 14px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  color: rgba(255,255,255,0.85);
-  z-index: 4;
-  line-height: 0;
+  width: 76px;
+  height: 82px;
+  border-radius: 7px;
+  object-fit: cover;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 
-.typeCardBody {
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+/* cards[0] — frontmost, rightmost, most rotated */
+.typeStackImg1 {
+  top: 4px;
+  left: 56px;
+  transform: rotate(29.21deg);
+  z-index: 3;
 }
 
-.typeCardHeading {
+.typeStackImg2 {
+  top: 2px;
+  left: 30px;
+  transform: rotate(10.96deg);
+  z-index: 2;
+}
+
+/* cards[2] — backmost, leftmost, least rotated */
+.typeStackImg3 {
+  top: 0;
+  left: 4px;
+  transform: rotate(-9.7deg);
+  z-index: 1;
+}
+
+.typeGridLabel {
   margin: 0;
-  font-size: 16px;
+  font-size: 13px;
   font-weight: 500;
-  line-height: 24px;
-  color: #000000;
+  line-height: 18px;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
 }
 
-.typeCardSub {
-  margin: 0;
-  font-size: 12px;
+.typeGridCount {
+  font-size: 10px;
   font-weight: 400;
-  line-height: 20px;
-  color: #2B2B2B;
+  color: rgba(255, 255, 255, 0.75);
+  text-transform: lowercase;
 }
 
 /* ===================== LIST VIEW ===================== */
@@ -792,6 +767,106 @@
   right: auto;
   left: 18px;
   transform: rotate(-16deg);
+}
+
+/* ===================== LIST + ALL: flat dream rows (glass-light) ===================== */
+/* Matches Figma "Gallery screen-all" — light glass cards (not the dark
+   .listRow style above), grouped under "Recent dream" / "More dreams you
+   dreamt" headings, each row showing a heart toggle, title, date, and a
+   small thumbnail. */
+
+.dreamRowGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+.dreamRowList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+/* Base = LTR/English: thumbnail leads (left), text left-aligned, heart
+   trails the title (right). Mirrored for Hebrew below, same convention as
+   .gridHeartBtn/.gridMoodTag further up this file. */
+.dreamRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 14px;
+  text-decoration: none;
+}
+
+.dreamRowBody {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  flex: 1 0 0;
+  min-width: 0;
+}
+
+.dreamRowTop {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  width: 100%;
+}
+
+.dreamRowHeart {
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+.dreamRowTitle {
+  flex: 1 0 0;
+  min-width: 0;
+  margin: 0;
+  font-size: 16px;
+  line-height: 24px;
+  color: #ffffff;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dreamRowDate {
+  margin: 0;
+  font-size: 12px;
+  line-height: 20px;
+  color: rgba(255, 255, 255, 0.7);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.dreamRowThumb {
+  flex-shrink: 0;
+  width: 41px;
+  height: 45px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+/* No flex-direction override needed here: .dreamRow/.dreamRowTop stay at
+   the default "row", which the browser already lays out right-to-left
+   under dir="rtl" — an explicit row-reverse would cancel that (row-reverse
+   is relative to writing direction, not physical left/right) and put the
+   thumbnail back on the left. */
+:global([dir="rtl"]) .dreamRowBody {
+  align-items: flex-end;
+}
+
+:global([dir="rtl"]) .dreamRowTitle,
+:global([dir="rtl"]) .dreamRowDate {
+  text-align: right;
 }
 
 /* ===================== CALENDAR (Date filter) ===================== */
@@ -972,8 +1047,7 @@
 
 /* Card headings + subheadings — Ploni + right-aligned in Hebrew */
 :global([lang="he"]) .cardHeading,
-:global([lang="he"]) .gridCardHeading,
-:global([lang="he"]) .typeCardHeading {
+:global([lang="he"]) .gridCardHeading {
   font-family: var(--font-ploni), serif;
   font-weight: 400;
   text-align: right;
@@ -982,7 +1056,6 @@
 
 :global([lang="he"]) .cardSubheading,
 :global([lang="he"]) .gridCardSubheading,
-:global([lang="he"]) .typeCardSub,
 :global([lang="he"]) .listRowCategory,
 :global([lang="he"]) .listRowSub {
   font-family: var(--font-ploni), serif;
@@ -991,10 +1064,15 @@
   width: 100%;
 }
 
-/* Card body — align to inline-end (right in RTL) */
-:global([lang="he"]) .typeCardBody {
-  align-items: flex-end;
-  text-align: right;
+:global([lang="he"]) .dreamRowTitle,
+:global([lang="he"]) .dreamRowDate {
+  font-family: var(--font-ploni), serif;
+  font-weight: 400;
+}
+
+/* Type grid label stays centered in both languages — only the font swaps */
+:global([lang="he"]) .typeGridLabel {
+  font-family: var(--font-ploni), serif;
 }
 
 /* Hero card body is a row now (title + date side by side, like the grid

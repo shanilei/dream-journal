@@ -8,7 +8,7 @@ import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon } from "@/components/Ico
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 
 type Card = {
   id: string;
@@ -173,131 +173,46 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
 }
 // ──────────────────────────────────────────────────────────────────────────
 
-// ── TYPE CAROUSEL ──────────────────────────────────────────────────────────
-// Labels and card stacks use DIFFERENT steps (from Figma measurements):
-//   Labels:  207px between each (so neighboring labels peek at screen edges)
-//   Cards:   279px between each (so only edges of neighboring stacks peek in)
-//
-// Figma anchor points (from screen left):
-//   Fear label center:      185px  → LABEL_ANCHOR
-//   Fear front card left:   114px  → CARD_ANCHOR
-const LABEL_STEP  = 207;
-const CARD_STEP   = 279;
-const CARD_ANCHOR = 114; // px from left of carousel — left edge of active front card
-const CARD_W       = 174;
-const CARD_H       = 340;
-const LABEL_TOP    = 36;  // px from carousel top (gap below filter row)
-const CARD_TOP     = 84;  // px from carousel top (36 + 24 label + 24 gap)
-
-function TypeCarousel({
+// ── TYPE GRID ──────────────────────────────────────────────────────────────
+// 2-column grid of glass pill cards, each showing a small fanned stack of
+// up to 3 dream thumbnails for that mood, with "{mood} ({count} dreams)"
+// centered below — matches the Figma "Gallery screen-type" grid layout.
+function TypeGrid({
   categories,
   cardsByMood,
   lang,
+  dreamsLabel,
 }: {
   categories: { label: string; count: number }[];
   cardsByMood: Record<string, Card[]>;
   lang: Lang;
+  dreamsLabel: string;
 }) {
-  const [active, setActive] = useState(0);
-  const startX = useRef<number | null>(null);
-  const wasSwiped = useRef(false);
-  const easing = "0.38s cubic-bezier(0.33, 1, 0.68, 1)";
-
-  function onPointerDown(e: React.PointerEvent) {
-    startX.current = e.clientX;
-    wasSwiped.current = false;
-  }
-
-  function onPointerMove(e: React.PointerEvent) {
-    if (startX.current === null) return;
-    const dx = Math.abs(e.clientX - startX.current);
-    if (dx > 10) wasSwiped.current = true;
-  }
-
-  function onPointerUp(e: React.PointerEvent) {
-    if (startX.current === null) return;
-    const dx = e.clientX - startX.current;
-    if (dx < -40) setActive((a) => Math.min(a + 1, categories.length - 1));
-    else if (dx > 40) setActive((a) => Math.max(a - 1, 0));
-    startX.current = null;
-  }
-
   return (
-    <div
-      className={styles.typeCarousel}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
-    >
-      {/* ── LABEL TRACK (step = 207px) ── */}
-      {categories.map((cat, i) => (
-        <p
-          key={`lbl-${cat.label}`}
-          className={styles.typeLabel}
-          style={{
-            position: "absolute",
-            left: "50%",
-            top: LABEL_TOP,
-            transform: `translateX(calc(-50% + ${(i - active) * LABEL_STEP}px))`,
-            transition: `transform ${easing}`,
-          }}
-        >
-          {translateMood(cat.label, lang)}
-        </p>
-      ))}
-
-      {/* ── CARD STACK TRACK (step = 279px) ── */}
-      {categories.map((cat, i) => {
+    <div className={styles.typeGrid}>
+      {categories.map((cat) => {
         const cards = cardsByMood[cat.label] ?? [];
-        const isActive = i === active;
         return (
-          <div
-            key={`stack-${cat.label}`}
-            style={{
-              position: "absolute",
-              left: CARD_ANCHOR,
-              top: CARD_TOP,
-              width: CARD_W,
-              height: CARD_H,
-              transform: `translateX(${(i - active) * CARD_STEP}px)`,
-              transition: `transform ${easing}`,
-              pointerEvents: isActive ? "auto" : "none",
-            }}
-          >
-            {/* Back-right (lowest z) */}
-            {cards[2] && (
-              <div className={styles.typeBackRight}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={cards[2].image} alt="" className={styles.typeCardImg} />
-              </div>
-            )}
-            {/* Back-left */}
-            {cards[1] && (
-              <div className={styles.typeBackLeft}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={cards[1].image} alt="" className={styles.typeCardImg} />
-              </div>
-            )}
-            {/* Front card */}
-            <Link
-              href={`/type/${encodeURIComponent(cat.label)}`}
-              className={styles.typeFront}
-              onClick={(e) => { if (wasSwiped.current) { wasSwiped.current = false; e.preventDefault(); } }}
-            >
-              {cards[0] ? (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={cards[0].image} alt="" className={styles.typeCardImg} />
-                </>
-              ) : (
-                <div style={{ flex: 1, borderRadius: 10, background: "rgba(0,0,0,0.1)" }} />
+          <Link key={cat.label} href={`/type/${encodeURIComponent(cat.label)}`} className={styles.typeGridCard}>
+            <div className={styles.typeGridStack}>
+              {cards[2] && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={cards[2].image} alt="" className={`${styles.typeStackImg} ${styles.typeStackImg3}`} />
               )}
-              <div className={styles.typeCardBody}>
-                <p className={styles.typeCardHeading}>{translateMood(cat.label, lang)}</p>
-                <p className={styles.typeCardSub}>{cards[0] ? formatDreamDate(cards[0].createdAt, langFromText(cards[0].summary, lang)) : ""}</p>
-              </div>
-            </Link>
-          </div>
+              {cards[1] && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={cards[1].image} alt="" className={`${styles.typeStackImg} ${styles.typeStackImg2}`} />
+              )}
+              {cards[0] && (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img src={cards[0].image} alt="" className={`${styles.typeStackImg} ${styles.typeStackImg1}`} />
+              )}
+            </div>
+            <p className={styles.typeGridLabel} dir="auto">
+              {translateMood(cat.label, lang)}{" "}
+              <span className={styles.typeGridCount}>({cat.count} {dreamsLabel})</span>
+            </p>
+          </Link>
         );
       })}
     </div>
@@ -359,6 +274,27 @@ export default function HomeScreenClient({
       saveFavorites(next);
       return next;
     });
+  }
+
+  function renderDreamRow(card: Card) {
+    return (
+      <Link key={card.id} href={`/dream/${card.id}`} className={styles.dreamRow}>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={card.image} alt="" className={styles.dreamRowThumb} />
+        <div className={styles.dreamRowBody}>
+          <div className={styles.dreamRowTop}>
+            <p className={styles.dreamRowTitle} dir="auto">{card.name || translateMood(card.mood, lang)}</p>
+            <FavoriteButton
+              filled={favorites.has(card.id)}
+              onToggle={(e) => toggleFavorite(card.id, e)}
+              size={18}
+              className={styles.dreamRowHeart}
+            />
+          </div>
+          <p className={styles.dreamRowDate}>{formatDreamDate(card.createdAt, langFromText(card.summary, lang))}</p>
+        </div>
+      </Link>
+    );
   }
 
   function renderCard(card: Card, className: string, imgClass: string, bodyClass: string, headingClass: string, subClass: string, index = 0) {
@@ -490,7 +426,42 @@ export default function HomeScreenClient({
         </div>
 
         {/* ── LIST VIEW ── */}
-        {!isSearching && viewMode === "list" && (
+        {!isSearching && viewMode === "list" && filter === "all" && (
+          <div className={styles.listView}>
+            {recentDream && (
+              <div className={styles.dreamRowGroup}>
+                <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.recentDream}</p>
+                {renderDreamRow(recentDream)}
+              </div>
+            )}
+
+            {collectionCards.length > 0 && (
+              <div className={styles.dreamRowGroup}>
+                <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.moreCollection}</p>
+                <div className={styles.dreamRowList}>
+                  {collectionCards.map((card) => renderDreamRow(card))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── LIST + FAVORITE: flat list, same row style as "All" ── */}
+        {!isSearching && viewMode === "list" && filter === "favorite" && (
+          <div className={styles.listView}>
+            {favoriteCards.length === 0 ? (
+              <p className={styles.comingSoon}>{t.noFavorites}</p>
+            ) : (
+              <div className={styles.dreamRowGroup}>
+                <div className={styles.dreamRowList}>
+                  {favoriteCards.map((card) => renderDreamRow(card))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {!isSearching && viewMode === "list" && filter === "type" && (
           <div className={styles.listView}>
             <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.recentDream}</p>
             {categories.map((cat) => (
@@ -512,17 +483,8 @@ export default function HomeScreenClient({
 
       </div>
 
-      {/* ── GRID + TYPE: Stacked carousel (outside wrapper, bleeds to edges) ── */}
-      {!isSearching && viewMode === "grid" && filter === "type" && (
-        <TypeCarousel
-          categories={categories}
-          cardsByMood={cardsByMood}
-          lang={lang}
-        />
-      )}
-
-      {/* ── GRID + DATE: Calendar view ── */}
-      {!isSearching && viewMode === "grid" && filter === "date" && (
+      {/* ── DATE: Calendar view (same in both list and grid view modes) ── */}
+      {!isSearching && filter === "date" && (
         <CalendarView gridCards={gridCards} />
       )}
 
@@ -551,6 +513,16 @@ export default function HomeScreenClient({
               )
             )}
           </div>
+        )}
+
+        {/* ── GRID + TYPE: 2-column stacked-photo cards ── */}
+        {!isSearching && viewMode === "grid" && filter === "type" && (
+          <TypeGrid
+            categories={categories}
+            cardsByMood={cardsByMood}
+            lang={lang}
+            dreamsLabel={t.dreamsCount}
+          />
         )}
 
         {/* ── GRID + ALL (default) ── */}
