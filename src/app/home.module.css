@@ -631,7 +631,13 @@
   padding: 16px 0 100px;
 }
 
-.typeGridCard {
+/* Structural layer (layout/positioning only) — the visual chrome
+   (background/border/blur/shadow) lives in .typeGridCardBg, a separate
+   absolutely positioned layer behind the stack images, so it can fade
+   out on open (shared-element transition) without dragging the
+   thumbnails' opacity down with it — they need to stay fully opaque
+   while Framer Motion flies them into the destination grid. */
+.typeGridCardWrap {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -640,13 +646,20 @@
   gap: 14px;
   padding: 14px 8px 16px;
   min-height: 130px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.typeGridCardBg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.35);
   background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
-  text-decoration: none;
 }
 
 /* Thumbnails sit fully in-flow inside the card (no negative offsets
@@ -654,6 +667,7 @@
    is never encroached on by a neighboring card's photos. */
 .typeGridStack {
   position: relative;
+  z-index: 1;
   width: 158px;
   height: 88px;
   margin: 0 auto;
@@ -668,30 +682,31 @@
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
 }
 
-/* cards[0] — frontmost, rightmost, most rotated */
+/* Rotation is applied inline via Framer Motion's `style.rotate` (see
+   TypeGrid in HomeScreenClient.tsx) instead of a static CSS transform, so
+   the shared-element transition can animate it back to 0deg. Only
+   position/z-index stay here. */
 .typeStackImg1 {
   top: 4px;
   left: 56px;
-  transform: rotate(29.21deg);
   z-index: 3;
 }
 
 .typeStackImg2 {
   top: 2px;
   left: 30px;
-  transform: rotate(10.96deg);
   z-index: 2;
 }
 
-/* cards[2] — backmost, leftmost, least rotated */
 .typeStackImg3 {
   top: 0;
   left: 4px;
-  transform: rotate(-9.7deg);
   z-index: 1;
 }
 
 .typeGridLabel {
+  position: relative;
+  z-index: 1;
   margin: 0;
   font-size: 13px;
   font-weight: 500;
@@ -706,6 +721,128 @@
   font-weight: 400;
   color: rgba(255, 255, 255, 0.75);
   text-transform: lowercase;
+}
+
+/* ===================== CATEGORY OVERLAY ===================== */
+/* Destination of the Type-grid shared-element transition — a full-screen
+   overlay (not a real route navigation) that sits above the still-mounted,
+   frozen Gallery. See CategoryOverlay in HomeScreenClient.tsx. */
+
+.overlayBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: #000000;
+  pointer-events: auto;
+}
+
+/* top/bottom instead of `inset` — `inset` would also set `right: 0`,
+   which conflicts with the `left: 50%; transform: translateX(-50%)`
+   centering trick under `dir="rtl"` (over-constrained left/right/width
+   resolves by keeping `right` and letting the transform shove the whole
+   panel half off-screen). */
+.overlayPanel {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 41;
+  width: 100%;
+  max-width: var(--shell-max-width);
+  height: 100dvh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
+  padding: 0 var(--shell-padding) 120px;
+  pointer-events: auto;
+}
+
+.overlayHeader {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 42px;
+  padding-bottom: 18px;
+  background: linear-gradient(180deg, #050A1A 0%, rgba(5, 10, 26, 0.85) 70%, rgba(5, 10, 26, 0) 100%);
+  margin: 0 calc(var(--shell-padding) * -1);
+  padding-left: var(--shell-padding);
+  padding-right: var(--shell-padding);
+}
+
+.overlayBackBtn {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+:global([dir="rtl"]) .overlayBackBtn svg {
+  transform: rotate(180deg);
+}
+
+.overlayTitle {
+  flex: 1;
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 28px;
+  color: #ffffff;
+}
+
+.overlayCount {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+:global([lang="he"]) .overlayTitle,
+:global([lang="he"]) .overlayCount {
+  font-family: var(--font-ploni), serif;
+}
+
+/* Shared-card image slot — the image itself (not a wrapper) owns the
+   border-radius, since Framer Motion's layout animation reads and
+   interpolates that directly off the animated element. Wrapping it in an
+   overflow:hidden container would clip it mid-flight while it's still
+   travelling from its folder position. */
+.sharedThumbSlot {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+
+.sharedThumbImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.sharedCardTapArea {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+}
+
+/* Lets the remaining-dreams stagger group's children act as direct
+   grandchildren of .collectionGrid — the group itself isn't a grid item. */
+.overlayStaggerGroup {
+  display: contents;
 }
 
 /* ===================== LIST VIEW ===================== */

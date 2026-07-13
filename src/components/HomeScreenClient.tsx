@@ -1,14 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
 import FavoriteButton from "@/components/FavoriteButton";
-import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon } from "@/components/Icons";
+import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
 import { useState, useEffect } from "react";
+
+// Calm, physical "dreamy" easing per the app's motion system — matches
+// src/components/onboarding/motion.ts's EASE so screen-to-screen and
+// element transitions feel like one consistent app, not per-screen ad hoc
+// values.
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 type Card = {
   id: string;
@@ -177,45 +184,233 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
 // 2-column grid of glass pill cards, each showing a small fanned stack of
 // up to 3 dream thumbnails for that mood, with "{mood} ({count} dreams)"
 // centered below — matches the Figma "Gallery screen-type" grid layout.
+//
+// Tapping a card doesn't navigate — it opens <CategoryOverlay> in place.
+// The 3 stacked thumbnails carry a `layoutId` shared with their full-size
+// counterparts in the overlay's grid, so Framer Motion animates them
+// (position/size/border-radius/rotation, transform+opacity only) from the
+// folder straight into the destination grid instead of cutting instantly.
+// The glass pill's background/border/label are a separate absolutely
+// positioned layer behind the images so they can fade out on open without
+// dragging the (still-animating) images' opacity down with them.
+const STACK_ROTATIONS = [29.21, 10.96, -9.7]; // cards[0], cards[1], cards[2]
+
 function TypeGrid({
   categories,
   cardsByMood,
   lang,
   dreamsLabel,
+  openMood,
+  onOpen,
 }: {
   categories: { label: string; count: number }[];
   cardsByMood: Record<string, Card[]>;
   lang: Lang;
   dreamsLabel: string;
+  openMood: string | null;
+  onOpen: (mood: string) => void;
 }) {
   return (
     <div className={styles.typeGrid}>
       {categories.map((cat) => {
         const cards = cardsByMood[cat.label] ?? [];
+        const isOpen = openMood === cat.label;
         return (
-          <Link key={cat.label} href={`/type/${encodeURIComponent(cat.label)}`} className={styles.typeGridCard}>
+          <div
+            key={cat.label}
+            className={styles.typeGridCardWrap}
+            role="button"
+            tabIndex={0}
+            onClick={() => onOpen(cat.label)}
+            onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(cat.label); } }}
+          >
+            <motion.div
+              className={styles.typeGridCardBg}
+              animate={{ opacity: isOpen ? 0 : 1 }}
+              transition={{ duration: 0.25, ease: EASE }}
+            />
             <div className={styles.typeGridStack}>
-              {cards[2] && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={cards[2].image} alt="" className={`${styles.typeStackImg} ${styles.typeStackImg3}`} />
-              )}
-              {cards[1] && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={cards[1].image} alt="" className={`${styles.typeStackImg} ${styles.typeStackImg2}`} />
-              )}
-              {cards[0] && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={cards[0].image} alt="" className={`${styles.typeStackImg} ${styles.typeStackImg1}`} />
-              )}
+              {[cards[2], cards[1], cards[0]].map((card, i) => {
+                // i=0 is cards[2] (back), i=2 is cards[0] (front) — stack
+                // position classes/z-index stay in that back-to-front order.
+                if (!card) return null;
+                const stackIndex = 2 - i; // 0 = front/cards[0], 2 = back/cards[2]
+                const posClass = [styles.typeStackImg1, styles.typeStackImg2, styles.typeStackImg3][stackIndex];
+                return (
+                  <motion.img
+                    key={card.id}
+                    layoutId={`type-thumb-${card.id}`}
+                    src={card.image}
+                    alt=""
+                    className={`${styles.typeStackImg} ${posClass}`}
+                    style={{ rotate: STACK_ROTATIONS[stackIndex] }}
+                    transition={{ duration: 0.5, ease: EASE }}
+                  />
+                );
+              })}
             </div>
-            <p className={styles.typeGridLabel} dir="auto">
+            <motion.p
+              className={styles.typeGridLabel}
+              dir="auto"
+              animate={{ opacity: isOpen ? 0 : 1 }}
+              transition={{ duration: 0.2, ease: EASE }}
+            >
               {translateMood(cat.label, lang)}{" "}
               <span className={styles.typeGridCount}>({cat.count} {dreamsLabel})</span>
-            </p>
-          </Link>
+            </motion.p>
+          </div>
         );
       })}
     </div>
+  );
+}
+// ──────────────────────────────────────────────────────────────────────────
+
+// ── CATEGORY OVERLAY ─────────────────────────────────────────────────────
+// Destination of the TypeGrid shared-element transition. Not a real route
+// navigation — it's rendered in place over the (still-mounted, frozen)
+// Gallery so the folder's images can animate straight into this grid via
+// the matching `type-thumb-${id}` layoutId, then the rest of that mood's
+// dreams reveal with a subtle stagger.
+function CategoryOverlay({
+  mood,
+  dreams,
+  stackCards,
+  lang,
+  t,
+  favorites,
+  onToggleFavorite,
+  onClose,
+}: {
+  mood: string;
+  dreams: Card[];
+  stackCards: Card[];
+  lang: Lang;
+  t: ReturnType<typeof useLanguage>["t"];
+  favorites: Set<string>;
+  onToggleFavorite: (id: string, e: React.MouseEvent) => void;
+  onClose: () => void;
+}) {
+  const stackIds = new Set(stackCards.map((c) => c.id));
+  const restDreams = dreams.filter((d) => !stackIds.has(d.id));
+
+  function renderChrome(card: Card) {
+    return (
+      <>
+        <span className={styles.gridMoodTag} dir="auto">{translateMood(card.mood, lang)}</span>
+        <FavoriteButton
+          filled={favorites.has(card.id)}
+          onToggle={(e) => onToggleFavorite(card.id, e)}
+          className={styles.gridHeartBtn}
+        />
+      </>
+    );
+  }
+
+  return (
+    <>
+      <motion.div
+        className={styles.overlayBackdrop}
+        initial={{ opacity: 0, backdropFilter: "blur(0px)" }}
+        animate={{ opacity: 0.35, backdropFilter: "blur(5px)" }}
+        exit={{ opacity: 0, backdropFilter: "blur(0px)" }}
+        transition={{ duration: 0.35, ease: EASE }}
+        onClick={onClose}
+      />
+      <motion.div
+        className={styles.overlayPanel}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: 0.3, ease: EASE }}
+      >
+        <motion.div
+          className={styles.overlayHeader}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 8 }}
+          transition={{ duration: 0.35, ease: EASE, delay: 0.15 }}
+        >
+          <button type="button" className={styles.overlayBackBtn} onClick={onClose} aria-label="Back">
+            <ArrowLeftIcon size={16} color="currentColor" />
+          </button>
+          <p className={styles.overlayTitle}>{translateMood(mood, lang)}</p>
+          <span className={styles.overlayCount}>{dreams.length} {t.dreamsCount}</span>
+        </motion.div>
+
+        <div className={styles.collectionGrid} style={{ paddingTop: 8 }}>
+          {/* Shared cards — same images that were fanned in the folder,
+              now landing in their full grid slots via layoutId. */}
+          {stackCards.map((card) => (
+            <div key={card.id} className={styles.gridCard} style={{ position: "relative" }}>
+              <div className={styles.sharedThumbSlot}>
+                <motion.img
+                  layoutId={`type-thumb-${card.id}`}
+                  src={card.image}
+                  alt=""
+                  className={styles.sharedThumbImg}
+                  style={{ rotate: 0 }}
+                  transition={{ duration: 0.5, ease: EASE }}
+                />
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.25, ease: EASE, delay: 0.3 }}
+                >
+                  {renderChrome(card)}
+                </motion.div>
+              </div>
+              <motion.div
+                className={styles.gridBody}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.25, ease: EASE, delay: 0.32 }}
+              >
+                <p className={styles.gridCardHeading}>{card.name || translateMood(card.mood, lang)}</p>
+                <p className={styles.gridCardSubheading}>{formatDreamDate(card.createdAt, langFromText(card.summary, lang))}</p>
+              </motion.div>
+              <Link href={`/dream/${card.id}`} className={styles.sharedCardTapArea} aria-label={card.name || translateMood(card.mood, lang)} />
+            </div>
+          ))}
+
+          {/* Remaining dreams — subtle staggered reveal once the shared
+              cards have landed. */}
+          <motion.div
+            className={styles.overlayStaggerGroup}
+            initial="hidden"
+            animate="show"
+            variants={{
+              hidden: {},
+              show: { transition: { delayChildren: 0.32, staggerChildren: 0.04 } },
+            }}
+          >
+            {restDreams.map((card) => (
+              <motion.div
+                key={card.id}
+                variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
+                transition={{ duration: 0.3, ease: EASE }}
+              >
+                <Link href={`/dream/${card.id}`} className={styles.gridCard}>
+                  <div className={styles.gridImgWrap}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={card.image} alt="" className={styles.gridImg} />
+                    {renderChrome(card)}
+                  </div>
+                  <div className={styles.gridBody}>
+                    <p className={styles.gridCardHeading}>{card.name || translateMood(card.mood, lang)}</p>
+                    <p className={styles.gridCardSubheading}>{formatDreamDate(card.createdAt, langFromText(card.summary, lang))}</p>
+                  </div>
+                </Link>
+              </motion.div>
+            ))}
+          </motion.div>
+
+          {dreams.length === 0 && (
+            <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.searchNoResults}</p>
+          )}
+        </div>
+      </motion.div>
+    </>
   );
 }
 // ──────────────────────────────────────────────────────────────────────────
@@ -236,6 +431,11 @@ export default function HomeScreenClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [gridColumns, setGridColumns] = useState<2 | 3>(3);
+  // Which Type-grid mood is expanded into <CategoryOverlay>. Not a route
+  // param — the overlay renders in place over the still-mounted Gallery
+  // so the shared-element transition has both ends of the animation
+  // (folder thumbnails + destination grid) mounted at once.
+  const [openMood, setOpenMood] = useState<string | null>(null);
 
   // Loaded on mount (not lazy useState init) since localStorage isn't
   // available during server render — matches DreamResultScreen's pattern
@@ -319,7 +519,13 @@ export default function HomeScreenClient({
   }
 
   return (
+    <LayoutGroup>
     <div className={styles.screen}>
+      {/* Frozen while the category overlay is open — the whole Gallery
+          (including BottomNav) stops receiving touch/click input, per the
+          shared-element transition spec, while it stays visible/mounted
+          underneath the dimmed + blurred backdrop. */}
+      <div style={{ pointerEvents: openMood ? "none" : undefined }} aria-hidden={openMood ? true : undefined}>
       {/* Nebula blobs */}
       <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
       <div className={`${styles.nebula} ${styles.nebulaPurple}`} />
@@ -522,6 +728,8 @@ export default function HomeScreenClient({
             cardsByMood={cardsByMood}
             lang={lang}
             dreamsLabel={t.dreamsCount}
+            openMood={openMood}
+            onOpen={setOpenMood}
           />
         )}
 
@@ -584,6 +792,23 @@ export default function HomeScreenClient({
       </div>
 
       <BottomNav active="dreams" />
+      </div>
+
+      <AnimatePresence>
+        {openMood && (
+          <CategoryOverlay
+            mood={openMood}
+            dreams={gridCards.filter((c) => c.mood === openMood)}
+            stackCards={cardsByMood[openMood] ?? []}
+            lang={lang}
+            t={t}
+            favorites={favorites}
+            onToggleFavorite={toggleFavorite}
+            onClose={() => setOpenMood(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
+    </LayoutGroup>
   );
 }
