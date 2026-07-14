@@ -70,6 +70,72 @@
   }
 }
 
+/* ===================== ADD-BUTTON LONG-PRESS MENU ===================== */
+/* Full-screen 50% black scrim behind the nav. Sits below .nav's z-index
+   (5) so "the bottom navigation stays visible above the overlay" — the
+   nav bar, Close button, and pills (all rendered inside/around .nav)
+   naturally paint on top of it. */
+.addMenuBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 4;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.centerSlot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* .expanded reuses .active's glass-to-solid-white look — the middle
+   button is still visually "the same circle", just holding a Close icon
+   instead of Add now. */
+.circle.expanded {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Zero-size anchor point, animated by Framer Motion (opacity/scale/y/x/
+   rotate — see BottomNav.tsx) — the visible pill inside is a separate,
+   non-animated element so Framer's transform never has to fight a CSS
+   transform on the same node. left: 50% anchors it to the nav's
+   horizontal center; Framer's x offset then fans it out left/right.
+   Physical `left`/`transform`, not logical properties, so Record stays
+   visually left and Write stays visually right in RTL Hebrew too. */
+.addMenuPillWrap {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 50%;
+}
+
+.addMenuPill {
+  position: relative;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 33.5px;
+  background: #ffffff;
+  color: #000000;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 20px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.28);
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.addMenuPillLabel {
+  color: #000000;
+}
+
+
 /* ===================== TABLET / IPAD ===================== */
 /* Same condition as record.module.css's tablet block (kept in sync with
    src/lib/useIsTablet.ts's TABLET_QUERY) — large touch devices only,

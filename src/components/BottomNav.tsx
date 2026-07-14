@@ -1,8 +1,16 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { motion, AnimatePresence } from "framer-motion";
 import styles from "./BottomNav.module.css";
-import { AddAIIcon, CalendarIcon, UserIcon } from "./Icons";
+import { AddAIIcon, CalendarIcon, UserIcon, CloseIcon, MicIcon, PencilIcon } from "./Icons";
+import { useLanguage } from "./LanguageProvider";
 
 type NavKey = "record" | "user" | "dreams";
+
+const LONG_PRESS_MS = 3000;
+const EASE = [0.22, 1, 0.36, 1] as const;
 
 export default function BottomNav({
   active,
@@ -11,26 +19,193 @@ export default function BottomNav({
   active: NavKey;
   hidden?: boolean;
 }) {
+  const { t } = useLanguage();
+  const [expanded, setExpanded] = useState(false);
+  const longPressTimerRef = useRef<number | null>(null);
+  const longPressFiredRef = useRef(false);
+  // The timer can fire while the finger/pointer is still down — React
+  // swaps the Link for the Close button right then, so the pointerup/
+  // click that follows can land on that new button and would otherwise
+  // close the menu in the same gesture that just opened it. Ignore
+  // close-triggering clicks for a short window right after opening.
+  const openedAtRef = useRef(0);
+
+  function closeMenu() {
+    if (Date.now() - openedAtRef.current < 400) return;
+    setExpanded(false);
+  }
+
+  function clearLongPressTimer() {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current);
+      longPressTimerRef.current = null;
+    }
+    window.removeEventListener("scroll", clearLongPressTimer, true);
+  }
+
+  function startLongPress() {
+    longPressFiredRef.current = false;
+    clearLongPressTimer();
+    // Capture-phase + window so scrolling in any nested scroll container
+    // (every screen's own .screen div, not just window) cancels the
+    // press — scroll events don't bubble, but capturing listeners still
+    // see them on the way down regardless.
+    window.addEventListener("scroll", clearLongPressTimer, true);
+    longPressTimerRef.current = window.setTimeout(() => {
+      longPressFiredRef.current = true;
+      openedAtRef.current = Date.now();
+      setExpanded(true);
+      clearLongPressTimer();
+    }, LONG_PRESS_MS);
+  }
+
+  // Cleanup on unmount (covers route changes away from a page with a
+  // press mid-flight, too).
+  useEffect(() => clearLongPressTimer, []);
+
+  // Escape-to-close (desktop) + lock background scroll while the menu's
+  // open — matches how modal-like overlays elsewhere in the app behave.
+  useEffect(() => {
+    if (!expanded) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setExpanded(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [expanded]);
+
   const items: { key: NavKey; href: string; icon: (color: string) => React.ReactNode }[] = [
     { key: "user", href: "/user", icon: (c) => <UserIcon color={c} size={22} /> },
-    { key: "record", href: "/record", icon: (c) => <AddAIIcon color={c} size={26} /> },
     { key: "dreams", href: "/gallery", icon: (c) => <CalendarIcon color={c} size={22} /> },
   ];
 
   return (
-    <nav className={`${styles.nav} ${hidden ? styles.navHidden : ""}`} aria-hidden={hidden} inert={hidden || undefined}>
-      {items.map((item) => {
-        const isActive = item.key === active;
-        return (
+    <>
+      <AnimatePresence>
+        {expanded && (
+          <motion.div
+            className={styles.addMenuBackdrop}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: EASE }}
+            onClick={closeMenu}
+            aria-hidden="true"
+          />
+        )}
+      </AnimatePresence>
+
+      <nav
+        className={`${styles.nav} ${hidden ? styles.navHidden : ""}`}
+        aria-hidden={hidden}
+        inert={hidden || undefined}
+      >
+        {/* Left item (user) */}
+        <motion.div
+          animate={{ opacity: expanded ? 0.4 : 1 }}
+          transition={{ duration: 0.2, ease: EASE }}
+          style={{ pointerEvents: expanded ? "none" : undefined }}
+        >
           <Link
-            key={item.key}
-            href={item.href}
-            className={`${styles.circle} ${isActive ? styles.active : ""}`}
+            href={items[0].href}
+            className={`${styles.circle} ${active === items[0].key ? styles.active : ""}`}
+            aria-disabled={expanded}
+            tabIndex={expanded ? -1 : undefined}
+            onClick={(e) => expanded && e.preventDefault()}
           >
-            <span className={styles.iconLayer}>{item.icon(isActive ? "#000624" : "#fff")}</span>
+            <span className={styles.iconLayer}>{items[0].icon(active === items[0].key ? "#000624" : "#fff")}</span>
           </Link>
-        );
-      })}
-    </nav>
+        </motion.div>
+
+        {/* Middle item (record) — long-press target, morphs into Close */}
+        <div className={styles.centerSlot}>
+          <AnimatePresence>
+            {expanded && (
+              <>
+                <motion.div
+                  className={styles.addMenuPillWrap}
+                  initial={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
+                  animate={{ opacity: 1, scale: 1, y: 0, x: -74, rotate: -8 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
+                  transition={{ duration: 0.32, ease: EASE }}
+                >
+                  <Link href="/record" className={styles.addMenuPill} onClick={() => setExpanded(false)}>
+                    <span className={styles.addMenuPillLabel}>{t.navRecord}</span>
+                    <MicIcon size={18} color="#000" />
+                  </Link>
+                </motion.div>
+                <motion.div
+                  className={styles.addMenuPillWrap}
+                  initial={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
+                  animate={{ opacity: 1, scale: 1, y: 0, x: 74, rotate: 8 }}
+                  exit={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
+                  transition={{ duration: 0.32, ease: EASE }}
+                >
+                  <Link href="/record/type" className={styles.addMenuPill} onClick={() => setExpanded(false)}>
+                    <span className={styles.addMenuPillLabel}>{t.navWrite}</span>
+                    <PencilIcon size={18} color="#000" />
+                  </Link>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
+
+          {expanded ? (
+            <button
+              type="button"
+              className={`${styles.circle} ${styles.expanded}`}
+              aria-label={t.navAddMenuClose}
+              onClick={closeMenu}
+            >
+              <span className={styles.iconLayer}>
+                <CloseIcon size={22} color="#000624" />
+              </span>
+            </button>
+          ) : (
+            <Link
+              href="/record"
+              className={`${styles.circle} ${active === "record" ? styles.active : ""}`}
+              aria-label={t.navAddMenu}
+              onPointerDown={startLongPress}
+              onPointerUp={clearLongPressTimer}
+              onPointerCancel={clearLongPressTimer}
+              onPointerLeave={clearLongPressTimer}
+              onClick={(e) => {
+                if (longPressFiredRef.current) {
+                  e.preventDefault();
+                }
+                clearLongPressTimer();
+              }}
+            >
+              <span className={styles.iconLayer}>
+                <AddAIIcon color={active === "record" ? "#000624" : "#fff"} size={26} />
+              </span>
+            </Link>
+          )}
+        </div>
+
+        {/* Right item (dreams) */}
+        <motion.div
+          animate={{ opacity: expanded ? 0.4 : 1 }}
+          transition={{ duration: 0.2, ease: EASE }}
+          style={{ pointerEvents: expanded ? "none" : undefined }}
+        >
+          <Link
+            href={items[1].href}
+            className={`${styles.circle} ${active === items[1].key ? styles.active : ""}`}
+            aria-disabled={expanded}
+            tabIndex={expanded ? -1 : undefined}
+            onClick={(e) => expanded && e.preventDefault()}
+          >
+            <span className={styles.iconLayer}>{items[1].icon(active === items[1].key ? "#000624" : "#fff")}</span>
+          </Link>
+        </motion.div>
+      </nav>
+    </>
   );
 }

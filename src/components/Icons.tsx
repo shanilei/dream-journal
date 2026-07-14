@@ -247,6 +247,20 @@ export function CloseIcon({ size = 16, color = "#fff" }: { size?: number; color?
   );
 }
 
+export function PencilIcon({ size = 18, color = "#000" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M4 20l.9-3.6a2 2 0 01.53-.94L16.2 4.7a1.6 1.6 0 012.26 0l.84.84a1.6 1.6 0 010 2.26L8.54 18.57a2 2 0 01-.94.53L4 20z"
+        stroke={color}
+        strokeWidth={1.6}
+        strokeLinejoin="round"
+      />
+      <path d="M14 6.6l3.4 3.4" stroke={color} strokeWidth={1.6} strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function RepeatIcon({ size = 16, color = "#fff" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
