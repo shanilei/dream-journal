@@ -150,7 +150,7 @@ export const translations = {
     latestDreams: "חלומות אחרונים",
     byType: "לפי סוג",
     seeAll: "הצג הכול",
-    filterAll: "הכול",
+    filterAll: "הכל",
     filterLatest: "אחרונים",
     filterAnalysis: "ניתוח",
     filterType: "קטגוריה",

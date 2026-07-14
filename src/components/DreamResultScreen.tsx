@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
 import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
@@ -11,6 +12,23 @@ import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translat
 
 import { CAPTION_MAX_WORDS, getCaptionWords, pickCaptionLayout, isHebrewText } from "@/lib/caption";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
+
+// This screen is rendered in two places that must look identical and
+// never re-animate against each other: (1) as the real /dream/[id]
+// route, and (2) as the Gallery's in-place overlay (see
+// DreamAnalysisOverlay in HomeScreenClient.tsx), where the image shares
+// a layoutId with the tapped grid thumbnail so Framer moves/resizes it
+// directly from card to final position — one motion, not "expand to a
+// preview, then jump again on the real page". The image itself gets NO
+// separate scale/opacity/blur settle of its own; the layoutId FLIP is
+// the only thing that ever moves or resizes it. `skipEntrance` is set
+// when the real route mounts right after that overlay handoff, so this
+// second mount renders already-settled instead of replaying the text
+// stagger a second time — a fresh direct visit (no preceding overlay)
+// leaves it false and gets the normal fade-up.
+const EASE = [0.22, 1, 0.36, 1] as const;
+const STAGGER_STEP = 0.03; // 40–60ms between elements, tuned to fit the ~550–650ms total
+const CONTENT_BASE_DELAY = 0.2; // analysis content starts ~200ms in, per spec
 
 function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
   const { t } = useLanguage();
@@ -56,6 +74,7 @@ export default function DreamResultScreen({
   symbols,
   dreamText,
   onBack,
+  skipEntrance = false,
 }: {
   id?: string;
   name?: string;
@@ -69,10 +88,27 @@ export default function DreamResultScreen({
   symbols: string[];
   dreamText?: string;
   onBack: () => void;
+  // True only when this mount immediately follows the Gallery overlay's
+  // own already-played entrance — see the file-level comment above.
+  skipEntrance?: boolean;
 }) {
   const { lang, t } = useLanguage();
   const { showBorder } = usePhotoBorder();
   const [favorited, setFavorited] = useState(false);
+  const reduceMotionPreference = useReducedMotion();
+  const reduceMotion = reduceMotionPreference || skipEntrance;
+
+  // step 0 = title, 1 = date, 2 = mood tag, 3+ = symbol tags, then
+  // interpretation gets a fixed slot past however many tags exist (up to
+  // 3 symbols, so index 6 is always safely after all of them).
+  function fadeStep(step: number) {
+    if (reduceMotion) return { initial: { opacity: 1, y: 0 }, animate: { opacity: 1, y: 0 }, transition: { duration: 0 } };
+    return {
+      initial: { opacity: 0, y: 8 },
+      animate: { opacity: 1, y: 0 },
+      transition: { duration: 0.25, ease: EASE, delay: CONTENT_BASE_DELAY + step * STAGGER_STEP },
+    };
+  }
 
   useEffect(() => {
     if (id) setFavorited(loadFavorites().has(id));
@@ -236,7 +272,12 @@ export default function DreamResultScreen({
   return (
     <>
     <div className={styles.screen} ref={scrollRef}>
-      <div className={styles.topBar}>
+      <motion.div
+        className={styles.topBar}
+        initial={reduceMotion ? false : { opacity: 0, y: -7 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.28, ease: EASE }}
+      >
         <button type="button" className={styles.iconButton} onClick={onBack} aria-label={t.back}>
           <span className={styles.backIcon}>
             <ArrowLeftIcon size={20} color="currentColor" />
@@ -255,9 +296,14 @@ export default function DreamResultScreen({
             <PrinterIcon size={16} color="currentColor" />
           </button>
         </div>
-      </div>
+      </motion.div>
 
       <div className={styles.content}>
+        {/* No opacity/scale/blur settle of its own — the shared layoutId
+            below (see .image) is the only thing that ever moves or
+            resizes the image, so there's exactly one motion, not this
+            card animating in and then the image separately animating
+            inside it. */}
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
           <div
             ref={wrapRef}
@@ -295,12 +341,14 @@ export default function DreamResultScreen({
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <motion.img
+              layoutId={id ? `dream-photo-${id}` : undefined}
               ref={imgRef}
               className={styles.image}
               src={imageUrl}
               alt="Dream artwork"
               onLoad={sampleBrightness}
+              transition={{ type: "tween", duration: 0.45, ease: EASE }}
             />
             {clearImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
@@ -350,7 +398,7 @@ export default function DreamResultScreen({
         </div>
 
         <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-start", width: "100%" } : undefined}>
-          <div className={styles.titleRow}>
+          <motion.div className={styles.titleRow} {...fadeStep(0)}>
             <p className={styles.title}>{dreamTitle}</p>
             <FavoriteButton
               filled={favorited}
@@ -359,19 +407,28 @@ export default function DreamResultScreen({
               color="#ffffff"
               className={styles.titleHeartBtn}
             />
-          </div>
+          </motion.div>
           <div className={styles.metaRow} style={lang === "he" ? { justifyContent: "flex-start", width: "100%" } : undefined}>
-            <span className={styles.moodPill}>{translateMood(mood, lang)}</span>
-            <span className={styles.metaText}>{dateLabel}</span>
-            {timeLabel && <span className={styles.metaText}>{timeLabel}</span>}
+            {/* Mood tag animates with the symbol tags (step 2) rather than
+                with the date next to it (step 1) — per the spec, emotion +
+                symbol tags fade in together as one "tags" beat, title →
+                date → tags → interpretation, regardless of where each
+                sits in the layout. */}
+            <motion.span className={styles.moodPill} {...fadeStep(2)}>{translateMood(mood, lang)}</motion.span>
+            <motion.span className={styles.metaText} {...fadeStep(1)}>{dateLabel}</motion.span>
+            {timeLabel && <motion.span className={styles.metaText} {...fadeStep(1)}>{timeLabel}</motion.span>}
           </div>
         </div>
 
         {(interpretationText || summaryText) && (
-          <div className={styles.block} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
+          <motion.div
+            className={styles.block}
+            style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}
+            {...fadeStep(6)}
+          >
             <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
             <CollapsibleText text={interpretationText || summaryText} dark={false} />
-          </div>
+          </motion.div>
         )}
 
         {symbols.length > 0 && (
@@ -379,9 +436,9 @@ export default function DreamResultScreen({
             <p className={styles.blockHeading}>{t.symbolsInYourDream}</p>
             <div className={styles.symbolsRow} style={lang === "he" ? { justifyContent: "flex-start", width: "100%" } : undefined}>
               {symbols.map((symbol, i) => (
-                <span key={i} className={styles.symbolChip}>
+                <motion.span key={i} className={styles.symbolChip} {...fadeStep(3 + i)}>
                   {symbol}
-                </span>
+                </motion.span>
               ))}
             </div>
           </div>
@@ -395,7 +452,16 @@ export default function DreamResultScreen({
         )}
       </div>
 
-      <BottomNav active="dreams" hidden={navHidden} />
+      {/* Opacity only, no y — BottomNav is position:fixed, and a
+          transform-animated ancestor (a translateY-based fade-up) would
+          make it fixed-relative-to-this-wrapper instead of the viewport. */}
+      <motion.div
+        initial={reduceMotion ? false : { opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.28, ease: EASE }}
+      >
+        <BottomNav active="dreams" hidden={navHidden} />
+      </motion.div>
 
       {copied && (
         <div className={styles.toast}>{t.linkCopied}</div>

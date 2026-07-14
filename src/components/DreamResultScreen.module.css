@@ -66,7 +66,10 @@
 .imageCard {
   background: #fff;
   padding: 16px 8px 74px;
-  animation: eyeOpen 1900ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  /* Entrance is driven by Framer Motion now (see DreamResultScreen.tsx) —
+     a quick settle rather than the old ~2s eye-opening clip-path reveal,
+     since most of the arrival is already "spent" by the Gallery's own
+     card-expansion handoff before this page even mounts. */
 }
 
 .imageCardNoBorder {
@@ -138,27 +141,9 @@
   width: 100%;
 }
 
-@keyframes eyeOpen {
-  0% {
-    opacity: 0;
-    clip-path: ellipse(50% 1% at 50% 50%);
-    filter: blur(16px);
-  }
-  45% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-    clip-path: ellipse(88% 88% at 50% 50%);
-    filter: blur(0px);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .imageCard {
-    animation: none;
-  }
-}
+/* prefers-reduced-motion is handled in DreamResultScreen.tsx via Framer
+   Motion's useReducedMotion() now, alongside the rest of the entrance
+   choreography, instead of a separate CSS override here. */
 
 .imageWrap {
   position: relative;

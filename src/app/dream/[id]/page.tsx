@@ -1,19 +1,19 @@
 import { notFound } from "next/navigation";
 import { getDream } from "@/dreams-store";
+import { shortSymbol } from "@/lib/dream-format";
 
 export const dynamic = "force-dynamic";
 import DreamDetailClient from "@/components/DreamDetailClient";
 
-function shortSymbol(symbol: string): string {
-  return symbol.split(" - ")[0].trim();
-}
-
 export default async function DreamDetailPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ transitioned?: string }>;
 }) {
   const { id } = await params;
+  const { transitioned } = await searchParams;
   const dream = await getDream(id);
 
   if (!dream) notFound();
@@ -31,6 +31,7 @@ export default async function DreamDetailPage({
       interpretationText={dream.interpretationText}
       symbols={dream.symbols.slice(0, 3).map(shortSymbol)}
       dreamText={dream.dreamText}
+      skipEntrance={transitioned === "1"}
     />
   );
 }

@@ -252,10 +252,10 @@
 
 
 .filterPill {
+  position: relative;
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  gap: 8px;
   padding: 6px 16px;
   height: 41px;
   border-radius: 99px;
@@ -277,11 +277,29 @@
 }
 
 .filterPillActive {
-  background: #FFFFFF;
   color: #000000;
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+/* Shared layoutId element (see HomeScreenClient.tsx) — Framer moves/
+   resizes this single white background between pills instead of each
+   pill's background just switching on and off. */
+.filterPillActiveBg {
+  position: absolute;
+  inset: 0;
+  border-radius: 99px;
+  background: #ffffff;
+  z-index: 0;
+}
+
+.filterPillLabel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 /* ===================== SECTION LABELS ===================== */
@@ -572,7 +590,7 @@
 }
 
 .gridHeartBtn {
-  top: 6px;
+  top: 7px;
   right: 6px;
   width: 16px;
   height: 16px;
@@ -601,7 +619,7 @@
 /* Emotion tag — white pill on the corner opposite the heart button */
 .gridMoodTag {
   position: absolute;
-  top: 6px;
+  top: 7px;
   left: 6px;
   background: #ffffff;
   color: rgba(0, 0, 0, 0.9);
@@ -881,6 +899,22 @@
    (no such wrapper) which never hits this. */
 .overlayStaggerItem {
   min-width: 0;
+}
+
+/* ===================== DREAM ANALYSIS OVERLAY ===================== */
+/* Gallery → Dream Analysis transition — renders the real DreamResultScreen
+   in place (see DreamAnalysisOverlay in HomeScreenClient.tsx); this is
+   just the fixed full-viewport positioning DreamResultScreen's own
+   .screen doesn't need when it's the routed page itself. Higher z-index
+   than .overlayBackdrop/.overlayPanel (Category overlay) since in
+   principle both could be triggered from the same frozen Gallery, though
+   in practice they don't currently co-occur. */
+.openOverlayRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  justify-content: center;
 }
 
 /* ===================== LIST VIEW ===================== */

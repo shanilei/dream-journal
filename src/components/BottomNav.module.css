@@ -47,13 +47,13 @@
 }
 
 .circle:active {
-  animation: navTap 0.22s ease;
+  animation: navTap 0.22s cubic-bezier(0.22, 0.61, 0.36, 1);
 }
 
 @keyframes navTap {
-  0%   { transform: scale(1); }
-  45%  { transform: scale(1.06); }
-  100% { transform: scale(1); }
+  0%   { transform: scale(1); box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
+  45%  { transform: scale(1.08); box-shadow: 0 0 16px rgba(255, 255, 255, 0.35); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
 }
 
 .iconLayer {

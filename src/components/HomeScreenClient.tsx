@@ -1,21 +1,73 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
 import FavoriteButton from "@/components/FavoriteButton";
+import DreamResultScreen from "@/components/DreamResultScreen";
 import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 // Calm, physical "dreamy" easing per the app's motion system — matches
 // src/components/onboarding/motion.ts's EASE so screen-to-screen and
 // element transitions feel like one consistent app, not per-screen ad hoc
 // values.
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+// Gallery → Dream Analysis transition timings. The overlay renders the
+// real DreamResultScreen in place (see DreamAnalysisOverlay below), so
+// there's exactly one shared layoutId FLIP and one content stagger —
+// not a separate preview animation followed by a second one when the
+// real route mounts. NAVIGATE_AFTER just needs to roughly match
+// DreamResultScreen's own total entrance time (image FLIP + its content
+// stagger, ~600ms) so the eventual route swap lands after everything
+// has already settled, instead of interrupting it mid-flight.
+const GALLERY_EXIT_DURATION = 0.2; // header/filters/cards/background exit
+const NAVIGATE_AFTER = 650; // ms — when we swap to the real route, after the overlay has settled
+
+// Switching between Gallery filters (All/Date/Type/Favorite) — a
+// distinct, faster motion language from the app's usual EASE: ease-in-out
+// rather than ease-out, and short enough (250–350ms total) to feel like
+// flipping a tab, not opening a new screen. Only the content area below
+// the (stable) header/filter row/background/BottomNav ever moves.
+const CONTENT_EASE = "easeInOut";
+const CONTENT_EXIT_DURATION = 0.13;
+const CONTENT_ENTER_DURATION = 0.2;
+
+// One reusable wrapper for every Gallery content view (grid, list,
+// calendar) — exit fades+shifts 8px down+blurs, enter fades+shifts up
+// from 8px below+unblurs, with mode="popLayout" so the outgoing view is
+// pulled out of layout flow immediately instead of both stacking and
+// pushing height around, letting the two overlap with no blank frame.
+function ViewTransition({ viewKey, children }: { viewKey: string; children: React.ReactNode }) {
+  return (
+    <AnimatePresence mode="popLayout" initial={false}>
+      <motion.div
+        key={viewKey}
+        initial={{ opacity: 0, y: 8, filter: "blur(2px)" }}
+        animate={{
+          opacity: 1,
+          y: 0,
+          filter: "blur(0px)",
+          transition: { duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE },
+        }}
+        exit={{
+          opacity: 0,
+          y: 8,
+          filter: "blur(2px)",
+          transition: { duration: CONTENT_EXIT_DURATION, ease: CONTENT_EASE },
+        }}
+      >
+        {children}
+      </motion.div>
+    </AnimatePresence>
+  );
+}
 
 type Card = {
   id: string;
@@ -109,8 +161,18 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
   }
   months.reverse();
 
+  // Only dream thumbnails get a (very small, capped) individual stagger —
+  // empty dates never animate on their own, they just appear as part of
+  // the calendar's one whole-group fade-in below.
+  let dreamCellIndex = 0;
+
   return (
-    <div className={styles.calScroll}>
+    <motion.div
+      className={styles.calScroll}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE }}
+    >
       {months.map((month, mi) => {
         const year = month.getFullYear();
         const m = month.getMonth();
@@ -154,12 +216,22 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
                       const isToday = dateKey === now.toISOString().slice(0, 10);
 
                       if (dream) {
+                        const delay = Math.min(dreamCellIndex * 0.015, 0.3);
+                        dreamCellIndex += 1;
                         return (
-                          <Link key={day} href={`/dream/${dream.id}`} className={`${styles.calCell} ${isToday ? styles.calCellSelected : ""}`} style={{ gridColumnStart }}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={dream.image} alt="" className={styles.calCellImg} />
-                            <span className={`${styles.calCellNum} ${styles.calCellNumLight}`}>{day}</span>
-                          </Link>
+                          <motion.div
+                            key={day}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE, delay }}
+                            style={{ gridColumnStart }}
+                          >
+                            <Link href={`/dream/${dream.id}`} className={`${styles.calCell} ${isToday ? styles.calCellSelected : ""}`}>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={dream.image} alt="" className={styles.calCellImg} />
+                              <span className={`${styles.calCellNum} ${styles.calCellNumLight}`}>{day}</span>
+                            </Link>
+                          </motion.div>
                         );
                       }
                       return (
@@ -181,7 +253,7 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
           </div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }
 // ──────────────────────────────────────────────────────────────────────────
@@ -232,15 +304,28 @@ function TypeGrid({
   openMood: string | null;
   onOpen: (mood: string) => void;
 }) {
+  // Category cards fade in with a short 30–40ms stagger — opacity/y only,
+  // no rotation or dramatic movement (the fanned photo stack's own tilt
+  // is unrelated, already handled by STACK_ROTATIONS below).
+  const cardStagger = {
+    hidden: {},
+    show: { transition: { staggerChildren: 0.035 } },
+  };
+  const cardFadeUp = {
+    hidden: { opacity: 0, y: 8 },
+    show: { opacity: 1, y: 0, transition: { duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE } },
+  };
+
   return (
-    <div className={styles.typeGrid}>
+    <motion.div className={styles.typeGrid} variants={cardStagger} initial="hidden" animate="show">
       {categories.map((cat) => {
         const cards = cardsByMood[cat.label] ?? [];
         const isOpen = openMood === cat.label;
         return (
-          <div
+          <motion.div
             key={cat.label}
             className={styles.typeGridCardWrap}
+            variants={cardFadeUp}
             role="button"
             tabIndex={0}
             onClick={() => onOpen(cat.label)}
@@ -284,10 +369,10 @@ function TypeGrid({
               {translateMood(cat.label, lang)}{" "}
               <span className={styles.typeGridCount}>({cat.count} {dreamsLabel})</span>
             </motion.p>
-          </div>
+          </motion.div>
         );
       })}
-    </div>
+    </motion.div>
   );
 }
 // ──────────────────────────────────────────────────────────────────────────
@@ -442,6 +527,86 @@ function CategoryOverlay({
 }
 // ──────────────────────────────────────────────────────────────────────────
 
+// ── DREAM ANALYSIS OVERLAY ───────────────────────────────────────────────
+// Renders the REAL DreamResultScreen in place over the (frozen, blurred)
+// Gallery — not a bespoke preview layout — so there is exactly one shared
+// layoutId FLIP (thumbnail → final image position/size, handled entirely
+// by DreamResultScreen's own <motion.img layoutId>) and exactly one
+// content stagger (also DreamResultScreen's own). When HomeScreenClient
+// later swaps to the real /dream/[id] route, that page renders the same
+// component with skipEntrance=true, so it appears already-settled instead
+// of replaying the animation — one continuous motion, no second jump.
+//
+// The grid only has the trimmed list-view fields (see LIST_COLUMNS in
+// dreams-store.ts), not the full interpretation/dreamText, so this fetches
+// the rest from /api/dream/[id] the moment it opens. The image position/
+// size never depends on that fetch — only the text content upgrades in
+// place once it resolves.
+function DreamAnalysisOverlay({ card, lang, onClose }: { card: Card; lang: Lang; onClose: () => void }) {
+  const [full, setFull] = useState<{
+    name?: string;
+    imageUrl: string;
+    clearImageUrl?: string;
+    printImageUrl?: string;
+    interpretationText?: string;
+    symbols: string[];
+    dreamText?: string;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/dream/${card.id}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        setFull({
+          name: data.name,
+          imageUrl: data.imageUrl,
+          clearImageUrl: data.clearImageUrl,
+          printImageUrl: data.printImageUrl,
+          interpretationText: data.interpretationText,
+          symbols: data.symbols ?? [],
+          dreamText: data.dreamText,
+        });
+      })
+      .catch(() => {
+        // Non-fatal — the overlay already has enough (image/mood/date/
+        // summary) from the tapped card to render the layout; the real
+        // /dream/[id] route (arriving shortly regardless) has its own
+        // independent server-side fetch and isn't affected by this.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [card.id]);
+
+  return (
+    <motion.div
+      className={styles.openOverlayRoot}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2, ease: EASE }}
+    >
+      <DreamResultScreen
+        id={card.id}
+        name={full?.name ?? card.name}
+        imageUrl={full?.imageUrl ?? card.image}
+        clearImageUrl={full?.clearImageUrl}
+        printImageUrl={full?.printImageUrl}
+        createdAt={card.createdAt}
+        mood={card.mood}
+        summaryText={card.summary ?? ""}
+        interpretationText={full?.interpretationText}
+        symbols={full?.symbols ?? card.symbols ?? []}
+        dreamText={full?.dreamText}
+        onBack={onClose}
+      />
+    </motion.div>
+  );
+}
+// ──────────────────────────────────────────────────────────────────────────
+
 export default function HomeScreenClient({
   cards: _cards,
   gridCards,
@@ -451,6 +616,7 @@ export default function HomeScreenClient({
   gridCards: Card[];
   categories: Category[];
 }) {
+  const router = useRouter();
   const { lang, t } = useLanguage();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [filter, setFilter] = useState<FilterMode>("all");
@@ -463,6 +629,29 @@ export default function HomeScreenClient({
   // so the shared-element transition has both ends of the animation
   // (folder thumbnails + destination grid) mounted at once.
   const [openMood, setOpenMood] = useState<string | null>(null);
+
+  // Tapped dream card mid-transition into /dream/[id]. Next.js App Router
+  // can't keep the Gallery and the destination route mounted at once (no
+  // real cross-route shared layout), so <DreamAnalysisOverlay> renders the
+  // real DreamResultScreen in place first — one shared layoutId FLIP, one
+  // content stagger — then this swaps to the real route once that's had
+  // time to fully settle (see NAVIGATE_AFTER), where it re-mounts with
+  // skipEntrance so it doesn't replay any of it.
+  const [openingCard, setOpeningCard] = useState<Card | null>(null);
+  const navigateTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+
+  function openDream(card: Card) {
+    if (openingCard) return;
+    setOpeningCard(card);
+    navigateTimeoutRef.current = window.setTimeout(() => {
+      router.push(`/dream/${card.id}?transitioned=1`);
+    }, NAVIGATE_AFTER);
+  }
+
+  function closeDream() {
+    if (navigateTimeoutRef.current) window.clearTimeout(navigateTimeoutRef.current);
+    setOpeningCard(null);
+  }
 
   // Loaded on mount (not lazy useState init) since localStorage isn't
   // available during server render — matches DreamResultScreen's pattern
@@ -525,18 +714,36 @@ export default function HomeScreenClient({
   }
 
   function renderCard(card: Card, className: string, imgClass: string, bodyClass: string, headingClass: string, subClass: string, index = 0) {
+    const isOpening = openingCard?.id === card.id;
     return (
-      <Link key={card.id} href={`/dream/${card.id}`} className={className} style={{ "--card-index": index } as React.CSSProperties}>
-        <div className={styles.gridImgWrap}>
+      <Link
+        key={card.id}
+        href={`/dream/${card.id}`}
+        className={className}
+        style={{ "--card-index": index } as React.CSSProperties}
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // let new-tab/middle-click behave normally
+          e.preventDefault();
+          openDream(card);
+        }}
+      >
+        <motion.div className={styles.gridImgWrap} whileTap={{ scale: 0.98 }} transition={{ duration: 0.08 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={card.image} alt="" className={imgClass} />
+          <motion.img
+            layoutId={`dream-photo-${card.id}`}
+            src={card.image}
+            alt=""
+            className={imgClass}
+            style={{ opacity: isOpening ? 0 : 1 }}
+            transition={{ type: "tween", duration: 0.45, ease: EASE }}
+          />
           <span className={styles.gridMoodTag} dir="auto">{translateMood(card.mood, lang)}</span>
           <FavoriteButton
             filled={favorites.has(card.id)}
             onToggle={(e) => toggleFavorite(card.id, e)}
             className={styles.gridHeartBtn}
           />
-        </div>
+        </motion.div>
         <div className={bodyClass}>
           <p className={headingClass}>{card.name || translateMood(card.mood, lang)}</p>
           <p className={subClass}>{formatDreamDate(card.createdAt, langFromText(card.summary, lang))}</p>
@@ -548,11 +755,16 @@ export default function HomeScreenClient({
   return (
     <LayoutGroup>
     <div className={styles.screen}>
-      {/* Frozen while the category overlay is open — the whole Gallery
-          (including BottomNav) stops receiving touch/click input, per the
-          shared-element transition spec, while it stays visible/mounted
-          underneath the dimmed + blurred backdrop. */}
-      <div style={{ pointerEvents: openMood ? "none" : undefined }} aria-hidden={openMood ? true : undefined}>
+      {/* Frozen while the category overlay OR a dream is opening — the
+          whole Gallery (including BottomNav) stops receiving touch/click
+          input, per the shared-element transition spec, while it stays
+          visible/mounted underneath the dimmed + blurred backdrop. */}
+      <motion.div
+        style={{ pointerEvents: openMood || openingCard ? "none" : undefined }}
+        aria-hidden={openMood || openingCard ? true : undefined}
+        animate={{ filter: openingCard ? "blur(6px) brightness(0.75)" : "blur(0px) brightness(1)" }}
+        transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
+      >
       {/* Nebula blobs */}
       <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
       <div className={`${styles.nebula} ${styles.nebulaPurple}`} />
@@ -570,7 +782,12 @@ export default function HomeScreenClient({
       <span className={styles.star} style={{ width:1.5, height:1.5, left:18,  top:680, opacity:0.24 }} />
 
       <div className={styles.contentWrapper}>
-        {/* Header */}
+        {/* Header + filters: move up 12px and fade out together as one
+            unit while a dream is opening. */}
+        <motion.div
+          animate={{ opacity: openingCard ? 0 : 1, y: openingCard ? -12 : 0 }}
+          transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
+        >
         <div className={styles.header}>
           <h1 className={styles.galleryTitle}>{t.gallery}</h1>
           <div className={styles.headerBtns}>
@@ -645,88 +862,137 @@ export default function HomeScreenClient({
           {filters
             .filter((f) => f.key === "all" || !isSearchOpen)
             .map((f) => (
-              <button
+              <motion.button
                 key={f.key}
                 type="button"
                 className={`${styles.filterPill} ${filter === f.key ? styles.filterPillActive : ""}`}
                 onClick={() => setFilter(f.key)}
+                whileTap={{ scale: 0.97 }}
+                transition={{ duration: 0.12, ease: CONTENT_EASE }}
               >
-                {f.label}
-                {/* Chevron hidden for now — re-enable by restoring the condition below. */}
-                {false && f.key !== "all" && f.key !== "favorite" && <ChevronIcon />}
-              </button>
+                {/* Shared layoutId — Framer FLIPs this single white
+                    background between pills instead of it just
+                    appearing/disappearing on each one independently. */}
+                {filter === f.key && (
+                  <motion.span
+                    layoutId="activeFilterPillBg"
+                    className={styles.filterPillActiveBg}
+                    transition={{ type: "tween", duration: 0.22, ease: CONTENT_EASE }}
+                  />
+                )}
+                <span className={styles.filterPillLabel}>
+                  {f.label}
+                  {/* Chevron hidden for now — re-enable by restoring the condition below. */}
+                  {false && f.key !== "all" && f.key !== "favorite" && <ChevronIcon />}
+                </span>
+              </motion.button>
             ))}
         </div>
+        </motion.div>
 
-        {/* ── LIST VIEW ── */}
-        {!isSearching && viewMode === "list" && filter === "all" && (
-          <div className={styles.listView}>
-            {recentDream && (
-              <div className={styles.dreamRowGroup}>
+        {/* Gallery cards (list view rows here; grid view further below in
+            the second .contentWrapper) simply fade out — no movement,
+            per the transition spec's "Gallery cards fade out". */}
+        <motion.div
+          animate={{ opacity: openingCard ? 0 : 1 }}
+          transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
+        >
+        {!isSearching && viewMode === "list" && filter !== "date" && (
+          <ViewTransition viewKey={`list-${filter}`}>
+            {/* ── LIST VIEW ── */}
+            {filter === "all" && (
+              <div className={styles.listView}>
+                {recentDream && (
+                  <div className={styles.dreamRowGroup}>
+                    <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.recentDream}</p>
+                    {renderDreamRow(recentDream)}
+                  </div>
+                )}
+
+                {collectionCards.length > 0 && (
+                  <div className={styles.dreamRowGroup}>
+                    <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.moreCollection}</p>
+                    <div className={styles.dreamRowList}>
+                      {collectionCards.map((card) => renderDreamRow(card))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── LIST + FAVORITE: flat list, same row style as "All" ── */}
+            {filter === "favorite" && (
+              <div className={styles.listView}>
+                {favoriteCards.length === 0 ? (
+                  <motion.p
+                    className={styles.comingSoon}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE }}
+                  >
+                    {t.noFavorites}
+                  </motion.p>
+                ) : (
+                  <div className={styles.dreamRowGroup}>
+                    <div className={styles.dreamRowList}>
+                      {favoriteCards.map((card) => renderDreamRow(card))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {filter === "type" && (
+              <div className={styles.listView}>
                 <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.recentDream}</p>
-                {renderDreamRow(recentDream)}
+                {categories.map((cat) => (
+                  <Link
+                    key={cat.label}
+                    href={`/type/${encodeURIComponent(cat.label)}`}
+                    className={styles.listRow}
+                  >
+                    <p className={styles.listRowCategory}>{translateMood(cat.label, lang)}</p>
+                    <p className={styles.listRowCount}>{cat.count} {t.dreamsCount}</p>
+                    <p className={styles.listRowSub}>Heading</p>
+                    <span className={styles.listRowArrow}>
+                      <ArrowUpIcon size={18} color="rgba(255,255,255,0.6)" />
+                    </span>
+                  </Link>
+                ))}
               </div>
             )}
-
-            {collectionCards.length > 0 && (
-              <div className={styles.dreamRowGroup}>
-                <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.moreCollection}</p>
-                <div className={styles.dreamRowList}>
-                  {collectionCards.map((card) => renderDreamRow(card))}
-                </div>
-              </div>
-            )}
-          </div>
+          </ViewTransition>
         )}
 
-        {/* ── LIST + FAVORITE: flat list, same row style as "All" ── */}
-        {!isSearching && viewMode === "list" && filter === "favorite" && (
-          <div className={styles.listView}>
-            {favoriteCards.length === 0 ? (
-              <p className={styles.comingSoon}>{t.noFavorites}</p>
-            ) : (
-              <div className={styles.dreamRowGroup}>
-                <div className={styles.dreamRowList}>
-                  {favoriteCards.map((card) => renderDreamRow(card))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {!isSearching && viewMode === "list" && filter === "type" && (
-          <div className={styles.listView}>
-            <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.recentDream}</p>
-            {categories.map((cat) => (
-              <Link
-                key={cat.label}
-                href={`/type/${encodeURIComponent(cat.label)}`}
-                className={styles.listRow}
-              >
-                <p className={styles.listRowCategory}>{translateMood(cat.label, lang)}</p>
-                <p className={styles.listRowCount}>{cat.count} {t.dreamsCount}</p>
-                <p className={styles.listRowSub}>Heading</p>
-                <span className={styles.listRowArrow}>
-                  <ArrowUpIcon size={18} color="rgba(255,255,255,0.6)" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        )}
-
+        </motion.div>
       </div>
 
       {/* ── DATE: Calendar view (same in both list and grid view modes) ── */}
       {!isSearching && filter === "date" && (
-        <CalendarView gridCards={gridCards} />
+        <ViewTransition viewKey="calendar">
+          <CalendarView gridCards={gridCards} />
+        </ViewTransition>
       )}
 
-      <div className={styles.contentWrapper}>
+      <motion.div
+        className={styles.contentWrapper}
+        animate={{ opacity: openingCard ? 0 : 1 }}
+        transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
+      >
+        <ViewTransition viewKey={`grid-${isSearching ? "search" : filter}`}>
         {/* ── SEARCH RESULTS ── */}
         {isSearching && (
           <div className={styles.collectionGrid} style={{ paddingTop: 36, gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}>
             {searchResults.length === 0 ? (
-              <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.searchNoResults}</p>
+              <motion.p
+                className={styles.comingSoon}
+                style={{ gridColumn: "1/-1" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE }}
+              >
+                {t.searchNoResults}
+              </motion.p>
             ) : (
               searchResults.map((card, i) =>
                 renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading, i)
@@ -739,7 +1005,15 @@ export default function HomeScreenClient({
         {!isSearching && viewMode === "grid" && filter === "favorite" && (
           <div className={styles.collectionGrid} style={{ paddingTop: 8, gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}>
             {favoriteCards.length === 0 ? (
-              <p className={styles.comingSoon} style={{ gridColumn: "1/-1" }}>{t.noFavorites}</p>
+              <motion.p
+                className={styles.comingSoon}
+                style={{ gridColumn: "1/-1" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE }}
+              >
+                {t.noFavorites}
+              </motion.p>
             ) : (
               favoriteCards.map((card, i) =>
                 renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading, i)
@@ -766,17 +1040,32 @@ export default function HomeScreenClient({
             {recentDream && (
               <>
                 <p className={`${styles.sectionLabel} ${styles.sectionLabelTight}`}>{t.recentDream}</p>
-                <Link href={`/dream/${recentDream.id}`} className={styles.heroCard}>
-                  <div className={styles.heroImgWrap}>
+                <Link
+                  href={`/dream/${recentDream.id}`}
+                  className={styles.heroCard}
+                  onClick={(e) => {
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                    e.preventDefault();
+                    openDream(recentDream);
+                  }}
+                >
+                  <motion.div className={styles.heroImgWrap} whileTap={{ scale: 0.98 }} transition={{ duration: 0.08 }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={recentDream.image} alt="" className={styles.heroImg} />
+                    <motion.img
+                      layoutId={`dream-photo-${recentDream.id}`}
+                      src={recentDream.image}
+                      alt=""
+                      className={styles.heroImg}
+                      style={{ opacity: openingCard?.id === recentDream.id ? 0 : 1 }}
+                      transition={{ type: "tween", duration: 0.45, ease: EASE }}
+                    />
                     <span className={styles.gridMoodTag} dir="auto">{translateMood(recentDream.mood, lang)}</span>
                     <FavoriteButton
                       filled={favorites.has(recentDream.id)}
                       onToggle={(e) => toggleFavorite(recentDream.id, e)}
                       className={styles.heartBtn}
                     />
-                  </div>
+                  </motion.div>
                   <div className={styles.heroBody}>
                     <p className={styles.cardHeading}>{recentDream.name || translateMood(recentDream.mood, lang)}</p>
                     <p className={styles.cardSubheading}>{formatDreamDate(recentDream.createdAt, langFromText(recentDream.summary, lang))}</p>
@@ -816,10 +1105,20 @@ export default function HomeScreenClient({
             )}
           </>
         )}
-      </div>
+        </ViewTransition>
+      </motion.div>
 
-      <BottomNav active="dreams" />
-      </div>
+      </motion.div>
+
+      {/* Stays outside the blurred/frozen wrapper so it can fade to 40%
+          in place (per the transition spec) without also blurring —
+          "remains visually stable throughout the transition." */}
+      <motion.div
+        animate={{ opacity: openingCard ? 0.4 : 1 }}
+        transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
+      >
+        <BottomNav active="dreams" />
+      </motion.div>
 
       <AnimatePresence>
         {openMood && (
@@ -834,6 +1133,10 @@ export default function HomeScreenClient({
             onClose={() => setOpenMood(null)}
           />
         )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {openingCard && <DreamAnalysisOverlay card={openingCard} lang={lang} onClose={closeDream} />}
       </AnimatePresence>
     </div>
     </LayoutGroup>

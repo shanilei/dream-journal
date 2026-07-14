@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import DreamResultScreen from "./DreamResultScreen";
 
@@ -15,6 +16,7 @@ export default function DreamDetailClient({
   interpretationText,
   symbols,
   dreamText,
+  skipEntrance = false,
 }: {
   id: string;
   name?: string;
@@ -27,8 +29,20 @@ export default function DreamDetailClient({
   interpretationText?: string;
   symbols: string[];
   dreamText?: string;
+  skipEntrance?: boolean;
 }) {
   const router = useRouter();
+
+  // Strip ?transitioned=1 once mounted — it's only a one-time signal to
+  // skip re-playing the entrance right after the Gallery's own overlay
+  // already played it. A later refresh/direct link to this same URL
+  // should show the normal entrance, not silently stay "skipped" forever.
+  useEffect(() => {
+    if (skipEntrance) {
+      router.replace(`/dream/${id}`, { scroll: false });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <DreamResultScreen
@@ -44,6 +58,7 @@ export default function DreamDetailClient({
       symbols={symbols}
       dreamText={dreamText}
       onBack={() => router.push("/gallery")}
+      skipEntrance={skipEntrance}
     />
   );
 }

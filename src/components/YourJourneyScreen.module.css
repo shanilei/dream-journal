@@ -217,7 +217,9 @@
   border-radius: 4px;
   min-width: 8px;
   max-width: 100%;
-  transition: width 0.6s ease;
+  /* Width is animated directly by Framer Motion (see YourJourneyScreen.tsx)
+     instead of a CSS transition, so it can animate from 0 on mount —
+     a transition here only fires on a value *change* after first paint. */
 }
 
 /* ── Sections (Dream Pattern + Trends) ──────────────────────────────────── */
