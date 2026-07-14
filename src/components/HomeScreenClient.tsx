@@ -201,6 +201,19 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
 // dragging the (still-animating) images' opacity down with them.
 const STACK_ROTATIONS = [29.21, 10.96, -9.7]; // cards[0], cards[1], cards[2]
 
+// The .typeStackImg1/2/3 CSS positions (left: 63/37/11) are tuned to
+// center a full 3-card rotated fan inside the 158px-wide stack box. With
+// fewer cards, reusing those same positions leaves the group lopsided
+// (e.g. a lone card sitting at the "front" slot has ~56px of empty space
+// on one side and ~12px on the other) — these per-count overrides
+// recenter the visible group's actual (post-rotation) bounding box
+// instead. Indexed by [visibleCount][stackIndex], stackIndex 0 = front.
+const STACK_LEFT_BY_COUNT: Record<number, number[]> = {
+  1: [41],
+  2: [50, 24],
+  3: [63, 37, 11],
+};
+
 function TypeGrid({
   categories,
   cardsByMood,
@@ -236,24 +249,28 @@ function TypeGrid({
               transition={{ duration: 0.25, ease: EASE }}
             />
             <div className={styles.typeGridStack}>
-              {[cards[2], cards[1], cards[0]].map((card, i) => {
-                // i=0 is cards[2] (back), i=2 is cards[0] (front) — stack
-                // position classes/z-index stay in that back-to-front order.
-                if (!card) return null;
-                const stackIndex = 2 - i; // 0 = front/cards[0], 2 = back/cards[2]
-                const posClass = [styles.typeStackImg1, styles.typeStackImg2, styles.typeStackImg3][stackIndex];
-                return (
-                  <motion.img
-                    key={card.id}
-                    layoutId={`type-thumb-${card.id}`}
-                    src={card.image}
-                    alt=""
-                    className={`${styles.typeStackImg} ${posClass}`}
-                    style={{ rotate: STACK_ROTATIONS[stackIndex] }}
-                    transition={{ duration: 0.5, ease: EASE }}
-                  />
-                );
-              })}
+              {(() => {
+                const visibleCount = Math.min(cards.length, 3);
+                const lefts = STACK_LEFT_BY_COUNT[visibleCount] ?? STACK_LEFT_BY_COUNT[3];
+                return [cards[2], cards[1], cards[0]].map((card, i) => {
+                  // i=0 is cards[2] (back), i=2 is cards[0] (front) — stack
+                  // position classes/z-index stay in that back-to-front order.
+                  if (!card) return null;
+                  const stackIndex = 2 - i; // 0 = front/cards[0], 2 = back/cards[2]
+                  const posClass = [styles.typeStackImg1, styles.typeStackImg2, styles.typeStackImg3][stackIndex];
+                  return (
+                    <motion.img
+                      key={card.id}
+                      layoutId={`type-thumb-${card.id}`}
+                      src={card.image}
+                      alt=""
+                      className={`${styles.typeStackImg} ${posClass}`}
+                      style={{ rotate: STACK_ROTATIONS[stackIndex], left: lefts[stackIndex] }}
+                      transition={{ duration: 0.5, ease: EASE }}
+                    />
+                  );
+                });
+              })()}
             </div>
             <motion.p
               className={styles.typeGridLabel}
@@ -393,6 +410,7 @@ function CategoryOverlay({
             {restDreams.map((card) => (
               <motion.div
                 key={card.id}
+                className={styles.overlayStaggerItem}
                 variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.3, ease: EASE }}
               >

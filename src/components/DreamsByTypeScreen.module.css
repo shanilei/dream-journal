@@ -1,18 +1,39 @@
-/* ── Background ── */
+/* ── Background ──
+   The cosmic gradient's color stops are percentages, so it must be pinned
+   to a fixed 100dvh layer (not painted on the scrolling container itself) —
+   otherwise on long dream lists the dark navy portion gets stretched across
+   the full scroll height and the lighter end shows through partway down.
+   Matches the fixed-background + separately-scrolling-content split used
+   in DreamTypeScreen. */
 .screen {
   animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
   position: relative;
   width: 100%;
   max-width: var(--shell-max-width);
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100vh;
+  height: 100dvh;
   margin: 0 auto;
+  overflow: hidden;
+  background: #0B1020;
+}
+
+.screen::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
+  pointer-events: none;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-x: none;
   touch-action: pan-y;
-  background: #0B1020;
-  background-image: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
   padding-bottom: 120px;
 }
 
