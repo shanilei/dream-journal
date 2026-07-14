@@ -634,7 +634,13 @@
 
 .typeGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  /* Fixed-width columns (not 1fr) + justify-content: center, instead of
+     stretching each card to fill half the row — so on wide viewports
+     (tablet breakpoints, where --shell-max-width itself grows) the pair
+     sits tight together as one centered block instead of each card
+     ballooning to fill its own half and ending up far apart. */
+  grid-template-columns: repeat(2, minmax(0, 200px));
+  justify-content: center;
   gap: 10px;
   /* Bottom padding bumped 100px → 180px: the more-spacious card padding
      added ~26px of height per row, which was eating into the clearance
@@ -658,6 +664,8 @@
   gap: 22px;
   padding: 24px 8px 24px;
   min-height: 130px;
+  width: 100%;
+  max-width: 200px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -676,19 +684,23 @@
 
 /* Thumbnails sit fully in-flow inside the card (no negative offsets
    poking past its edge), so nothing needs clipping and the 10px grid gap
-   is never encroached on by a neighboring card's photos. */
+   is never encroached on by a neighboring card's photos.
+   Everything below is expressed as a % of this box (rather than the old
+   fixed 158×88px) so the whole fanned stack — images included — scales
+   down together with the card on narrow screens instead of overflowing
+   or crowding the card's side padding. */
 .typeGridStack {
   position: relative;
   z-index: 1;
-  width: 158px;
-  height: 88px;
+  width: 100%;
+  aspect-ratio: 158 / 88;
   margin: 0 auto;
 }
 
 .typeStackImg {
   position: absolute;
-  width: 76px;
-  height: 82px;
+  width: 48.101%; /* 76 / 158 */
+  aspect-ratio: 76 / 82;
   border-radius: 7px;
   object-fit: cover;
   box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
@@ -698,26 +710,25 @@
    TypeGrid in HomeScreenClient.tsx) instead of a static CSS transform, so
    the shared-element transition can animate it back to 0deg. Only
    position/z-index stay here. */
-/* left offsets shifted +11px from the original 56/30/4 so the fanned
-   trio (spanning 128px) sits centered in the 158px-wide .typeGridStack
-   box (15px margin each side) instead of hugging the left edge (4px
-   left / 26px right) — the lopsided margin was the same in both LTR
-   and RTL since these are physical offsets, not logical ones. */
+/* left offsets (as % of stack width) centered the fanned trio in the
+   stack box instead of hugging one edge — the lopsided margin was the
+   same in both LTR and RTL since these were physical px offsets, not
+   logical ones. */
 .typeStackImg1 {
-  top: 4px;
-  left: 63px;
+  top: 4.545%; /* 4 / 88 */
+  left: 39.873%; /* 63 / 158 */
   z-index: 3;
 }
 
 .typeStackImg2 {
-  top: 2px;
-  left: 37px;
+  top: 2.273%; /* 2 / 88 */
+  left: 23.418%; /* 37 / 158 */
   z-index: 2;
 }
 
 .typeStackImg3 {
   top: 0;
-  left: 11px;
+  left: 6.962%; /* 11 / 158 */
   z-index: 1;
 }
 

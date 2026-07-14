@@ -201,17 +201,20 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
 // dragging the (still-animating) images' opacity down with them.
 const STACK_ROTATIONS = [29.21, 10.96, -9.7]; // cards[0], cards[1], cards[2]
 
-// The .typeStackImg1/2/3 CSS positions (left: 63/37/11) are tuned to
-// center a full 3-card rotated fan inside the 158px-wide stack box. With
-// fewer cards, reusing those same positions leaves the group lopsided
-// (e.g. a lone card sitting at the "front" slot has ~56px of empty space
-// on one side and ~12px on the other) — these per-count overrides
-// recenter the visible group's actual (post-rotation) bounding box
-// instead. Indexed by [visibleCount][stackIndex], stackIndex 0 = front.
-const STACK_LEFT_BY_COUNT: Record<number, number[]> = {
-  1: [41],
-  2: [50, 24],
-  3: [63, 37, 11],
+// The .typeStackImg1/2/3 CSS positions (left: 39.873%/23.418%/6.962%,
+// i.e. 63/37/11 out of the 158px reference width the stack box scales
+// from) are tuned to center a full 3-card rotated fan inside the stack
+// box. With fewer cards, reusing those same positions leaves the group
+// lopsided (e.g. a lone card sitting at the "front" slot has ~56px of
+// empty space on one side and ~12px on the other) — these per-count
+// overrides recenter the visible group's actual (post-rotation)
+// bounding box instead. Expressed as % (not px) so it scales down
+// together with the stack on narrow screens. Indexed by
+// [visibleCount][stackIndex], stackIndex 0 = front.
+const STACK_LEFT_BY_COUNT: Record<number, string[]> = {
+  1: ["25.949%"], // 41 / 158
+  2: ["31.646%", "15.190%"], // 50 / 158, 24 / 158
+  3: ["39.873%", "23.418%", "6.962%"], // 63 / 158, 37 / 158, 11 / 158
 };
 
 function TypeGrid({
