@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
+import type { Variants } from "framer-motion";
 import styles from "./YourJourneyScreen.module.css";
 import BottomNav from "./BottomNav";
 import SettingsSheet from "./SettingsSheet";
@@ -68,14 +69,14 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
   // restarts its own stagger timer once its turn comes, so the totals
   // compound. Tuned so the full assembly (header through trends) lands
   // inside the 500–700ms target instead of dragging on.
-  const staggerContainer = {
+  const staggerContainer: Variants = {
     hidden: {},
     show: {
       transition: reduceMotion ? {} : { staggerChildren: 0.05, delayChildren: 0.03 },
     },
   };
 
-  const fadeUp = {
+  const fadeUp: Variants = {
     hidden: { opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : 8 },
     show: {
       opacity: 1,

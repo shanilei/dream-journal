@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import type { Variants } from "framer-motion";
 import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
 import FavoriteButton from "@/components/FavoriteButton";
@@ -307,11 +308,11 @@ function TypeGrid({
   // Category cards fade in with a short 30–40ms stagger — opacity/y only,
   // no rotation or dramatic movement (the fanned photo stack's own tilt
   // is unrelated, already handled by STACK_ROTATIONS below).
-  const cardStagger = {
+  const cardStagger: Variants = {
     hidden: {},
     show: { transition: { staggerChildren: 0.035 } },
   };
-  const cardFadeUp = {
+  const cardFadeUp: Variants = {
     hidden: { opacity: 0, y: 8 },
     show: { opacity: 1, y: 0, transition: { duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE } },
   };
@@ -638,7 +639,11 @@ export default function HomeScreenClient({
   // time to fully settle (see NAVIGATE_AFTER), where it re-mounts with
   // skipEntrance so it doesn't replay any of it.
   const [openingCard, setOpeningCard] = useState<Card | null>(null);
-  const navigateTimeoutRef = useRef<ReturnType<typeof window.setTimeout> | null>(null);
+  // Explicit `number` (not ReturnType<typeof window.setTimeout>) — with
+  // @types/node in scope, that ReturnType resolves to Node's Timeout
+  // instead of the DOM's number, even though this is client-only code
+  // where window.setTimeout always returns a number.
+  const navigateTimeoutRef = useRef<number | null>(null);
 
   function openDream(card: Card) {
     if (openingCard) return;
