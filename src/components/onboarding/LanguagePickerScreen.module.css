@@ -18,6 +18,14 @@
 
 .headingBlock {
   max-width: 320px;
+  /* Measured: both "Choose your language" (en) and the Hebrew
+     equivalent wrap to the same 2-line heading + 1-line subtitle at
+     this max-width, giving an identical 146px today — reserved as a
+     floor so the buttons/CTA below (the screen is bottom-anchored via
+     .screen's justify-content: flex-end) never shift vertically if a
+     future copy change makes one language wrap differently than the
+     other. */
+  min-height: 146px;
   display: flex;
   flex-direction: column;
   gap: 12px;
