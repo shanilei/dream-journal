@@ -730,6 +730,7 @@ export default function HomeScreenClient({
       <Link
         key={card.id}
         href={`/dream/${card.id}`}
+        prefetch={false}
         className={className}
         style={{ "--card-index": index } as React.CSSProperties}
         onClick={(e) => {
