@@ -12,6 +12,8 @@ import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon } from "@
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
+import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
+import { toGalleryThumbnailUrl } from "@/lib/thumbnail";
 import { useState, useEffect, useRef } from "react";
 
 // Calm, physical "dreamy" easing per the app's motion system — matches
@@ -229,7 +231,7 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
                           >
                             <Link href={`/dream/${dream.id}`} className={`${styles.calCell} ${isToday ? styles.calCellSelected : ""}`}>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={dream.image} alt="" className={styles.calCellImg} />
+                              <img src={dream.image} alt="" className={styles.calCellImg} loading="lazy" decoding="async" />
                               <span className={`${styles.calCellNum} ${styles.calCellNumLight}`}>{day}</span>
                             </Link>
                           </motion.div>
@@ -619,6 +621,10 @@ export default function HomeScreenClient({
 }) {
   const router = useRouter();
   const { lang, t } = useLanguage();
+  // The pulsing background gradient (.screen::before) is purely
+  // decorative — pause it once the user's settled in or after a few
+  // idle seconds, matching every other screen (see useIdleAnimationPause).
+  const { paused: bgAnimPaused, rootRef: screenRef } = useIdleAnimationPause();
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [filter, setFilter] = useState<FilterMode>("all");
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
@@ -736,11 +742,19 @@ export default function HomeScreenClient({
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <motion.img
             layoutId={`dream-photo-${card.id}`}
-            src={card.image}
+            src={toGalleryThumbnailUrl(card.image)}
             alt=""
             className={imgClass}
             style={{ opacity: isOpening ? 0 : 1 }}
             transition={{ type: "tween", duration: 0.45, ease: EASE }}
+            loading="lazy"
+            decoding="async"
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (img.dataset.fallback) return;
+              img.dataset.fallback = "1";
+              img.src = card.image;
+            }}
           />
           <span className={styles.gridMoodTag} dir="auto">{translateMood(card.mood, lang)}</span>
           <FavoriteButton
@@ -759,7 +773,7 @@ export default function HomeScreenClient({
 
   return (
     <LayoutGroup>
-    <div className={styles.screen}>
+    <div ref={screenRef} className={`${styles.screen} ${bgAnimPaused ? styles.animPaused : ""}`}>
       {/* Frozen while the category overlay OR a dream is opening — the
           whole Gallery (including BottomNav) stops receiving touch/click
           input, per the shared-element transition spec, while it stays

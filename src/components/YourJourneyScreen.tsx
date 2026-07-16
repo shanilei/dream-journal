@@ -8,6 +8,7 @@ import BottomNav from "./BottomNav";
 import SettingsSheet from "./SettingsSheet";
 import AnimatedNumber from "./AnimatedNumber";
 import { useLanguage } from "./LanguageProvider";
+import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
 import { translateMood } from "@/i18n/translations";
 import {
   SettingsIcon,
@@ -62,6 +63,7 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
   const { lang, t } = useLanguage();
   const isHe = lang === "he";
   const reduceMotion = useReducedMotion();
+  const { paused: bgAnimPaused, rootRef: screenRef } = useIdleAnimationPause();
 
   // staggerChildren/delayChildren kept small (0.05/0.03) since this same
   // container nests three levels deep (content → statsCard → statsCol,
@@ -140,7 +142,7 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
   const sinceDate = isHe ? stats.sinceDateHe : stats.sinceDate;
 
   return (
-    <div className={styles.screen}>
+    <div ref={screenRef} className={`${styles.screen} ${bgAnimPaused ? styles.animPaused : ""}`}>
       {/* Background — same nebula system as Gallery/Record/Type */}
       <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
       <div className={`${styles.nebula} ${styles.nebulaPurple}`} />

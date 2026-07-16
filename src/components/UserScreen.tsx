@@ -8,6 +8,7 @@ import { ArrowLeftIcon } from "./Icons";
 import { useTheme } from "./ThemeProvider";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
+import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
 
 function Toggle({
   checked,
@@ -40,9 +41,10 @@ export default function UserScreen() {
   const isHebrew = lang === "he";
   const [notifications, setNotifications] = useState(true);
   const [saveToLibrary, setSaveToLibrary] = useState(true);
+  const { paused: bgAnimPaused, rootRef: screenRef } = useIdleAnimationPause();
 
   return (
-    <div className={styles.screen}>
+    <div ref={screenRef} className={`${styles.screen} ${bgAnimPaused ? styles.animPaused : ""}`}>
       <div className={styles.glow1} />
       <div className={styles.glow2} />
       <div className={styles.glow3} />

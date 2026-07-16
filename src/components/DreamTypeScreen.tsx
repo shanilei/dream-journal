@@ -5,6 +5,7 @@ import Link from "next/link";
 import styles from "./DreamTypeScreen.module.css";
 import { ArrowLeftIcon, ArrowUpIcon } from "./Icons";
 import { useLanguage } from "./LanguageProvider";
+import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
 
 type Status = "typing" | "error";
 
@@ -21,6 +22,7 @@ export default function DreamTypeScreen({
 }) {
   const { t } = useLanguage();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { paused: bgAnimPaused, rootRef: screenRef } = useIdleAnimationPause();
 
   function handleInput(e: React.ChangeEvent<HTMLTextAreaElement>) {
     onChange(e.target.value);
@@ -37,7 +39,7 @@ export default function DreamTypeScreen({
   }
 
   return (
-    <div className={`${styles.screen} lockedScreen`}>
+    <div ref={screenRef} className={`${styles.screen} ${bgAnimPaused ? styles.animPaused : ""} lockedScreen`}>
       <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
       <div className={`${styles.nebula} ${styles.nebulaPurple}`} />
       <div className={`${styles.nebula} ${styles.nebulaCyan}`} />

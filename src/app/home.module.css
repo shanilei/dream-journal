@@ -48,6 +48,14 @@
   pointer-events: none;
 }
 
+/* Purely decorative — paused after a few idle seconds or once the user
+   interacts, resumed on return/visibility (see useIdleAnimationPause).
+   animation-play-state, not display:none, so it freezes exactly where it
+   was instead of restarting the fade from scratch on resume. */
+.screen.animPaused::before {
+  animation-play-state: paused;
+}
+
 /* ===================== NEBULA BLOBS ===================== */
 .nebula {
   position: fixed;

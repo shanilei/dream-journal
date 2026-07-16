@@ -105,56 +105,49 @@ export default function BottomNav({
         aria-hidden={hidden}
         inert={hidden || undefined}
       >
-        {/* Left item (user) */}
-        <motion.div
-          animate={{ opacity: expanded ? 0.4 : 1 }}
-          transition={{ duration: 0.2, ease: EASE }}
-          style={{ pointerEvents: expanded ? "none" : undefined }}
-        >
-          <Link
-            href={items[0].href}
-            className={`${styles.circle} ${active === items[0].key ? styles.active : ""}`}
-            aria-disabled={expanded}
-            tabIndex={expanded ? -1 : undefined}
-            onClick={(e) => expanded && e.preventDefault()}
+        {/* Left item (user) — also anchors the Record pill directly above
+            itself (position: relative + the pill's left:50% inside it),
+            instead of guessing a pixel offset from the center button
+            that drifted out of alignment on wider/tablet nav layouts.
+            The pill sits as a sibling of the dimmed-opacity circle, not
+            nested inside it — otherwise it would inherit that 0.4
+            opacity itself and never look fully white. */}
+        <div className={styles.navItemSlot}>
+          <AnimatePresence>
+            {expanded && (
+              <motion.div
+                className={styles.addMenuPillWrap}
+                initial={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
+                animate={{ opacity: 1, scale: 1, y: 0, x: 20.5, rotate: -8 }}
+                exit={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
+                transition={{ duration: 0.32, ease: EASE }}
+              >
+                <Link href="/record" className={styles.addMenuPill} onClick={() => setExpanded(false)}>
+                  <MicIcon size={18} color="#000" />
+                  <span className={styles.addMenuPillLabel}>{t.navRecord}</span>
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <motion.div
+            animate={{ opacity: expanded ? 0.4 : 1 }}
+            transition={{ duration: 0.2, ease: EASE }}
+            style={{ pointerEvents: expanded ? "none" : undefined }}
           >
-            <span className={styles.iconLayer}>{items[0].icon(active === items[0].key ? "#000624" : "#fff")}</span>
-          </Link>
-        </motion.div>
+            <Link
+              href={items[0].href}
+              className={`${styles.circle} ${active === items[0].key ? styles.active : ""}`}
+              aria-disabled={expanded}
+              tabIndex={expanded ? -1 : undefined}
+              onClick={(e) => expanded && e.preventDefault()}
+            >
+              <span className={styles.iconLayer}>{items[0].icon(active === items[0].key ? "#000624" : "#fff")}</span>
+            </Link>
+          </motion.div>
+        </div>
 
         {/* Middle item (record) — long-press target, morphs into Close */}
         <div className={styles.centerSlot}>
-          <AnimatePresence>
-            {expanded && (
-              <>
-                <motion.div
-                  className={styles.addMenuPillWrap}
-                  initial={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
-                  animate={{ opacity: 1, scale: 1, y: 0, x: -74, rotate: -8 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
-                  transition={{ duration: 0.32, ease: EASE }}
-                >
-                  <Link href="/record" className={styles.addMenuPill} onClick={() => setExpanded(false)}>
-                    <span className={styles.addMenuPillLabel}>{t.navRecord}</span>
-                    <MicIcon size={18} color="#000" />
-                  </Link>
-                </motion.div>
-                <motion.div
-                  className={styles.addMenuPillWrap}
-                  initial={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
-                  animate={{ opacity: 1, scale: 1, y: 0, x: 74, rotate: 8 }}
-                  exit={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
-                  transition={{ duration: 0.32, ease: EASE }}
-                >
-                  <Link href="/record/type" className={styles.addMenuPill} onClick={() => setExpanded(false)}>
-                    <span className={styles.addMenuPillLabel}>{t.navWrite}</span>
-                    <PencilIcon size={18} color="#000" />
-                  </Link>
-                </motion.div>
-              </>
-            )}
-          </AnimatePresence>
-
           {expanded ? (
             <button
               type="button"
@@ -189,22 +182,42 @@ export default function BottomNav({
           )}
         </div>
 
-        {/* Right item (dreams) */}
-        <motion.div
-          animate={{ opacity: expanded ? 0.4 : 1 }}
-          transition={{ duration: 0.2, ease: EASE }}
-          style={{ pointerEvents: expanded ? "none" : undefined }}
-        >
-          <Link
-            href={items[1].href}
-            className={`${styles.circle} ${active === items[1].key ? styles.active : ""}`}
-            aria-disabled={expanded}
-            tabIndex={expanded ? -1 : undefined}
-            onClick={(e) => expanded && e.preventDefault()}
+        {/* Right item (dreams) — anchors the Write pill directly above
+            itself, same reasoning (and same "pill is a sibling, not a
+            child, of the dimmed circle") as the left item above. */}
+        <div className={styles.navItemSlot}>
+          <AnimatePresence>
+            {expanded && (
+              <motion.div
+                className={styles.addMenuPillWrap}
+                initial={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
+                animate={{ opacity: 1, scale: 1, y: 0, x: -20.5, rotate: 8 }}
+                exit={{ opacity: 0, scale: 0.9, y: 6, x: 0, rotate: 0 }}
+                transition={{ duration: 0.32, ease: EASE }}
+              >
+                <Link href="/record/type" className={styles.addMenuPill} onClick={() => setExpanded(false)}>
+                  <PencilIcon size={18} color="#000" />
+                  <span className={styles.addMenuPillLabel}>{t.navWrite}</span>
+                </Link>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <motion.div
+            animate={{ opacity: expanded ? 0.4 : 1 }}
+            transition={{ duration: 0.2, ease: EASE }}
+            style={{ pointerEvents: expanded ? "none" : undefined }}
           >
-            <span className={styles.iconLayer}>{items[1].icon(active === items[1].key ? "#000624" : "#fff")}</span>
-          </Link>
-        </motion.div>
+            <Link
+              href={items[1].href}
+              className={`${styles.circle} ${active === items[1].key ? styles.active : ""}`}
+              aria-disabled={expanded}
+              tabIndex={expanded ? -1 : undefined}
+              onClick={(e) => expanded && e.preventDefault()}
+            >
+              <span className={styles.iconLayer}>{items[1].icon(active === items[1].key ? "#000624" : "#fff")}</span>
+            </Link>
+          </motion.div>
+        </div>
       </nav>
     </>
   );

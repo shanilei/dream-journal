@@ -32,6 +32,12 @@
   pointer-events: none;
 }
 
+/* Purely decorative — paused after a few idle seconds or once the user
+   interacts, resumed on return/visibility (see useIdleAnimationPause). */
+.screen.animPaused::before {
+  animation-play-state: paused;
+}
+
 /* ── Nebula blobs ──────────────────────────────────────────────────────── */
 .nebula {
   position: fixed;

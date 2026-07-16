@@ -11,6 +11,7 @@ import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CloseIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
 import { useIsTablet } from "@/lib/useIsTablet";
+import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
 
 type DreamResult = {
   id: string;
@@ -66,6 +67,20 @@ export default function RecordPage() {
   const pendingActionRef = useRef<"submit" | "discard">("submit");
 
   const isRecording = status === "recording";
+
+  // The idle screen's background (gradient pulse, starfield twinkle, glow
+  // blobs, the orb's rotating rings) is decorative — pause it once the
+  // user's settled in or after a few idle seconds, same as every other
+  // screen. Recording itself always overrides it: the orb visually
+  // representing "I'm listening" shouldn't go idle-still mid-recording,
+  // so it's excluded from the paused state below regardless of what the
+  // hook's own idle timer is doing internally.
+  const { paused: idleAnimPaused, rootRef: screenRef, resume: resumeIdleAnim } = useIdleAnimationPause();
+  const bgAnimPaused = idleAnimPaused && !isRecording;
+
+  useEffect(() => {
+    if (isRecording) resumeIdleAnim();
+  }, [isRecording, resumeIdleAnim]);
 
   // Ticks once a second while actively recording; pausing freezes it in
   // place instead of continuing to count silent time.
@@ -153,7 +168,11 @@ export default function RecordPage() {
   }
 
   return (
-    <div className={`${styles.screen} lockedScreen`} data-tablet={isTablet || undefined}>
+    <div
+      ref={screenRef}
+      className={`${styles.screen} ${bgAnimPaused ? styles.animPaused : ""} lockedScreen`}
+      data-tablet={isTablet || undefined}
+    >
       <div className={styles.glowBlue} />
       <div className={styles.glowPurple} />
       <div className={styles.starfield} />

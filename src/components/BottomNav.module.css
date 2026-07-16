@@ -13,6 +13,13 @@
   padding: 10px 24px;
   opacity: 1;
   transition: transform 0.45s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.35s ease;
+  /* Flexbox reverses its main-axis order in an RTL document even though
+     the DOM order doesn't change — without this, the "user" circle (the
+     first child) renders on the right in Hebrew and "dreams" on the
+     left, which then also flips which side the Record/Write pills
+     (each anchored to its own circle) land on. Icons carry no text, so
+     forcing ltr here has no effect on Hebrew rendering elsewhere. */
+  direction: ltr;
 }
 
 /* Slides the whole bar down out of view (e.g. while recording is active) —
@@ -37,6 +44,12 @@
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.15);
   transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.15s ease, opacity 1s ease;
+  /* Without this, iOS Safari's own long-press-on-link callout ("Open",
+     "Open in New Tab", "Share…") intercepts the 3s press meant for the
+     Add-button menu before our pointer handlers ever see it. */
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .circle.active {
@@ -89,6 +102,12 @@
   justify-content: center;
 }
 
+/* Wraps the left/right nav items (user, dreams) so each can anchor its
+   own pill directly above itself — see .addMenuPillWrap below. */
+.navItemSlot {
+  position: relative;
+}
+
 /* .expanded reuses .active's glass-to-solid-white look — the middle
    button is still visually "the same circle", just holding a Close icon
    instead of Add now. */
@@ -99,26 +118,49 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-/* Zero-size anchor point, animated by Framer Motion (opacity/scale/y/x/
-   rotate — see BottomNav.tsx) — the visible pill inside is a separate,
-   non-animated element so Framer's transform never has to fight a CSS
-   transform on the same node. left: 50% anchors it to the nav's
-   horizontal center; Framer's x offset then fans it out left/right.
-   Physical `left`/`transform`, not logical properties, so Record stays
-   visually left and Write stays visually right in RTL Hebrew too. */
+/* Zero-size anchor point, animated by Framer Motion (opacity/scale/y/
+   rotate — see BottomNav.tsx), positioned relative to .navItemSlot —
+   i.e. directly above the specific circle (user/dreams) it belongs to,
+   rather than a guessed pixel offset from the center button that drifted
+   out of alignment once nav sizing/gap changed at the tablet breakpoint.
+   The visible pill inside is a separate, non-animated element so
+   Framer's transform never has to fight the CSS centering transform on
+   the same node. Physical `left`/`transform`, not logical properties, so
+   Record stays visually left and Write stays visually right in RTL
+   Hebrew too. */
 .addMenuPillWrap {
   position: absolute;
-  bottom: calc(100% + 14px);
+  bottom: calc(100% + 20px);
   left: 50%;
+  /* Centered via layout (margin-left), not a transform — a translateX
+     on the child below would compose *inside* this wrap's own rotation
+     (Framer's rotate, applied here), so a -50% shift reads as a
+     diagonal move in the wrap's tilted frame instead of a pure
+     horizontal one. Record (-8deg) and Write (+8deg) would then each
+     pick up a vertical component in opposite directions, landing at
+     different heights — exactly what margin-based centering avoids by
+     never introducing a second transform into the chain. Half of
+     .addMenuPill's 116px width. */
+  margin-left: -58px;
+  /* Pivot from the bottom-center (not the default center-center) so
+     Record's -8deg and Write's +8deg rotations keep both pills' bottom
+     edges level with each other. */
+  transform-origin: center bottom;
 }
 
 .addMenuPill {
   position: relative;
-  transform: translateX(-50%);
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
-  padding: 12px 20px;
+  /* Fixed width (not padding-driven auto-size) so "Record"/"Write" (and
+     "הקלטה"/"כתיבה") produce identical rotated geometry — two different-
+     width pills rotated by equal-and-opposite angles still swing their
+     corners by different amounts, which is what made them sit at
+     different heights before. */
+  width: 116px;
+  padding: 12px 16px;
   border-radius: 33.5px;
   background: #ffffff;
   color: #000000;
@@ -129,6 +171,13 @@
   white-space: nowrap;
   text-decoration: none;
   cursor: pointer;
+}
+
+/* Without this, Chromium can mis-compute the flex-basis of an <svg> that
+   only carries its size via width/height attributes (not CSS) and
+   squashes it down to a couple of px instead of its real 18px. */
+.addMenuPill svg {
+  flex-shrink: 0;
 }
 
 .addMenuPillLabel {
