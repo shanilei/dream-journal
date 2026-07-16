@@ -37,11 +37,9 @@ const alumniSans = Alumni_Sans({
 
 const ploni = localFont({
   src: [
-    { path: "../../font/ploni-light-aaa.otf", weight: "300" },
     { path: "../../font/ploni-regular-aaa.otf", weight: "400" },
     { path: "../../font/ploni-medium-aaa.otf", weight: "500" },
     { path: "../../font/ploni-demibold-aaa.otf", weight: "600" },
-    { path: "../../font/ploni-bold-aaa.otf", weight: "700" },
   ],
   variable: "--font-ploni",
 });

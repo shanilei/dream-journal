@@ -3,15 +3,29 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import styles from "./record.module.css";
 import BottomNav from "@/components/BottomNav";
-import DreamLoadingScreen from "@/components/DreamLoadingScreen";
-import DreamResultScreen from "@/components/DreamResultScreen";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CloseIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
 import { useIsTablet } from "@/lib/useIsTablet";
 import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
+
+// Not needed for the idle/recording UI (the vast majority of a visit to
+// this route) — only mounted once transcription/analysis is already
+// underway, by which point there's real network wait time to absorb the
+// small extra chunk fetch. `loading: () => null` matches this route's
+// existing dark background (see .screen in record.module.css / body in
+// globals.css) instead of a stock spinner, so any brief gap between
+// status flipping and the chunk resolving reads as "still on the same
+// dark screen," not a flash.
+const DreamLoadingScreen = dynamic(() => import("@/components/DreamLoadingScreen"), {
+  loading: () => null,
+});
+const DreamResultScreen = dynamic(() => import("@/components/DreamResultScreen"), {
+  loading: () => null,
+});
 
 type DreamResult = {
   id: string;
