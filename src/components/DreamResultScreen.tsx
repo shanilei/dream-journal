@@ -130,23 +130,29 @@ export default function DreamResultScreen({
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
   const [revealed, setRevealed] = useState(false);
-  const [navHidden, setNavHidden] = useState(false);
+  // Starts hidden — keeps focus on the artwork/interpretation the moment
+  // this screen opens, before the user has scrolled at all. Reveals with
+  // BottomNav's existing slide-up/fade `hidden` prop (same mechanism
+  // already used during recording) once the user scrolls past a small
+  // threshold, then stays visible while they keep reading regardless of
+  // scroll direction — only hides again if they scroll back to the very
+  // top. The gap between the two thresholds avoids flicker if the
+  // scroll position happens to sit right at either edge.
+  const [navHidden, setNavHidden] = useState(true);
 
-  // Hide the bottom nav while scrolling down (more room to read), bring it
-  // back the moment the user scrolls back up — same slide-down/fade
-  // `hidden` prop BottomNav already uses during recording.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    let lastY = el.scrollTop;
+    const SHOW_THRESHOLD = 24;
+    const HIDE_AT_TOP = 2;
     function onScroll() {
       if (!el) return;
       const y = el.scrollTop;
-      const delta = y - lastY;
-      if (Math.abs(delta) > 4) {
-        setNavHidden(delta > 0 && y > 80);
-        lastY = y;
-      }
+      setNavHidden((prev) => {
+        if (prev && y >= SHOW_THRESHOLD) return false;
+        if (!prev && y <= HIDE_AT_TOP) return true;
+        return prev;
+      });
     }
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => el.removeEventListener("scroll", onScroll);
