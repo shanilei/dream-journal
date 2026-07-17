@@ -430,34 +430,34 @@
 
 /* ── Hebrew font overrides ──────────────────────────────────────────────── */
 .titleHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
   font-weight: 600;
 }
 
 .subtitleHe p {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
 }
 
 .statsLabelHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
 }
 
 .sectionLabelHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
 }
 
 .patternLabelHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
 }
 
 .patternDescHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
 }
 
 .trendTitleHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
 }
 
 .trendSubtitleHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
 }

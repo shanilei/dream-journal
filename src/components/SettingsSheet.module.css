@@ -324,7 +324,7 @@ button.row:active {
 
 /* ── Hebrew font overrides ──────────────────────────────────────────────── */
 .titleHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
   font-weight: 600;
   font-size: 40px;
   line-height: 44px;
@@ -332,5 +332,5 @@ button.row:active {
 }
 
 .sectionLabelHe {
-  font-family: 'Ploni DL 1.1 AAA', 'Arial Hebrew', Heebo, sans-serif;
+  font-family: var(--font-ploni), serif;
 }
