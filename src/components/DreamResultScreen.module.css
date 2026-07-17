@@ -464,6 +464,51 @@
   color: #fff;
 }
 
+/* Wraps the "What does it say?" heading + Listen pill, heading pinned to
+   one edge and the pill to the other. justify-content: space-between
+   uses flexbox's own start/end, which already flips with the document's
+   dir (English: heading left, pill right — Hebrew: heading right, pill
+   left) with no RTL-specific override needed. */
+.blockHeadingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 10px;
+}
+
+/* Listen/Reading pill — Figma node 1613:17527 ("Navigation button"),
+   scaled up from its tiny Figma export units to this file's existing
+   12px/18px chip convention (see .symbolChip/.moodPill above) rather
+   than using the literal (sub-pixel) exported values. Deliberately a
+   dark navy-tinted glass rather than this app's usual white-based flat
+   glass — an intentional one-off per the Figma spec, not the general
+   card pattern. */
+.listenBtn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background: rgba(5, 10, 95, 0.5);
+  color: var(--accent-primary);
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 400;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.listenBtn:active {
+  opacity: 0.8;
+}
+
+.listenBtnIcon {
+  display: flex;
+  flex-shrink: 0;
+}
+
 .bodyText {
   margin: 0;
   font-size: 14px;
@@ -667,6 +712,16 @@
 
 :global([lang="he"]) .symbolChip {
   font-family: var(--font-ploni), serif;
+}
+
+:global([lang="he"]) .listenBtn {
+  font-family: var(--font-ploni), serif;
+}
+
+/* Same mirroring already used for .ctaIcon (LanguagePickerScreen) —
+   directional icon flips 180° in RTL so it still reads correctly. */
+:global([dir="rtl"]) .listenBtnIcon {
+  transform: scaleX(-1);
 }
 
 /* Print modal: Ploni */

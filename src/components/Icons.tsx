@@ -239,6 +239,24 @@ export function PlayIcon({ size = 16, color = "#fff" }: { size?: number; color?:
   );
 }
 
+// Matches the "volume-medium-sharp" icon used in the Dream Result
+// "Reading" pill (Figma node 1613:17527) — speaker body + two sound-wave
+// arcs, redrawn in this app's own stroke-based icon style instead of
+// pixel-matching the Ionicons source.
+export function VolumeIcon({ size = 16, color = "#fff" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M3 9.5v5h4l5 4V5.5l-5 4H3z" fill={color} />
+      <path
+        d="M16.5 8.5a5 5 0 010 7"
+        stroke={color}
+        strokeWidth={1.8}
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export function CloseIcon({ size = 16, color = "#fff" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

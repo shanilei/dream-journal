@@ -1,11 +1,12 @@
 "use client";
 
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import styles from "./SettingsSheet.module.css";
 import { useTheme } from "./ThemeProvider";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
 import { clearOnboarded } from "@/lib/onboarding";
+import { loadSelectedVoiceId, saveSelectedVoiceId } from "@/lib/voicePreference";
 import {
   AlarmIcon,
   LanguageAIcon,
@@ -15,6 +16,7 @@ import {
   ChevronRightIcon,
   UpDownChevronIcon,
   CheckmarkIcon,
+  VolumeIcon,
 } from "./Icons";
 
 type DropdownOption = { label: string; value: string };
@@ -158,7 +160,30 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
   const { showBorder, toggleBorder } = usePhotoBorder();
   const [isClosing, setIsClosing] = useState(false);
   const [interpLength, setInterpLength] = useState<InterpLength>("long");
+  const [voices, setVoices] = useState<{ id: string; name: string }[]>([]);
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const isHe = lang === "he";
+
+  // Only the voices actually added to the ElevenLabs account show up
+  // here (see /api/voices) — not the full default library. Defaults to
+  // whichever was picked last time; if nothing's been picked yet, falls
+  // back to the first voice in the list once it loads.
+  useEffect(() => {
+    setSelectedVoiceId(loadSelectedVoiceId());
+    fetch("/api/voices")
+      .then((res) => res.json())
+      .then((data: { voices?: { id: string; name: string }[] }) => {
+        const list = data.voices ?? [];
+        setVoices(list);
+        setSelectedVoiceId((current) => current ?? list[0]?.id ?? null);
+      })
+      .catch(() => {});
+  }, []);
+
+  function handleSelectVoice(voiceId: string) {
+    setSelectedVoiceId(voiceId);
+    saveSelectedVoiceId(voiceId);
+  }
 
   function handleClose() {
     setIsClosing(true);
@@ -191,6 +216,9 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
       ];
 
   const interpLabel = interpOptions.find((o) => o.value === interpLength)?.label ?? t.settingsLong;
+
+  const voiceOptions: DropdownOption[] = voices.map((v) => ({ value: v.id, label: v.name }));
+  const voiceLabel = voices.find((v) => v.id === selectedVoiceId)?.name ?? "";
 
   const sectionLabelClass = isHe
     ? `${styles.sectionLabelLarge} ${styles.sectionLabelHe}`
@@ -251,6 +279,16 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
                 selectedValue={interpLength}
                 onSelectOption={(v) => setInterpLength(v as InterpLength)}
               />
+              {voices.length > 0 && (
+                <ValueRow
+                  icon={<VolumeIcon size={18} color="#fff" />}
+                  label={t.settingsVoice}
+                  value={voiceLabel}
+                  dropdownOptions={voiceOptions}
+                  selectedValue={selectedVoiceId ?? ""}
+                  onSelectOption={handleSelectVoice}
+                />
+              )}
               <ToggleRow
                 icon={<SaveIcon size={18} color="#fff" />}
                 label={t.settingsSaveLib}

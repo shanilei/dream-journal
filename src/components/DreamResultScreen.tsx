@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, ShareIcon, PrinterIcon } from "./Icons";
+import { ArrowLeftIcon, ShareIcon, PrinterIcon, PlayIcon, VolumeIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import BottomNav from "./BottomNav";
 import { useLanguage } from "./LanguageProvider";
@@ -12,6 +12,7 @@ import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translat
 
 import { CAPTION_MAX_WORDS, getCaptionWords, pickCaptionLayout, isHebrewText } from "@/lib/caption";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
+import { loadSelectedVoiceId } from "@/lib/voicePreference";
 
 // This screen is rendered in two places that must look identical and
 // never re-animate against each other: (1) as the real /dream/[id]
@@ -264,6 +265,53 @@ export default function DreamResultScreen({
     }
   }
 
+  const [ttsStatus, setTtsStatus] = useState<"idle" | "loading" | "playing" | "unavailable">("idle");
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  async function handleListen() {
+    if (ttsStatus === "playing") {
+      audioRef.current?.pause();
+      setTtsStatus("idle");
+      return;
+    }
+    if (ttsStatus === "loading") return;
+
+    const text = interpretationText || summaryText;
+    if (!text) return;
+
+    setTtsStatus("loading");
+    try {
+      const voiceId = loadSelectedVoiceId();
+      const res = await fetch("/api/tts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, voiceId }),
+      });
+      if (res.status === 501) {
+        setTtsStatus("unavailable");
+        setTimeout(() => setTtsStatus("idle"), 2500);
+        return;
+      }
+      if (!res.ok) throw new Error("tts request failed");
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      if (!audioRef.current) audioRef.current = new Audio();
+      const audio = audioRef.current;
+      audio.src = url;
+      audio.onended = () => setTtsStatus("idle");
+      await audio.play();
+      setTtsStatus("playing");
+    } catch {
+      setTtsStatus("idle");
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      audioRef.current?.pause();
+    };
+  }, []);
+
   function handlePrint() {
     setShowPrintModal(false);
     // A hidden .printCard copy of the image card lives in this same
@@ -432,7 +480,28 @@ export default function DreamResultScreen({
             style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}
             {...fadeStep(6)}
           >
-            <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
+            <div className={styles.blockHeadingRow}>
+              <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
+              <button
+                type="button"
+                className={styles.listenBtn}
+                onClick={handleListen}
+                aria-label={ttsStatus === "playing" ? t.reading : t.listen}
+              >
+                <span className={styles.listenBtnIcon}>
+                  {ttsStatus === "playing" ? (
+                    <VolumeIcon size={14} color="currentColor" />
+                  ) : (
+                    <PlayIcon size={14} color="currentColor" />
+                  )}
+                </span>
+                {ttsStatus === "playing"
+                  ? t.reading
+                  : ttsStatus === "loading"
+                  ? t.loadingAudio
+                  : t.listen}
+              </button>
+            </div>
             <CollapsibleText text={interpretationText || summaryText} dark={false} />
           </motion.div>
         )}
