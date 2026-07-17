@@ -26,7 +26,7 @@ export const translations = {
     filterEmotion: "Emotion",
     filterFavorite: "Favorite",
     gallery: "Dream Journal",
-    searchPlaceholder: "Search",
+    searchPlaceholder: "Search dream",
     searchClose: "Close search",
     recentDream: "Latest Dream",
     moreCollection: "Dream History",
