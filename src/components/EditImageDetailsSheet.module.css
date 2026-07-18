@@ -180,6 +180,15 @@
   color: #fff;
   font-family: inherit;
   color-scheme: dark;
+  /* Native date/time pickers render their internal day/month/year (or
+     hour/minute) segments in the page's own direction — in RTL (Hebrew)
+     that flips their internal layout too, and on iOS Safari specifically
+     the segments then overlap/garble instead of just reordering cleanly.
+     Forcing these two inputs back to ltr only affects how Safari lays out
+     its own segment widgets; the value round-trips as a plain "YYYY-MM-DD"
+     / "HH:mm" string either way (see toDateInputValue/toTimeInputValue),
+     so this has no effect on what's actually saved. */
+  direction: ltr;
 }
 
 .input:focus {
