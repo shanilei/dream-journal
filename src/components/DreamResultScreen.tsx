@@ -166,7 +166,13 @@ export default function DreamResultScreen({
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-  const REVEAL_RADIUS = 65; // 130px spotlight
+  const REVEAL_RADIUS = 65; // 130px spotlight (mouse)
+  // Touch needs to be obviously bigger than mouse: a mouse pointer is
+  // already precisely where the user is looking, but a finger covers the
+  // touch point itself and the page can shift slightly the moment a
+  // touch starts — a same-size reveal is easy to miss entirely. ~60%
+  // bigger, within the 50–70% range.
+  const TOUCH_REVEAL_RADIUS = REVEAL_RADIUS * 1.6; // ~208px spotlight (touch)
   const targetMaskRef = useRef({ x: 0, y: 0, r: 0 });
   const displayMaskRef = useRef({ x: 0, y: 0, r: 0 });
   // Trails behind the main circle with slower easing and a larger target
@@ -384,7 +390,18 @@ export default function DreamResultScreen({
               if (!clearImageUrl) return;
               const touch = e.touches[0];
               if (touch) updateMaskPos(touch.clientX, touch.clientY);
-              targetMaskRef.current.r = REVEAL_RADIUS;
+              targetMaskRef.current.r = TOUCH_REVEAL_RADIUS;
+              // Snap straight to the target on first touch instead of
+              // easing in from wherever the last interaction left off —
+              // otherwise the initial reveal can still read as small/
+              // subtle for the first several frames, exactly the "easy
+              // to miss" problem this is meant to fix. Position/radius
+              // only for this one starting frame; the rAF loop's normal
+              // easing takes back over immediately after (touchmove,
+              // and the trail layer, are both untouched).
+              displayMaskRef.current.x = targetMaskRef.current.x;
+              displayMaskRef.current.y = targetMaskRef.current.y;
+              displayMaskRef.current.r = TOUCH_REVEAL_RADIUS;
               setRevealed(true);
             }}
             onTouchMove={(e) => {
