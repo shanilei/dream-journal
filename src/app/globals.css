@@ -55,6 +55,26 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+/* ── Widow prevention (progressive enhancement) ───────────────────────────
+   The actual guarantee ("last line always has >= 2 words") comes from
+   preventWidows() in src/lib/text.ts, applied to every string at render
+   time (see LanguageProvider's `t` and any dynamic text — CollapsibleText,
+   dream titles, computed sentences — that calls it directly). This rule
+   is a no-cost extra layer only: `text-wrap: pretty` asks supporting
+   browsers to balance wrapping and avoid orphans on its own, but it isn't
+   supported everywhere and is capped to short blocks by spec, so it can
+   never be relied on alone — preventWidows() is what makes the rule true
+   on every browser, every language, every viewport. */
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-wrap: pretty;
+}
+
 html,
 body {
   margin: 0;

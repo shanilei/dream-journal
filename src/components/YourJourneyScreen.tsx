@@ -10,6 +10,7 @@ import AnimatedNumber from "./AnimatedNumber";
 import { useLanguage } from "./LanguageProvider";
 import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
 import { translateMood } from "@/i18n/translations";
+import { preventWidows } from "@/lib/text";
 import {
   SettingsIcon,
   BoltIcon,
@@ -252,8 +253,8 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
                       )}
                     </div>
                     <div className={styles.patternInfo}>
-                      <p className={`${styles.patternLabel} ${isHe ? styles.patternLabelHe : ""}`}>{cardLabel}</p>
-                      <p className={`${styles.patternDesc} ${isHe ? styles.patternDescHe : ""}`}>{desc}</p>
+                      <p className={`${styles.patternLabel} ${isHe ? styles.patternLabelHe : ""}`}>{preventWidows(cardLabel)}</p>
+                      <p className={`${styles.patternDesc} ${isHe ? styles.patternDescHe : ""}`}>{preventWidows(desc)}</p>
                     </div>
                   </motion.div>
                 );
@@ -274,7 +275,7 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
                 <div className={styles.trendIcon}>{row.icon}</div>
                 <div className={styles.trendText}>
                   <p className={`${styles.trendTitle} ${isHe ? styles.trendTitleHe : ""}`}>{row.title}</p>
-                  <p className={`${styles.trendSubtitle} ${isHe ? styles.trendSubtitleHe : ""}`}>{row.subtitle}</p>
+                  <p className={`${styles.trendSubtitle} ${isHe ? styles.trendSubtitleHe : ""}`}>{preventWidows(row.subtitle)}</p>
                 </div>
                 <AnimatedNumber
                   value={row.numericValue}

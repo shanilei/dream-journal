@@ -15,6 +15,7 @@ import { CAPTION_MAX_WORDS, getCaptionWords, wrapCaptionLines, pickCaptionLayout
 import { toDateInputValue, toTimeInputValue, combineDateAndTime } from "@/lib/dream-format";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
 import { loadSelectedVoiceId } from "@/lib/voicePreference";
+import { preventWidows } from "@/lib/text";
 
 // This screen is rendered in two places that must look identical and
 // never re-animate against each other: (1) as the real /dream/[id]
@@ -53,7 +54,7 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
           dark ? styles.bodyTextDark : ""
         }`}
       >
-        {text.replace(/\n+/g, " ")}
+        {preventWidows(text.replace(/\n+/g, " "))}
       </p>
       {(overflowing || expanded) && (
         <button type="button" className={styles.readMoreBtn} onClick={() => setExpanded((v) => !v)}>
@@ -686,7 +687,7 @@ export default function DreamResultScreen({
 
         <div className={styles.titleBlock} style={lang === "he" ? { alignItems: "flex-start", width: "100%" } : undefined}>
           <motion.div className={styles.titleRow} {...fadeStep(0)}>
-            <p className={styles.title}>{dreamTitle}</p>
+            <p className={styles.title}>{preventWidows(dreamTitle)}</p>
             <FavoriteButton
               filled={favorited}
               onToggle={toggleFavorite}

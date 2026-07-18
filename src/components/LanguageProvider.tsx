@@ -1,7 +1,8 @@
 "use client";
 
-import { createContext, useContext, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { translations, type Lang, type TranslationKey } from "@/i18n/translations";
+import { preventWidows } from "@/lib/text";
 
 const STORAGE_KEY = "dream-journal-lang";
 
@@ -97,8 +98,24 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     setLangState((l) => (l === "en" ? "he" : "en"));
   }
 
+  // Every string in `translations` runs through preventWidows() exactly
+  // once here — the app-wide, reusable widow-prevention layer for all
+  // static UI copy (headings, prompts, buttons, labels). Any component
+  // reading `t.someKey` gets the protection for free, with no per-screen
+  // changes; only free-form dynamic text assembled outside `t` (AI-
+  // generated interpretation/dream text, computed sentences, etc.) needs
+  // to call preventWidows() itself at its own render site.
+  const t = useMemo(() => {
+    const raw = translations[lang];
+    const result = {} as Record<TranslationKey, string>;
+    for (const key in raw) {
+      result[key as TranslationKey] = preventWidows(raw[key as TranslationKey]);
+    }
+    return result;
+  }, [lang]);
+
   return (
-    <LanguageContext.Provider value={{ lang, setLang: setLangState, toggleLang, t: translations[lang], resolved, fontReady }}>
+    <LanguageContext.Provider value={{ lang, setLang: setLangState, toggleLang, t, resolved, fontReady }}>
       {children}
     </LanguageContext.Provider>
   );
