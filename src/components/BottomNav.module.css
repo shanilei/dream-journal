@@ -39,10 +39,14 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(0deg, rgba(196, 196, 196, 0.2), rgba(196, 196, 196, 0.2)), rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* Flat, atmospheric glass — nearly uniform translucent fill (no
+     directional gradient/specular patch), a faint border, and only a
+     minimal shadow for separation from the content behind it. */
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px) saturate(140%);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
   transition: background 0.22s ease, box-shadow 0.22s ease, transform 0.15s ease, opacity 1s ease;
   /* Without this, iOS Safari's own long-press-on-link callout ("Open",
      "Open in New Tab", "Share…") intercepts the 3s press meant for the
@@ -53,9 +57,10 @@
 }
 
 .circle.active {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(240, 241, 255, 0.75);
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -112,9 +117,10 @@
    button is still visually "the same circle", just holding a Close icon
    instead of Add now. */
 .circle.expanded {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(240, 241, 255, 0.75);
   backdrop-filter: blur(16px) saturate(160%);
   -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
