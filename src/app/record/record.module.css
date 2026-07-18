@@ -168,6 +168,7 @@
 
 .prompt {
   animation: recordIn 0.75s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  transform-origin: center center;
   position: absolute;
   left: calc(50% - 130px);
   top: calc(23.08% - 14px);
@@ -430,13 +431,27 @@
 }
 
 
+/* Hebrew's prompt is variable-width (two lines of differing length), so
+   it can't reuse .prompt's fixed 260px/calc(50% - 130px) centering. It
+   previously centered itself by shrink-wrapping to content width via
+   `left: 50%; transform: translateX(-50%)` — but that combines with the
+   scale-from-0 keyframe on `animation` (a separate `scale` transform)
+   in a way that doesn't compose around the box's true visual center:
+   the translate and the scale end up compounding, so the box visibly
+   grew from a point right-of-center instead of its actual middle
+   (confirmed by comparing the animated vs. resting bounding box). A
+   full-width, transform-free box with the text centered via flexbox
+   sidesteps that entirely — no transform to interact with `scale`, and
+   nothing direction-dependent (`left`/`right` here are both 0, not an
+   RTL-relative offset). */
 .promptHe {
   font-family: var(--font-ploni), serif;
   font-size: 30px;
   font-weight: 500;
   line-height: 36px;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  transform: none;
   width: auto;
   display: flex;
   flex-direction: column;
