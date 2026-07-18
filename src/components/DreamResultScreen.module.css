@@ -602,6 +602,37 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  /* Extra breathing room specifically around the divider below — adds to
+     (doesn't replace) .content's own 14px gap, and only affects the
+     space before a .block specifically (titleBlock, which has no
+     divider, is untouched), never the space inside any section. ~10px
+     more on each side of the divider once .block::before's own `top` is
+     shifted to match — see below. */
+  margin-top: 20px;
+  /* Positioning context only for ::before below — doesn't move or resize
+     this element, so it has no effect on layout/spacing by itself. */
+  position: relative;
+}
+
+/* Section divider — a soft, short, centered hairline that sits inside
+   .content's gap (now 14px + this .block's own 20px margin-top = 34px)
+   between this block and whatever precedes it (titleBlock or another
+   .block), not additional space beyond that. Purely a ::before, so no
+   DOM/structure change and no layout shift: it's absolutely positioned
+   and takes no flow space of its own. Fades at both ends via its own
+   gradient rather than a hard-edged line, and stays intentionally
+   understated — neutral rgba white, no glow/shadow/blur, nothing that
+   competes with the content it separates. */
+.block::before {
+  content: "";
+  position: absolute;
+  top: -17px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 65%;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255, 255, 255, 0.1), transparent);
+  pointer-events: none;
 }
 
 .blockHeading {
