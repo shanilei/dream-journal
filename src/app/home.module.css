@@ -125,6 +125,28 @@
   color: #FFFFFF;
 }
 
+/* On narrow phones "Dream Journal"/its Hebrew equivalent wraps to two
+   lines inside .header's fixed 90px height, reading as cramped. .header
+   already vertically centers its content, so shrinking the title here
+   just settles it back onto one line with more breathing room above/
+   below — no other layout change needed. Two steps: 400px covers
+   standard iPhone widths (390px and similar Android), 340px covers the
+   narrowest devices still in use (iPhone SE 1st-gen, 320px) where even
+   the first step's 30px still wrapped. */
+@media (max-width: 400px) {
+  .galleryTitle {
+    font-size: 30px;
+    line-height: 34px;
+  }
+}
+
+@media (max-width: 340px) {
+  .galleryTitle {
+    font-size: 25px;
+    line-height: 29px;
+  }
+}
+
 .headerBtns {
   display: flex;
   gap: 6px;
@@ -1135,6 +1157,12 @@
      from .calWeek's own grid below, not from this wrapper. */
   width: 100%;
   max-width: 394px;
+  /* .calScroll's per-month wrapper is stretched full-width (see its own
+     comment above) and .calMonth is a plain block child of that — once
+     max-width caps it below the wrapper's actual width (any screen
+     wider than 394px, e.g. iPad or desktop), a block element doesn't
+     center itself by default, so it was sitting flush left instead. */
+  margin: 0 auto;
 }
 
 .calMonthName {
@@ -1374,6 +1402,53 @@
   font-family: var(--font-ploni), serif;
 }
 
+/* ===================== CALENDAR — TABLET / IPAD ===================== */
+/* Same tablet detection as record.module.css's TABLET/IPAD block (kept
+   in sync with TABLET_QUERY in src/lib/useIsTablet.ts) — real touch
+   tablets only, independent of the app-wide --shell-max-width
+   breakpoints. .calMonth's 394px cap (sized for a phone) left most of
+   an iPad's width unused even after the centering fix above, so this
+   widens it and scales the day numbers/headers up to match — mobile
+   rules above are untouched. */
+@media
+  (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
+  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
+{
+  .calMonth {
+    max-width: 640px;
+    gap: 20px;
+  }
+
+  .calDayHeaders,
+  .calWeek {
+    gap: 16px;
+  }
+
+  .calDayHeader {
+    font-size: 15px;
+    line-height: 22px;
+  }
+
+  .calCellNum {
+    font-size: 20px;
+    line-height: 26px;
+  }
+
+  .calMonthName {
+    font-size: 20px;
+    line-height: 28px;
+  }
+
+  /* Gallery "Type" filter — 2 fixed-width columns (see .typeGrid above)
+     left a lot of an iPad's width empty; 3 fits comfortably within the
+     tablet --shell-max-width range and keeps the same fixed-width +
+     justify-content: center approach (cards stay a tight centered block
+     instead of stretching). */
+  .typeGrid {
+    grid-template-columns: repeat(3, minmax(0, 200px));
+    gap: 14px;
+  }
+}
 
 @media print {
   .screen { display: none; }
