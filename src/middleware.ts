@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { ONBOARDING_COOKIE } from "@/lib/onboarding";
+import { updateSession } from "@/lib/supabase/middleware";
 
 // Server-side onboarding gate — runs before any page renders (including
 // client-side navigations, since the App Router's RSC fetches also pass
@@ -7,14 +8,25 @@ import { ONBOARDING_COOKIE } from "@/lib/onboarding";
 // can see or interact with the real app before a redirect fires. This
 // replaces the old client-side OnboardingGate, which checked the cookie
 // inside a useEffect after the real page had already painted.
-export function middleware(request: NextRequest) {
+//
+// updateSession() (Phase 1 auth infrastructure) runs first on every
+// request to keep Supabase session cookies refreshed — it doesn't
+// redirect or gate anything by itself, so the onboarding check below is
+// completely unchanged; its response is just the base we build the
+// onboarding redirect on top of (carrying over any refreshed auth
+// cookies) instead of a fresh NextResponse. No auth gating exists yet.
+export async function middleware(request: NextRequest) {
+  const response = await updateSession(request);
+
   const onboarded = request.cookies.get(ONBOARDING_COOKIE)?.value === "1";
   if (!onboarded) {
     const url = request.nextUrl.clone();
     url.pathname = "/onboarding";
-    return NextResponse.redirect(url);
+    const redirect = NextResponse.redirect(url);
+    response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
+    return redirect;
   }
-  return NextResponse.next();
+  return response;
 }
 
 export const config = {

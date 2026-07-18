@@ -1,4 +1,4 @@
-import { getSupabase } from "./supabase";
+import { getSupabaseAdmin } from "./supabase-admin";
 
 export interface DreamEntry {
   id: string;
@@ -67,7 +67,7 @@ function fromRow(row: DreamRow): DreamEntry {
 }
 
 export async function saveDream(entry: DreamEntry): Promise<void> {
-  const { error } = await getSupabase().from("dreams").insert({
+  const { error } = await getSupabaseAdmin().from("dreams").insert({
     id: entry.id,
     created_at: entry.createdAt,
     image_url: entry.imageUrl,
@@ -108,7 +108,7 @@ export async function updateDream(id: string, patch: DreamOverlayPatch): Promise
   if ("displayAt" in patch) update.display_at = patch.displayAt ?? null;
   if ("printImageUrl" in patch) update.print_image_url = patch.printImageUrl;
 
-  const { error } = await getSupabase().from("dreams").update(update).eq("id", id);
+  const { error } = await getSupabaseAdmin().from("dreams").update(update).eq("id", id);
   if (error) throw error;
 }
 
@@ -120,7 +120,7 @@ export async function updateDream(id: string, patch: DreamOverlayPatch): Promise
 const LIST_COLUMNS = "id, created_at, image_url, mood, name, summary_text, symbols, keywords";
 
 export async function listDreams(): Promise<DreamEntry[]> {
-  const { data, error } = await getSupabase()
+  const { data, error } = await getSupabaseAdmin()
     .from("dreams")
     .select(LIST_COLUMNS)
     .order("created_at", { ascending: false });
@@ -129,7 +129,7 @@ export async function listDreams(): Promise<DreamEntry[]> {
 }
 
 export async function getDream(id: string): Promise<DreamEntry | undefined> {
-  const { data, error } = await getSupabase().from("dreams").select("*").eq("id", id).maybeSingle();
+  const { data, error } = await getSupabaseAdmin().from("dreams").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
   return data ? fromRow(data) : undefined;
 }

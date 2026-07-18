@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDream, updateDream } from "@/dreams-store";
 import { shortSymbol } from "@/lib/dream-format";
 import { generatePrintImage } from "@/print-image";
-import { getSupabase } from "@/supabase";
+import { getSupabaseAdmin } from "@/supabase-admin";
 import { randomUUID } from "node:crypto";
 
 // generatePrintImage uses @napi-rs/canvas, which needs the Node runtime.
@@ -76,11 +76,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       });
 
       const printStoragePath = `${randomUUID()}.png`;
-      const { error: uploadError } = await getSupabase()
+      const { error: uploadError } = await getSupabaseAdmin()
         .storage.from("dream-images")
         .upload(printStoragePath, printImageBuffer, { contentType: "image/png" });
       if (uploadError) throw uploadError;
-      printImageUrl = getSupabase().storage.from("dream-images").getPublicUrl(printStoragePath).data.publicUrl;
+      printImageUrl = getSupabaseAdmin().storage.from("dream-images").getPublicUrl(printStoragePath).data.publicUrl;
     } catch (err) {
       // Non-fatal — the caption/date/time edit itself still saves; only the
       // flattened print PNG fails to refresh, in which case print keeps

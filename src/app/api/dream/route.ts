@@ -6,7 +6,7 @@ import { analyzeDream } from "@/analyze";
 import { interpretDream } from "@/interpret";
 import { generateImage, pickProfile } from "@/generate-image";
 import { saveDream } from "@/dreams-store";
-import { getSupabase } from "@/supabase";
+import { getSupabaseAdmin } from "@/supabase-admin";
 import { generatePrintImage } from "@/print-image";
 
 export const runtime = "nodejs";
@@ -48,19 +48,19 @@ export async function POST(req: NextRequest) {
     rmSync(clearPath, { force: true });
 
     const storagePath = `${randomUUID()}.png`;
-    const { error: uploadError } = await getSupabase().storage
+    const { error: uploadError } = await getSupabaseAdmin().storage
       .from("dream-images")
       .upload(storagePath, imageBuffer, { contentType: "image/png", cacheControl: "31536000" });
     if (uploadError) throw uploadError;
-    const { data: publicUrlData } = getSupabase().storage.from("dream-images").getPublicUrl(storagePath);
+    const { data: publicUrlData } = getSupabaseAdmin().storage.from("dream-images").getPublicUrl(storagePath);
     const imageUrl = publicUrlData.publicUrl;
 
     const clearStoragePath = `${randomUUID()}.png`;
-    const { error: clearUploadError } = await getSupabase().storage
+    const { error: clearUploadError } = await getSupabaseAdmin().storage
       .from("dream-images")
       .upload(clearStoragePath, clearBuffer, { contentType: "image/png" });
     if (clearUploadError) throw clearUploadError;
-    const { data: clearPublicUrlData } = getSupabase().storage.from("dream-images").getPublicUrl(clearStoragePath);
+    const { data: clearPublicUrlData } = getSupabaseAdmin().storage.from("dream-images").getPublicUrl(clearStoragePath);
     const clearImageUrl = clearPublicUrlData.publicUrl;
 
     const mood = MOOD_LABELS[pickProfile(analysis)];
@@ -102,11 +102,11 @@ export async function POST(req: NextRequest) {
       }
 
       const printStoragePath = `${randomUUID()}.png`;
-      const { error: printUploadError } = await getSupabase().storage
+      const { error: printUploadError } = await getSupabaseAdmin().storage
         .from("dream-images")
         .upload(printStoragePath, printImageBufferFromDisk, { contentType: "image/png" });
       if (printUploadError) throw printUploadError;
-      printImageUrl = getSupabase().storage.from("dream-images").getPublicUrl(printStoragePath).data.publicUrl;
+      printImageUrl = getSupabaseAdmin().storage.from("dream-images").getPublicUrl(printStoragePath).data.publicUrl;
     } catch (printErr) {
       // Non-fatal — the dream itself is already generated; printing just
       // falls back to the live layered layout for this one entry.
