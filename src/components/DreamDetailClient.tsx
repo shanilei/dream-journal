@@ -16,6 +16,10 @@ export default function DreamDetailClient({
   interpretationText,
   symbols,
   dreamText,
+  captionOverride,
+  showDate,
+  showTime,
+  displayAt,
   skipEntrance = false,
 }: {
   id: string;
@@ -29,6 +33,10 @@ export default function DreamDetailClient({
   interpretationText?: string;
   symbols: string[];
   dreamText?: string;
+  captionOverride?: string;
+  showDate?: boolean;
+  showTime?: boolean;
+  displayAt?: string;
   skipEntrance?: boolean;
 }) {
   const router = useRouter();
@@ -57,6 +65,10 @@ export default function DreamDetailClient({
       interpretationText={interpretationText}
       symbols={symbols}
       dreamText={dreamText}
+      captionOverride={captionOverride}
+      showDate={showDate}
+      showTime={showTime}
+      displayAt={displayAt}
       onBack={() => router.push("/gallery")}
       skipEntrance={skipEntrance}
     />

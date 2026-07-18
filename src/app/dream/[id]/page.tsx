@@ -31,6 +31,10 @@ export default async function DreamDetailPage({
       interpretationText={dream.interpretationText}
       symbols={dream.symbols.slice(0, 3).map(shortSymbol)}
       dreamText={dream.dreamText}
+      captionOverride={dream.captionOverride}
+      showDate={dream.showDate}
+      showTime={dream.showTime}
+      displayAt={dream.displayAt}
       skipEntrance={transitioned === "1"}
     />
   );

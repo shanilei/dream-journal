@@ -14,6 +14,14 @@ export interface DreamEntry {
   dreamText?: string;
   interpretationText?: string;
   keywords?: string[];
+  // Overlay-only edits (see "Edit image details" on the Dream Result
+  // screen) — these never touch the generated artwork itself, only what's
+  // drawn on top of it (and, for captionOverride/displayAt, only the
+  // caption/date/time shown — createdAt keeps controlling gallery order).
+  captionOverride?: string;
+  showDate?: boolean;
+  showTime?: boolean;
+  displayAt?: string;
 }
 
 interface DreamRow {
@@ -30,6 +38,10 @@ interface DreamRow {
   dream_text: string | null;
   interpretation_text: string | null;
   keywords: string[] | null;
+  caption_override: string | null;
+  show_date: boolean | null;
+  show_time: boolean | null;
+  display_at: string | null;
 }
 
 function fromRow(row: DreamRow): DreamEntry {
@@ -47,6 +59,10 @@ function fromRow(row: DreamRow): DreamEntry {
     dreamText: row.dream_text ?? undefined,
     interpretationText: row.interpretation_text ?? undefined,
     keywords: row.keywords ?? [],
+    captionOverride: row.caption_override ?? undefined,
+    showDate: row.show_date ?? true,
+    showTime: row.show_time ?? true,
+    displayAt: row.display_at ?? undefined,
   };
 }
 
@@ -65,7 +81,34 @@ export async function saveDream(entry: DreamEntry): Promise<void> {
     dream_text: entry.dreamText ?? null,
     interpretation_text: entry.interpretationText ?? null,
     keywords: entry.keywords ?? null,
+    caption_override: entry.captionOverride ?? null,
+    show_date: entry.showDate ?? true,
+    show_time: entry.showTime ?? true,
+    display_at: entry.displayAt ?? null,
   });
+  if (error) throw error;
+}
+
+// Overlay-only edits (see "Edit image details") — never touches image_url,
+// summary_text, or any other artwork/analysis field, only the caption/
+// date/time metadata drawn on top of the image.
+export interface DreamOverlayPatch {
+  captionOverride?: string | null;
+  showDate?: boolean;
+  showTime?: boolean;
+  displayAt?: string | null;
+  printImageUrl?: string;
+}
+
+export async function updateDream(id: string, patch: DreamOverlayPatch): Promise<void> {
+  const update: Record<string, unknown> = {};
+  if ("captionOverride" in patch) update.caption_override = patch.captionOverride ?? null;
+  if ("showDate" in patch) update.show_date = patch.showDate;
+  if ("showTime" in patch) update.show_time = patch.showTime;
+  if ("displayAt" in patch) update.display_at = patch.displayAt ?? null;
+  if ("printImageUrl" in patch) update.print_image_url = patch.printImageUrl;
+
+  const { error } = await getSupabase().from("dreams").update(update).eq("id", id);
   if (error) throw error;
 }
 

@@ -1,6 +1,6 @@
 import { createCanvas, GlobalFonts, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
 import { join } from "path";
-import { CAPTION_MAX_WORDS, getCaptionWords, pickCaptionLayout, isHebrewText } from "./lib/caption";
+import { CAPTION_MAX_WORDS, getCaptionWords, wrapCaptionLines, pickCaptionLayout, isHebrewText } from "./lib/caption";
 import { formatDreamDate, formatDreamTime, langFromText } from "./i18n/translations";
 
 // 2x the on-screen card's 338:475 box for print sharpness.
@@ -80,6 +80,16 @@ export interface PrintImageParams {
   summaryText: string;
   dreamText?: string;
   createdAt: string;
+  // Overlay-only edits (see "Edit image details" on the Dream Result
+  // screen) — captionOverride replaces the auto-generated caption as-is
+  // (already user-wrapped by their own line breaks, already capped to 80
+  // chars client-side), displayAt replaces createdAt for the date/time
+  // labels only (createdAt itself keeps controlling gallery order), and
+  // showDate/showTime hide either label entirely.
+  captionOverride?: string;
+  showDate?: boolean;
+  showTime?: boolean;
+  displayAt?: string;
 }
 
 export async function generatePrintImage({
@@ -88,16 +98,21 @@ export async function generatePrintImage({
   summaryText,
   dreamText,
   createdAt,
+  captionOverride,
+  showDate = true,
+  showTime = true,
+  displayAt,
 }: PrintImageParams): Promise<Buffer> {
   ensureFontsRegistered();
 
-  const isHebrew = isHebrewText(dreamText || summaryText || "");
-  const lang = langFromText(dreamText || summaryText, "en");
-  const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
-  const captionLines = captionText ? captionText.split("\n") : [];
+  const isHebrew = isHebrewText(captionOverride || dreamText || summaryText || "");
+  const lang = langFromText(captionOverride || dreamText || summaryText, "en");
+  const captionText = captionOverride?.trim() ? wrapCaptionLines(captionOverride) : getCaptionWords(summaryText, CAPTION_MAX_WORDS);
+  const captionLines = captionText ? captionText.split("\n").filter(Boolean) : [];
   const captionLayout = pickCaptionLayout(imageUrl);
-  const dateLabel = formatDreamDate(createdAt, lang);
-  const timeLabel = formatDreamTime(createdAt, lang);
+  const dateSource = displayAt ?? createdAt;
+  const dateLabel = showDate ? formatDreamDate(dateSource, lang) : "";
+  const timeLabel = showTime ? formatDreamTime(dateSource, lang) : "";
 
   const canvas = createCanvas(CANVAS_W, CANVAS_H);
   const ctx = canvas.getContext("2d");
@@ -144,7 +159,7 @@ export async function generatePrintImage({
     color: fg,
   }));
   const metaLines: TextLine[] = [
-    { text: dateLabel, fontSize: 26, family: dateFamily, color: fg },
+    ...(dateLabel ? [{ text: dateLabel, fontSize: 26, family: dateFamily, color: fg }] : []),
     ...(timeLabel ? [{ text: timeLabel, fontSize: timeFontSize, family: dateFamily, color: timeColor }] : []),
   ];
 

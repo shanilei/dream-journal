@@ -47,6 +47,65 @@
   flex-shrink: 0;
 }
 
+.moreMenuWrapper {
+  position: relative;
+}
+
+.moreMenuBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9;
+}
+
+/* Flat-glass floating menu, per the app's design system: thin border,
+   heavy blur, soft shadow only — no colored surface. Sits directly over
+   the dream photo, so (as with EditImageDetailsSheet) the usual
+   rgba(255,255,255,0.05–0.06) fill left the labels washed out against a
+   bright image; a near-opaque dark navy base (matching .screen's own
+   background) keeps the glass look but stays legible. */
+.moreMenu {
+  position: absolute;
+  top: calc(100% + 8px);
+  inset-inline-end: 0;
+  z-index: 10;
+  min-width: 190px;
+  width: max-content;
+  background: rgba(9, 10, 19, 0.94);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.moreMenuItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: start;
+  white-space: nowrap;
+}
+
+.moreMenuItem:active {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:global([lang="he"]) .moreMenuItem {
+  font-family: var(--font-ploni), serif;
+}
+
 .backIcon {
   display: flex;
 }

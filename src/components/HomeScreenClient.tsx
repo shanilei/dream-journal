@@ -554,6 +554,10 @@ function DreamAnalysisOverlay({ card, lang, onClose }: { card: Card; lang: Lang;
     interpretationText?: string;
     symbols: string[];
     dreamText?: string;
+    captionOverride?: string;
+    showDate?: boolean;
+    showTime?: boolean;
+    displayAt?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -570,6 +574,10 @@ function DreamAnalysisOverlay({ card, lang, onClose }: { card: Card; lang: Lang;
           interpretationText: data.interpretationText,
           symbols: data.symbols ?? [],
           dreamText: data.dreamText,
+          captionOverride: data.captionOverride,
+          showDate: data.showDate,
+          showTime: data.showTime,
+          displayAt: data.displayAt,
         });
       })
       .catch(() => {
@@ -603,6 +611,10 @@ function DreamAnalysisOverlay({ card, lang, onClose }: { card: Card; lang: Lang;
         interpretationText={full?.interpretationText}
         symbols={full?.symbols ?? card.symbols ?? []}
         dreamText={full?.dreamText}
+        captionOverride={full?.captionOverride}
+        showDate={full?.showDate}
+        showTime={full?.showTime}
+        displayAt={full?.displayAt}
         onBack={onClose}
       />
     </motion.div>

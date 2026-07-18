@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, ShareIcon, PrinterIcon, PlayIcon, VolumeIcon } from "./Icons";
+import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import BottomNav from "./BottomNav";
+import EditImageDetailsSheet from "./EditImageDetailsSheet";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
 import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translations";
 
-import { CAPTION_MAX_WORDS, getCaptionWords, pickCaptionLayout, isHebrewText } from "@/lib/caption";
+import { CAPTION_MAX_WORDS, getCaptionWords, wrapCaptionLines, pickCaptionLayout, isHebrewText } from "@/lib/caption";
+import { toDateInputValue, toTimeInputValue, combineDateAndTime } from "@/lib/dream-format";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
 import { loadSelectedVoiceId } from "@/lib/voicePreference";
 
@@ -74,6 +76,10 @@ export default function DreamResultScreen({
   interpretationText,
   symbols,
   dreamText,
+  captionOverride: savedCaptionOverride,
+  showDate: savedShowDate,
+  showTime: savedShowTime,
+  displayAt: savedDisplayAt,
   onBack,
   skipEntrance = false,
 }: {
@@ -88,6 +94,12 @@ export default function DreamResultScreen({
   interpretationText?: string;
   symbols: string[];
   dreamText?: string;
+  // Overlay-only edits (see "Edit image details") — never touches the
+  // generated artwork, only the caption/date/time drawn on top of it.
+  captionOverride?: string;
+  showDate?: boolean;
+  showTime?: boolean;
+  displayAt?: string;
   onBack: () => void;
   // True only when this mount immediately follows the Gallery overlay's
   // own already-played entrance — see the file-level comment above.
@@ -173,12 +185,21 @@ export default function DreamResultScreen({
   // touch starts — a same-size reveal is easy to miss entirely. ~60%
   // bigger, within the 50–70% range.
   const TOUCH_REVEAL_RADIUS = REVEAL_RADIUS * 1.6; // ~208px spotlight (touch)
+  // On touch release, the circle should linger a beat before it starts
+  // closing — a same-instant fade reads as flickery on a finger release,
+  // where the user is still looking at the spot they just touched.
+  const TOUCH_RELEASE_HOLD_MS = 1100;
   const targetMaskRef = useRef({ x: 0, y: 0, r: 0 });
   const displayMaskRef = useRef({ x: 0, y: 0, r: 0 });
   // Trails behind the main circle with slower easing and a larger target
   // radius, so it visually "lags" and gets dragged along — the pull effect.
   const trailMaskRef = useRef({ x: 0, y: 0, r: 0 });
   const maskRafRef = useRef<number | null>(null);
+  // Set true only while the touch-release fade is playing, so that close
+  // alone eases slower than every other radius change (grow-in, mouse
+  // leave) without touching those.
+  const slowFadeRef = useRef(false);
+  const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     function tick() {
@@ -186,7 +207,7 @@ export default function DreamResultScreen({
       const display = displayMaskRef.current;
       display.x += (target.x - display.x) * 0.22;
       display.y += (target.y - display.y) * 0.22;
-      display.r += (target.r - display.r) * 0.15;
+      display.r += (target.r - display.r) * (slowFadeRef.current ? 0.018 : 0.15);
 
       const trail = trailMaskRef.current;
       trail.x += (target.x - trail.x) * 0.07;
@@ -207,6 +228,7 @@ export default function DreamResultScreen({
     maskRafRef.current = requestAnimationFrame(tick);
     return () => {
       if (maskRafRef.current) cancelAnimationFrame(maskRafRef.current);
+      if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
     };
   }, []);
 
@@ -217,13 +239,117 @@ export default function DreamResultScreen({
     targetMaskRef.current.y = clientY - rect.top;
   }
   const [copied, setCopied] = useState(false);
-  const isHebrew = isHebrewText(dreamText || summaryText || "");
-  const captionText = getCaptionWords(summaryText, CAPTION_MAX_WORDS);
+
+  // ── "Edit image details" (caption/date/time overlay editing) ───────────
+  // These are the values actually drawn on the image — they double as the
+  // sheet's live-bound fields, so typing/toggling updates the overlay
+  // immediately with no separate "preview" step. `lastSaved` is the
+  // snapshot Cancel reverts to; Save both persists to the server and
+  // becomes the new snapshot.
+  const autoCaptionPlain = getCaptionWords(summaryText, CAPTION_MAX_WORDS).replace(/\n/g, " ");
+  const [lastSaved, setLastSaved] = useState(() => ({
+    captionOverride: savedCaptionOverride ?? autoCaptionPlain,
+    showDate: savedShowDate ?? true,
+    showTime: savedShowTime ?? true,
+    dateInput: toDateInputValue(savedDisplayAt ?? createdAt),
+    timeInput: toTimeInputValue(savedDisplayAt ?? createdAt),
+  }));
+  const [captionOverride, setCaptionOverride] = useState(lastSaved.captionOverride);
+  const [showDateOn, setShowDateOn] = useState(lastSaved.showDate);
+  const [showTimeOn, setShowTimeOn] = useState(lastSaved.showTime);
+  const [dateInput, setDateInput] = useState(lastSaved.dateInput);
+  const [timeInput, setTimeInput] = useState(lastSaved.timeInput);
+  const [printImageUrlState, setPrintImageUrlState] = useState(printImageUrl);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const [showEditSheet, setShowEditSheet] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [detailsUpdated, setDetailsUpdated] = useState(false);
+  const displayAt = combineDateAndTime(dateInput, timeInput);
+
+  function openEditSheet() {
+    setShowMoreMenu(false);
+    setShowEditSheet(true);
+  }
+
+  function cancelEditSheet() {
+    setCaptionOverride(lastSaved.captionOverride);
+    setShowDateOn(lastSaved.showDate);
+    setShowTimeOn(lastSaved.showTime);
+    setDateInput(lastSaved.dateInput);
+    setTimeInput(lastSaved.timeInput);
+    setShowEditSheet(false);
+  }
+
+  async function saveEditSheet() {
+    if (!id) {
+      setShowEditSheet(false);
+      return;
+    }
+    setSavingEdit(true);
+    try {
+      const nextDisplayAt = combineDateAndTime(dateInput, timeInput);
+      const res = await fetch(`/api/dream/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caption: captionOverride,
+          showDate: showDateOn,
+          showTime: showTimeOn,
+          displayAt: nextDisplayAt,
+        }),
+      });
+      if (!res.ok) throw new Error("save failed");
+      const updated = await res.json().catch(() => null);
+      if (updated?.printImageUrl) setPrintImageUrlState(updated.printImageUrl);
+      setLastSaved({
+        captionOverride,
+        showDate: showDateOn,
+        showTime: showTimeOn,
+        dateInput,
+        timeInput,
+      });
+      setShowEditSheet(false);
+      setDetailsUpdated(true);
+      setTimeout(() => setDetailsUpdated(false), 2500);
+    } catch {
+      // Keep the sheet open with the user's edits intact so they can retry
+      // instead of silently discarding what they typed.
+    } finally {
+      setSavingEdit(false);
+    }
+  }
+
+  async function handleSaveImage() {
+    setShowMoreMenu(false);
+    try {
+      const res = await fetch(imageUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `dream-${id ?? "image"}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      // Non-fatal — nothing else to fall back to here.
+    }
+  }
+
+  const isHebrew = isHebrewText(captionOverride || dreamText || summaryText || "");
+  const captionText = captionOverride.trim() ? wrapCaptionLines(captionOverride) : getCaptionWords(summaryText, CAPTION_MAX_WORDS);
   const captionLines = captionText ? captionText.split("\n") : [];
   const captionLayout = pickCaptionLayout(imageUrl);
   const dateLang = isHebrew ? "he" : lang;
-  const dateLabel = formatDreamDate(createdAt, dateLang);
-  const timeLabel = formatDreamTime(createdAt, dateLang);
+  // Always computed regardless of the show/hide toggles — used by the
+  // title fallback and the meta-row badges below the image, which are a
+  // separate piece of UI from the image's own caption overlay.
+  const dateLabel = formatDreamDate(displayAt, dateLang);
+  const timeLabel = formatDreamTime(displayAt, dateLang);
+  // What's actually drawn on the image — hidden independently per toggle.
+  const overlayDateLabel = showDateOn ? dateLabel : "";
+  const overlayTimeLabel = showTimeOn ? timeLabel : "";
   const dreamTitle = name || (lang === "he" ? `${t.dreamTitleSuffix} ${dateLabel}` : `${dateLabel} ${t.dreamTitleSuffix}`);
 
   function sampleBrightness() {
@@ -351,9 +477,51 @@ export default function DreamResultScreen({
           </span>
         </button>
         <div className={styles.topBarRight}>
-          <button type="button" className={styles.iconButton} aria-label={t.share} onClick={handleShare}>
-            <ShareIcon size={16} color="currentColor" />
-          </button>
+          <div className={styles.moreMenuWrapper}>
+            <button
+              type="button"
+              className={styles.iconButton}
+              aria-label={t.more}
+              aria-expanded={showMoreMenu}
+              onClick={() => setShowMoreMenu((v) => !v)}
+            >
+              <MoreIcon size={18} color="currentColor" />
+            </button>
+            <AnimatePresence>
+              {showMoreMenu && (
+                <>
+                  <div className={styles.moreMenuBackdrop} onClick={() => setShowMoreMenu(false)} />
+                  <motion.div
+                    className={styles.moreMenu}
+                    initial={{ opacity: 0, y: -6, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.96 }}
+                    transition={{ duration: 0.16, ease: EASE }}
+                  >
+                    <button type="button" className={styles.moreMenuItem} onClick={openEditSheet}>
+                      <PencilIcon size={16} color="#fff" />
+                      <span>{t.editImageDetails}</span>
+                    </button>
+                    <button
+                      type="button"
+                      className={styles.moreMenuItem}
+                      onClick={() => {
+                        setShowMoreMenu(false);
+                        handleShare();
+                      }}
+                    >
+                      <ShareIcon size={16} color="#fff" />
+                      <span>{t.shareImage}</span>
+                    </button>
+                    <button type="button" className={styles.moreMenuItem} onClick={handleSaveImage}>
+                      <SaveIcon size={16} color="#fff" />
+                      <span>{t.saveImage}</span>
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
           <button
             type="button"
             className={styles.iconButton}
@@ -388,6 +556,11 @@ export default function DreamResultScreen({
             }}
             onTouchStart={(e) => {
               if (!clearImageUrl) return;
+              if (releaseTimerRef.current) {
+                clearTimeout(releaseTimerRef.current);
+                releaseTimerRef.current = null;
+              }
+              slowFadeRef.current = false;
               const touch = e.touches[0];
               if (touch) updateMaskPos(touch.clientX, touch.clientY);
               targetMaskRef.current.r = TOUCH_REVEAL_RADIUS;
@@ -410,12 +583,20 @@ export default function DreamResultScreen({
               if (touch) updateMaskPos(touch.clientX, touch.clientY);
             }}
             onTouchEnd={() => {
-              targetMaskRef.current.r = 0;
               setRevealed(false);
+              if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
+              releaseTimerRef.current = setTimeout(() => {
+                slowFadeRef.current = true;
+                targetMaskRef.current.r = 0;
+              }, TOUCH_RELEASE_HOLD_MS);
             }}
             onTouchCancel={() => {
-              targetMaskRef.current.r = 0;
               setRevealed(false);
+              if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
+              releaseTimerRef.current = setTimeout(() => {
+                slowFadeRef.current = true;
+                targetMaskRef.current.r = 0;
+              }, TOUCH_RELEASE_HOLD_MS);
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -466,7 +647,7 @@ export default function DreamResultScreen({
               />
             )}
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
-            {(captionText || dateLabel) && (
+            {(captionText || overlayDateLabel) && (
               <div
                 className={`${styles.captionOverlay} ${
                   captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
@@ -484,16 +665,20 @@ export default function DreamResultScreen({
                     ))}
                   </p>
                 )}
-                <div className={styles.captionMeta}>
-                  <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
-                    {dateLabel}
-                  </span>
-                  {timeLabel && (
-                    <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
-                      {timeLabel}
-                    </span>
-                  )}
-                </div>
+                {(overlayDateLabel || overlayTimeLabel) && (
+                  <div className={styles.captionMeta}>
+                    {overlayDateLabel && (
+                      <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                        {overlayDateLabel}
+                      </span>
+                    )}
+                    {overlayTimeLabel && (
+                      <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                        {overlayTimeLabel}
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -590,6 +775,28 @@ export default function DreamResultScreen({
         <div className={styles.toast}>{t.linkCopied}</div>
       )}
 
+      {detailsUpdated && (
+        <div className={styles.toast}>{t.detailsUpdated}</div>
+      )}
+
+      {showEditSheet && (
+        <EditImageDetailsSheet
+          caption={captionOverride}
+          onCaptionChange={setCaptionOverride}
+          dateValue={dateInput}
+          onDateChange={setDateInput}
+          timeValue={timeInput}
+          onTimeChange={setTimeInput}
+          showDate={showDateOn}
+          onShowDateChange={setShowDateOn}
+          showTime={showTimeOn}
+          onShowTimeChange={setShowTimeOn}
+          saving={savingEdit}
+          onSave={saveEditSheet}
+          onCancel={cancelEditSheet}
+        />
+      )}
+
       {showPrintModal && (
         <div className={styles.printModalOverlay} onClick={() => setShowPrintModal(false)}>
           <div className={styles.printModalCard} onClick={(e) => e.stopPropagation()}>
@@ -620,15 +827,15 @@ export default function DreamResultScreen({
     <div className={styles.printCard}>
       <div className={styles.printCardInner}>
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
-          {printImageUrl ? (
+          {printImageUrlState ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className={styles.printFlatImage} src={printImageUrl} alt="Dream artwork" />
+            <img className={styles.printFlatImage} src={printImageUrlState} alt="Dream artwork" />
           ) : (
             <div className={styles.imageWrap}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className={styles.image} src={imageUrl} alt="Dream artwork" />
               <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
-              {(captionText || dateLabel) && (
+              {(captionText || overlayDateLabel) && (
                 <div
                   className={`${styles.captionOverlay} ${
                     captionLayout === "center" ? styles.captionOverlayCenter : styles.captionOverlayBottom
@@ -646,16 +853,20 @@ export default function DreamResultScreen({
                       ))}
                     </p>
                   )}
-                  <div className={styles.captionMeta}>
-                    <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
-                      {dateLabel}
-                    </span>
-                    {timeLabel && (
-                      <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
-                        {timeLabel}
-                      </span>
-                    )}
-                  </div>
+                  {(overlayDateLabel || overlayTimeLabel) && (
+                    <div className={styles.captionMeta}>
+                      {overlayDateLabel && (
+                        <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                          {overlayDateLabel}
+                        </span>
+                      )}
+                      {overlayTimeLabel && (
+                        <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                          {overlayTimeLabel}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

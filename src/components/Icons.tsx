@@ -178,6 +178,16 @@ export function ShareIcon({ size = 16, color = "#000624" }: { size?: number; col
   );
 }
 
+export function MoreIcon({ size = 16, color = "#000624" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="5" cy="12" r="2" fill={color} />
+      <circle cx="12" cy="12" r="2" fill={color} />
+      <circle cx="19" cy="12" r="2" fill={color} />
+    </svg>
+  );
+}
+
 export function PrinterIcon({ size = 16, color = "#000624" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
