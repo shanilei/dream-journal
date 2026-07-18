@@ -30,10 +30,21 @@ export function preventWidows(text: string): string {
   return text
     .split("\n")
     .map((line) => {
-      const trimmed = line.trimEnd();
-      const lastSpace = trimmed.lastIndexOf(" ");
+      // Some translation strings are deliberately half-sentences meant to
+      // be concatenated around another inline element — e.g.
+      // langPickerHeadingBefore: "Choose your " (rendered right before a
+      // separately-styled gradient <span>) carries that trailing space on
+      // purpose. Trimming it here would silently glue the next element
+      // straight onto this text with no space at all. So: pull out the
+      // leading/trailing whitespace first and preserve it byte-for-byte,
+      // touching only the whitespace *between* words in the trimmed core.
+      const leading = line.match(/^\s*/)?.[0] ?? "";
+      const trailing = line.match(/\s*$/)?.[0] ?? "";
+      const core = line.slice(leading.length, line.length - trailing.length);
+      const lastSpace = core.lastIndexOf(" ");
       if (lastSpace === -1) return line; // single word — nothing to protect
-      return trimmed.slice(0, lastSpace) + " " + trimmed.slice(lastSpace + 1);
+      const fixedCore = core.slice(0, lastSpace) + " " + core.slice(lastSpace + 1);
+      return leading + fixedCore + trailing;
     })
     .join("\n");
 }
