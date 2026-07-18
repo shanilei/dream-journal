@@ -695,6 +695,10 @@ export default function HomeScreenClient({
 
   function toggleFavorite(id: string, e: React.MouseEvent) {
     e.preventDefault();
+    // The heart sits inside a card that's itself a <Link> with its own
+    // onClick (opens the dream) — without this, the click still bubbles
+    // up after toggling the favorite and triggers that navigation too.
+    e.stopPropagation();
     setFavorites((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);

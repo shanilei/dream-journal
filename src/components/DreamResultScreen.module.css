@@ -157,11 +157,37 @@
   border-radius: 26px;
 }
 
-/* The unblurred photo, stacked on top of .image — revealed only inside an
-   80px circle that glides toward the pointer/finger with a soft, blurred
-   edge, like the dream clearing up under a flashlight. --mask-x/--mask-y/
-   --mask-r are written directly onto .imageWrap by a rAF easing loop, so
-   the circle glides and fades rather than snapping to the pointer. */
+/* Temporary "condensation" layer for the mist/glass reveal (see the
+   .image entrance transition in DreamResultScreen.tsx) — a static,
+   centered, soft-edged haze with no direction/sweep of its own; only its
+   opacity animates (once, on mount), fading out at the same pace the
+   image's own blur clears. Removed from the DOM entirely once that
+   animation completes (see the component), so nothing keeps running or
+   painting afterward. */
+.imageMist {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 45%, transparent 75%);
+  mix-blend-mode: overlay;
+}
+
+/* The unblurred photo, stacked on top of .image — revealed only inside a
+   soft, irregular, mist-like shape that glides toward the pointer/finger,
+   like fog gently clearing off glass. --mask-x/--mask-y/--mask-r are
+   written directly onto .imageWrap by a rAF easing loop, so the shape
+   glides and fades rather than snapping to the pointer.
+
+   The organic shape is 3 overlapping radial gradients, each offset from
+   the pointer by a different amount/direction and sized to a different
+   fraction of --mask-r — every offset and size is itself a fraction of
+   --mask-r (not a fixed px value), so the whole cluster scales up/down
+   together in proportion as the reveal grows/shrinks, instead of the
+   blobs drifting apart or overlapping oddly at small radii. Deliberately
+   no perfect circle, no hard edge, no ring — each blob fades out over
+   its own outer 60% so the composite edge is heavily feathered and
+   asymmetrical rather than one crisp circular boundary. */
 .imageClear {
   display: block;
   position: absolute;
@@ -171,23 +197,52 @@
   object-fit: cover;
   border-radius: 26px;
   filter: blur(2px);
-  -webkit-mask-image: radial-gradient(
-    circle at var(--mask-x, 50%) var(--mask-y, 50%),
-    #000 0,
-    #000 calc(var(--mask-r, 0px) - 16px),
-    transparent var(--mask-r, 0px)
-  );
-  mask-image: radial-gradient(
-    circle at var(--mask-x, 50%) var(--mask-y, 50%),
-    #000 0,
-    #000 calc(var(--mask-r, 0px) - 16px),
-    transparent var(--mask-r, 0px)
-  );
+  -webkit-mask-image:
+    radial-gradient(
+      circle calc(var(--mask-r, 0px) * 0.95) at
+        calc(var(--mask-x, 50%) - var(--mask-r, 0px) * 0.22)
+        calc(var(--mask-y, 50%) - var(--mask-r, 0px) * 0.16),
+      #000 0%, transparent 62%
+    ),
+    radial-gradient(
+      circle calc(var(--mask-r, 0px) * 0.8) at
+        calc(var(--mask-x, 50%) + var(--mask-r, 0px) * 0.26)
+        calc(var(--mask-y, 50%) + var(--mask-r, 0px) * 0.1),
+      #000 0%, transparent 62%
+    ),
+    radial-gradient(
+      circle calc(var(--mask-r, 0px) * 0.7) at
+        calc(var(--mask-x, 50%) - var(--mask-r, 0px) * 0.06)
+        calc(var(--mask-y, 50%) + var(--mask-r, 0px) * 0.3),
+      #000 0%, transparent 62%
+    );
+  mask-image:
+    radial-gradient(
+      circle calc(var(--mask-r, 0px) * 0.95) at
+        calc(var(--mask-x, 50%) - var(--mask-r, 0px) * 0.22)
+        calc(var(--mask-y, 50%) - var(--mask-r, 0px) * 0.16),
+      #000 0%, transparent 62%
+    ),
+    radial-gradient(
+      circle calc(var(--mask-r, 0px) * 0.8) at
+        calc(var(--mask-x, 50%) + var(--mask-r, 0px) * 0.26)
+        calc(var(--mask-y, 50%) + var(--mask-r, 0px) * 0.1),
+      #000 0%, transparent 62%
+    ),
+    radial-gradient(
+      circle calc(var(--mask-r, 0px) * 0.7) at
+        calc(var(--mask-x, 50%) - var(--mask-r, 0px) * 0.06)
+        calc(var(--mask-y, 50%) + var(--mask-r, 0px) * 0.3),
+      #000 0%, transparent 62%
+    );
   pointer-events: none;
 }
 
 /* Soft, larger echo that lags behind .imageClear (slower easing target in
-   DreamResultScreen.tsx) — reads as the reveal being "pulled" along. */
+   DreamResultScreen.tsx) — reads as the reveal being "pulled" along. Same
+   organic-cluster technique as .imageClear, on --trail-x/y/r, with its
+   own slightly different offsets/proportions so it doesn't read as a
+   mechanical duplicate of the main shape. */
 .imageClearTrail {
   display: block;
   position: absolute;
@@ -198,21 +253,54 @@
   border-radius: 26px;
   filter: blur(6px);
   opacity: 0.45;
-  -webkit-mask-image: radial-gradient(
-    circle at var(--trail-x, 50%) var(--trail-y, 50%),
-    #000 0,
-    #000 calc(var(--trail-r, 0px) - 24px),
-    transparent var(--trail-r, 0px)
-  );
-  mask-image: radial-gradient(
-    circle at var(--trail-x, 50%) var(--trail-y, 50%),
-    #000 0,
-    #000 calc(var(--trail-r, 0px) - 24px),
-    transparent var(--trail-r, 0px)
-  );
+  -webkit-mask-image:
+    radial-gradient(
+      circle calc(var(--trail-r, 0px) * 0.9) at
+        calc(var(--trail-x, 50%) + var(--trail-r, 0px) * 0.18)
+        calc(var(--trail-y, 50%) - var(--trail-r, 0px) * 0.24),
+      #000 0%, transparent 65%
+    ),
+    radial-gradient(
+      circle calc(var(--trail-r, 0px) * 0.75) at
+        calc(var(--trail-x, 50%) - var(--trail-r, 0px) * 0.2)
+        calc(var(--trail-y, 50%) + var(--trail-r, 0px) * 0.14),
+      #000 0%, transparent 65%
+    ),
+    radial-gradient(
+      circle calc(var(--trail-r, 0px) * 0.65) at
+        calc(var(--trail-x, 50%) + var(--trail-r, 0px) * 0.04)
+        calc(var(--trail-y, 50%) + var(--trail-r, 0px) * 0.28),
+      #000 0%, transparent 65%
+    );
+  mask-image:
+    radial-gradient(
+      circle calc(var(--trail-r, 0px) * 0.9) at
+        calc(var(--trail-x, 50%) + var(--trail-r, 0px) * 0.18)
+        calc(var(--trail-y, 50%) - var(--trail-r, 0px) * 0.24),
+      #000 0%, transparent 65%
+    ),
+    radial-gradient(
+      circle calc(var(--trail-r, 0px) * 0.75) at
+        calc(var(--trail-x, 50%) - var(--trail-r, 0px) * 0.2)
+        calc(var(--trail-y, 50%) + var(--trail-r, 0px) * 0.14),
+      #000 0%, transparent 65%
+    ),
+    radial-gradient(
+      circle calc(var(--trail-r, 0px) * 0.65) at
+        calc(var(--trail-x, 50%) + var(--trail-r, 0px) * 0.04)
+        calc(var(--trail-y, 50%) + var(--trail-r, 0px) * 0.28),
+      #000 0%, transparent 65%
+    );
   pointer-events: none;
 }
 
+/* Inverse of .imageClear's hole — scrim covers everything except where
+   the reveal shows through. Kept as a single soft circle (not the same
+   3-blob cluster) sized/feathered generously enough to fully envelop the
+   organic shape above, since a mismatch here would only ever show up as
+   scrim peeking back in slightly early at the shape's widest lobes —
+   pushing the radius/feather out a bit removes any margin for that
+   without needing exact per-blob inversion math. */
 .imageScrimDark,
 .imageScrimLight {
   position: absolute;
@@ -222,14 +310,14 @@
   -webkit-mask-image: radial-gradient(
     circle at var(--mask-x, 50%) var(--mask-y, 50%),
     transparent 0,
-    transparent calc(var(--mask-r, 0px) - 16px),
-    #000 var(--mask-r, 0px)
+    transparent calc(var(--mask-r, 0px) * 1.35 - 16px),
+    #000 calc(var(--mask-r, 0px) * 1.35)
   );
   mask-image: radial-gradient(
     circle at var(--mask-x, 50%) var(--mask-y, 50%),
     transparent 0,
-    transparent calc(var(--mask-r, 0px) - 16px),
-    #000 var(--mask-r, 0px)
+    transparent calc(var(--mask-r, 0px) * 1.35 - 16px),
+    #000 calc(var(--mask-r, 0px) * 1.35)
   );
 }
 

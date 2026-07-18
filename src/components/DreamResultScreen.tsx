@@ -98,6 +98,13 @@ export default function DreamResultScreen({
   const [favorited, setFavorited] = useState(false);
   const reduceMotionPreference = useReducedMotion();
   const reduceMotion = reduceMotionPreference || skipEntrance;
+  // Mist/condensation overlay for the image's entrance — mounted only
+  // while the reveal is playing, removed from the DOM the moment it
+  // finishes fading (see the .imageMist element below) so nothing keeps
+  // rendering after the one-time reveal completes. Never mounted at all
+  // when motion is skipped (reduced-motion preference, or this is the
+  // second mount right after the Gallery handoff).
+  const [mistVisible, setMistVisible] = useState(!reduceMotion);
 
   // step 0 = title, 1 = date, 2 = mood tag, 3+ = symbol tags, then
   // interpretation gets a fixed slot past however many tags exist (up to
@@ -159,7 +166,7 @@ export default function DreamResultScreen({
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-  const REVEAL_RADIUS = 45; // 90px spotlight
+  const REVEAL_RADIUS = 65; // 130px spotlight
   const targetMaskRef = useRef({ x: 0, y: 0, r: 0 });
   const displayMaskRef = useRef({ x: 0, y: 0, r: 0 });
   // Trails behind the main circle with slower easing and a larger target
@@ -395,6 +402,14 @@ export default function DreamResultScreen({
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
+            {/* Mist/glass-condensation reveal: the shared layoutId FLIP
+                (position/size, from the Gallery thumbnail) keeps its own
+                0.45s tween untouched — filter/opacity animate separately,
+                slower, so the artwork settles into place quickly and then
+                keeps clearing up like fog lifting off glass. Skipped
+                entirely (initial={false}) under reduced motion or on the
+                second mount right after the Gallery handoff, same as
+                every other entrance animation on this screen. */}
             <motion.img
               layoutId={id ? `dream-photo-${id}` : undefined}
               ref={imgRef}
@@ -402,8 +417,24 @@ export default function DreamResultScreen({
               src={imageUrl}
               alt="Dream artwork"
               onLoad={sampleBrightness}
-              transition={{ type: "tween", duration: 0.45, ease: EASE }}
+              initial={reduceMotion ? false : { filter: "blur(30px) saturate(0.9)", opacity: 0.8 }}
+              animate={{ filter: "blur(0px) saturate(1)", opacity: 1 }}
+              transition={{
+                layout: { type: "tween", duration: 0.45, ease: EASE },
+                filter: { duration: 2, ease: EASE },
+                opacity: { duration: 2, ease: EASE },
+              }}
             />
+            {mistVisible && (
+              <motion.div
+                className={styles.imageMist}
+                aria-hidden="true"
+                initial={{ opacity: 0.5 }}
+                animate={{ opacity: 0 }}
+                transition={{ duration: 2, ease: EASE }}
+                onAnimationComplete={() => setMistVisible(false)}
+              />
+            )}
             {clearImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img className={styles.imageClearTrail} src={clearImageUrl} alt="" aria-hidden="true" />
