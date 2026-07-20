@@ -483,6 +483,19 @@ export function CheckmarkIcon({ size = 13, color = "#000" }: { size?: number; co
 // Standard multi-color Google "G" mark — brand colors are fixed
 // (this is the one place in the app a hardcoded palette is correct,
 // since it's a third-party logo, not part of Lucid's own design system).
+// Standard black Apple mark — same fixed-brand-color rationale as
+// GoogleIcon above.
+export function AppleIcon({ size = 18, color = "#000" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M16.365 1.43c0 1.14-.462 2.15-1.152 2.926-.795.9-2.05 1.596-3.086 1.51-.132-1.087.436-2.235 1.155-2.98C13.99.99 15.4.212 16.365 1.43zM20.02 17.24c-.53 1.222-.783 1.77-1.463 2.85-.947 1.51-2.283 3.39-3.94 3.404-1.472.014-1.852-.958-3.85-.947-1.996.012-2.415.964-3.888.95-1.657-.015-2.923-1.71-3.87-3.22-2.653-4.212-2.933-9.156-1.294-11.79 1.163-1.878 3-2.977 4.72-2.977 1.752 0 2.854 1.007 4.303 1.007 1.406 0 2.264-1.01 4.302-1.01 1.532 0 3.156.836 4.315 2.276-3.794 2.078-3.178 7.492.665 9.478z"
+        fill={color}
+      />
+    </svg>
+  );
+}
+
 export function GoogleIcon({ size = 18 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

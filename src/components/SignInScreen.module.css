@@ -17,7 +17,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 40px;
   padding: 0 var(--shell-padding);
   text-align: center;
 }
@@ -42,19 +42,32 @@
   max-width: none;
 }
 
+.textBlock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  max-width: 271px;
+}
+
 .subtitle {
   margin: 0;
-  font-size: 20px;
-  font-weight: 500;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 28px;
   color: var(--text-primary);
+}
+
+.subtitleAccent {
+  color: #8571ff;
 }
 
 .explainer {
   margin: 0;
-  max-width: 280px;
-  font-size: 14px;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 24px;
+  color: rgba(255, 255, 255, 0.75);
 }
 
 .error {
@@ -63,16 +76,22 @@
   color: #ff8a8a;
 }
 
+.buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+
 .cta {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 14px;
   width: 100%;
-  max-width: 320px;
-  margin-top: 12px;
-  padding: 14px 0;
+  padding: 10px 0;
   border: none;
   border-radius: var(--radius-pill);
   background: var(--text-primary);
@@ -91,9 +110,10 @@
 
 .ctaLabel {
   font-family: var(--font-family);
-  font-size: 16px;
-  font-weight: 500;
-  color: #1a1a1a;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 28px;
+  color: rgba(0, 0, 0, 0.7);
   white-space: nowrap;
 }
 
