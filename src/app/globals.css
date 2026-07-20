@@ -181,6 +181,23 @@ h1, h2, h3, h4, h5, h6, p, li, span, label {
   }
 }
 
+/* IMPORTANT — every `.screen` using this keyframe must NOT add a `both`
+   (or `forwards`) fill-mode, even though it's tempting to "lock in" the
+   settled state. A *filling* CSS animation that ever touches transform/
+   filter — even once its current frame's value is the visual identity —
+   makes the browser treat that element as establishing a containing
+   block for its position:fixed descendants for as long as the fill
+   holds, i.e. forever. Any `.screen::before`/`::after` meant to be a
+   full-viewport fixed background then gets silently clipped to the
+   .screen's own (possibly narrower, centered) box instead of the real
+   viewport — invisible on phones where the shell already fills the
+   screen, but very visible on any wider viewport (tablet, desktop
+   browser), where the gutter beside the centered shell shows the plain
+   page background instead of the gradient. Confirmed by isolated
+   before/after test. Safe to drop the fill-mode entirely here since
+   every `.screen` rule's own resting (non-animated) opacity/transform/
+   filter already equal this keyframe's `to` values — nothing to hold. */
+
 /* Honour system accessibility preference */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {

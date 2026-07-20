@@ -25,7 +25,12 @@
 
 /* ===================== SCREEN ===================== */
 .screen {
-  animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+  /* No `both`/`forwards` fill-mode — see the comment on @keyframes
+     screenIn in globals.css for why: this .screen has a position:fixed
+     ::before full-viewport gradient background, which a filling
+     transform/filter animation would otherwise clip to this element's
+     own centered box on any viewport wider than the shell. */
+  animation: screenIn 0.45s cubic-bezier(0.22, 0.61, 0.36, 1);
   position: relative;
   width: 100%;
   max-width: var(--shell-max-width);
