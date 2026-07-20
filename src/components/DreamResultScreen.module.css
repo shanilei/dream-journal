@@ -206,6 +206,14 @@
 
 .imageWrap {
   position: relative;
+  /* Scopes repaint to just this box — the touch/mouse reveal below
+     rewrites 6 CSS custom properties every animation frame, which forces
+     the browser to recompute a multi-layer mask; without `contain`
+     Safari has to consider whether that invalidates layout/paint further
+     up the tree (title, symbols, dream text, etc. below the image),
+     which it never actually does since every masked/blurred layer here
+     is absolutely positioned and clipped to this box. */
+  contain: layout paint style;
 }
 
 .image {
@@ -214,6 +222,13 @@
   aspect-ratio: 338 / 475;
   object-fit: cover;
   border-radius: 26px;
+  /* Hints the compositor to keep this layer ready for its one-time
+     entrance transition (filter+opacity, see DreamResultScreen.tsx) —
+     not `transform`, since Framer Motion's layoutId FLIP already manages
+     this element's transform directly via inline style, and a
+     stylesheet rule would either conflict with or be silently
+     overridden by that. */
+  will-change: filter, opacity;
 }
 
 /* Temporary "condensation" layer for the mist/glass reveal (see the
@@ -230,6 +245,12 @@
   pointer-events: none;
   background: radial-gradient(circle at 50% 45%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 45%, transparent 75%);
   mix-blend-mode: overlay;
+  /* GPU-composited opacity fade instead of a CPU-repainted one — safe to
+     force its own layer here since nothing else touches this element's
+     transform. */
+  will-change: opacity;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* The unblurred photo, stacked on top of .image — revealed only inside a
@@ -256,6 +277,16 @@
   object-fit: cover;
   border-radius: 26px;
   filter: blur(2px);
+  /* This layer's mask-image is rewritten every animation frame while the
+     reveal is moving (see --mask-x/y/r in DreamResultScreen.tsx) — these
+     four properties push it onto its own compositor layer up front and
+     scope repaint to just its own box, instead of Safari re-evaluating
+     blur+mask compositing against a plain, unpromoted paint layer on
+     every frame. */
+  will-change: mask-image, -webkit-mask-image;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: paint;
   -webkit-mask-image:
     radial-gradient(
       circle calc(var(--mask-r, 0px) * 0.95) at
@@ -312,6 +343,12 @@
   border-radius: 26px;
   filter: blur(6px);
   opacity: 0.45;
+  /* Same reasoning as .imageClear above — its own compositor layer,
+     scoped repaint, since --trail-x/y/r also update every frame. */
+  will-change: mask-image, -webkit-mask-image;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: paint;
   -webkit-mask-image:
     radial-gradient(
       circle calc(var(--trail-r, 0px) * 0.9) at
@@ -366,6 +403,13 @@
   inset: 0;
   border-radius: 26px;
   pointer-events: none;
+  /* Also mask-animated every frame during the reveal (inverse hole
+     around --mask-x/y/r) — same GPU-layer/repaint-scoping reasoning as
+     .imageClear/.imageClearTrail above. */
+  will-change: mask-image, -webkit-mask-image;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: paint;
   -webkit-mask-image: radial-gradient(
     circle at var(--mask-x, 50%) var(--mask-y, 50%),
     transparent 0,

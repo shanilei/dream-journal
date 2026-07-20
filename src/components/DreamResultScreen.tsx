@@ -150,7 +150,12 @@ export default function DreamResultScreen({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
-  const [revealed, setRevealed] = useState(false);
+  // Not React state on purpose — it only gates a couple of pointer-move
+  // guards below and never affects what's rendered, so it was causing a
+  // full re-render of this whole (fairly large) screen on every touch/
+  // mouse enter and leave for no visual benefit. A ref gives identical
+  // behavior with zero re-renders.
+  const revealedRef = useRef(false);
   // Starts hidden — keeps focus on the artwork/interpretation the moment
   // this screen opens, before the user has scrolled at all. Reveals with
   // BottomNav's existing slide-up/fade `hidden` prop (same mechanism
@@ -201,35 +206,94 @@ export default function DreamResultScreen({
   // leave) without touching those.
   const slowFadeRef = useRef(false);
   const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Whether the rAF loop below is currently scheduled — lets every
+  // interaction handler safely call ensureTicking() without ever
+  // double-scheduling a second parallel chain of frames.
+  const tickingRef = useRef(false);
 
-  useEffect(() => {
-    function tick() {
-      const target = targetMaskRef.current;
-      const display = displayMaskRef.current;
-      display.x += (target.x - display.x) * 0.22;
-      display.y += (target.y - display.y) * 0.22;
-      display.r += (target.r - display.r) * (slowFadeRef.current ? 0.018 : 0.15);
+  // Was previously an unconditional `requestAnimationFrame(tick)` at the
+  // end of tick() itself, forever — i.e. this ran every single frame for
+  // the entire lifetime of the screen, whether or not the reveal was
+  // actually moving, because the exponential-ease formulas below never
+  // reach their target *exactly*, only asymptotically closer. Every one
+  // of those frames wrote 6 CSS custom properties consumed inside
+  // mask-image's radial-gradient()s (see .imageClear/.imageClearTrail/
+  // .imageScrimDark/.imageScrimLight in the stylesheet) — recomputing a
+  // multi-layer CSS mask is one of the more expensive things a browser
+  // can be asked to repaint, and Safari in particular struggled to keep
+  // that at 60fps indefinitely, which is what made the *interactive*
+  // part of a touch feel like it was dropping frames even after the
+  // finger had stopped moving.
+  //
+  // Now: once every value is within a visually-imperceptible epsilon of
+  // its target, tick() snaps to the exact target, writes it one final
+  // time, and simply stops rescheduling itself — no more idle cost.
+  // Every place that changes a target value below calls ensureTicking()
+  // to resume the loop; it's a no-op if already running.
+  const MASK_EPSILON = 0.05; // px — below this, the difference isn't visible
 
-      const trail = trailMaskRef.current;
-      trail.x += (target.x - trail.x) * 0.07;
-      trail.y += (target.y - trail.y) * 0.07;
-      trail.r += (target.r * 1.4 - trail.r) * 0.06;
+  function tick() {
+    const target = targetMaskRef.current;
+    const display = displayMaskRef.current;
+    display.x += (target.x - display.x) * 0.22;
+    display.y += (target.y - display.y) * 0.22;
+    display.r += (target.r - display.r) * (slowFadeRef.current ? 0.018 : 0.15);
 
-      const el = wrapRef.current;
-      if (el) {
-        el.style.setProperty("--mask-x", `${display.x}px`);
-        el.style.setProperty("--mask-y", `${display.y}px`);
-        el.style.setProperty("--mask-r", `${display.r}px`);
-        el.style.setProperty("--trail-x", `${trail.x}px`);
-        el.style.setProperty("--trail-y", `${trail.y}px`);
-        el.style.setProperty("--trail-r", `${trail.r}px`);
-      }
-      maskRafRef.current = requestAnimationFrame(tick);
+    const trail = trailMaskRef.current;
+    trail.x += (target.x - trail.x) * 0.07;
+    trail.y += (target.y - trail.y) * 0.07;
+    trail.r += (target.r * 1.4 - trail.r) * 0.06;
+
+    const settled =
+      Math.abs(target.x - display.x) < MASK_EPSILON &&
+      Math.abs(target.y - display.y) < MASK_EPSILON &&
+      Math.abs(target.r - display.r) < MASK_EPSILON &&
+      Math.abs(target.x - trail.x) < MASK_EPSILON &&
+      Math.abs(target.y - trail.y) < MASK_EPSILON &&
+      Math.abs(target.r * 1.4 - trail.r) < MASK_EPSILON;
+
+    if (settled) {
+      display.x = target.x;
+      display.y = target.y;
+      display.r = target.r;
+      trail.x = target.x;
+      trail.y = target.y;
+      trail.r = target.r * 1.4;
+    }
+
+    const el = wrapRef.current;
+    if (el) {
+      el.style.setProperty("--mask-x", `${display.x}px`);
+      el.style.setProperty("--mask-y", `${display.y}px`);
+      el.style.setProperty("--mask-r", `${display.r}px`);
+      el.style.setProperty("--trail-x", `${trail.x}px`);
+      el.style.setProperty("--trail-y", `${trail.y}px`);
+      el.style.setProperty("--trail-r", `${trail.r}px`);
+    }
+
+    if (settled) {
+      tickingRef.current = false;
+      maskRafRef.current = null;
+      return;
     }
     maskRafRef.current = requestAnimationFrame(tick);
+  }
+
+  function ensureTicking() {
+    if (tickingRef.current) return;
+    tickingRef.current = true;
+    maskRafRef.current = requestAnimationFrame(tick);
+  }
+
+  useEffect(() => {
+    // Paints the initial at-rest state once, then stops immediately (both
+    // target and display start at r:0, so the very first tick() is
+    // already "settled").
+    ensureTicking();
     return () => {
       if (maskRafRef.current) cancelAnimationFrame(maskRafRef.current);
       if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
+      tickingRef.current = false;
     };
   }, []);
 
@@ -238,6 +302,7 @@ export default function DreamResultScreen({
     if (!rect) return;
     targetMaskRef.current.x = clientX - rect.left;
     targetMaskRef.current.y = clientY - rect.top;
+    ensureTicking();
   }
   const [copied, setCopied] = useState(false);
 
@@ -548,12 +613,14 @@ export default function DreamResultScreen({
               if (!clearImageUrl) return;
               updateMaskPos(e.clientX, e.clientY);
               targetMaskRef.current.r = REVEAL_RADIUS;
-              setRevealed(true);
+              ensureTicking();
+              revealedRef.current = true;
             }}
-            onMouseMove={(e) => revealed && updateMaskPos(e.clientX, e.clientY)}
+            onMouseMove={(e) => revealedRef.current && updateMaskPos(e.clientX, e.clientY)}
             onMouseLeave={() => {
               targetMaskRef.current.r = 0;
-              setRevealed(false);
+              ensureTicking();
+              revealedRef.current = false;
             }}
             onTouchStart={(e) => {
               if (!clearImageUrl) return;
@@ -576,27 +643,30 @@ export default function DreamResultScreen({
               displayMaskRef.current.x = targetMaskRef.current.x;
               displayMaskRef.current.y = targetMaskRef.current.y;
               displayMaskRef.current.r = TOUCH_REVEAL_RADIUS;
-              setRevealed(true);
+              ensureTicking();
+              revealedRef.current = true;
             }}
             onTouchMove={(e) => {
-              if (!revealed) return;
+              if (!revealedRef.current) return;
               const touch = e.touches[0];
               if (touch) updateMaskPos(touch.clientX, touch.clientY);
             }}
             onTouchEnd={() => {
-              setRevealed(false);
+              revealedRef.current = false;
               if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
               releaseTimerRef.current = setTimeout(() => {
                 slowFadeRef.current = true;
                 targetMaskRef.current.r = 0;
+                ensureTicking();
               }, TOUCH_RELEASE_HOLD_MS);
             }}
             onTouchCancel={() => {
-              setRevealed(false);
+              revealedRef.current = false;
               if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
               releaseTimerRef.current = setTimeout(() => {
                 slowFadeRef.current = true;
                 targetMaskRef.current.r = 0;
+                ensureTicking();
               }, TOUCH_RELEASE_HOLD_MS);
             }}
           >
