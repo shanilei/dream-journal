@@ -8,6 +8,7 @@ import { generateImage, pickProfile } from "@/generate-image";
 import { saveDream } from "@/dreams-store";
 import { getSupabaseAdmin } from "@/supabase-admin";
 import { generatePrintImage } from "@/print-image";
+import { getCurrentUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -18,6 +19,16 @@ function shortSymbol(symbol: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Resolved server-side via the session cookie, never from the request
+  // body — the client has no way to claim a user_id for itself. Checked
+  // before any of the (expensive) analysis/image-generation work below,
+  // so an unauthenticated request fails fast instead of doing real work
+  // for a dream that couldn't be saved anyway.
+  const user = await getCurrentUser();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const body = await req.json().catch(() => null);
   const dreamText = body?.text;
   const lang = body?.lang === "en" ? "en" : "he";
@@ -127,6 +138,7 @@ export async function POST(req: NextRequest) {
       dreamText,
       interpretationText: interpretation.interpretationText,
       keywords: interpretation.keywords,
+      userId: user.id,
     });
 
     return NextResponse.json({

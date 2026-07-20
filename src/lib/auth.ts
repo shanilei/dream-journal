@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import { createClient } from "./supabase/server";
 
 // Server-side "who is signed in" check — for Server Components, Route
@@ -17,5 +18,16 @@ export async function getCurrentUser() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+  return user;
+}
+
+// For Server Components on personal-journal routes. Middleware already
+// redirects signed-out visitors to /signin before these ever render —
+// this is a second, independent check (defense in depth, and the only
+// way the component actually gets the user's id to scope its query by),
+// not the primary gate.
+export async function requireUser() {
+  const user = await getCurrentUser();
+  if (!user) redirect("/signin");
   return user;
 }

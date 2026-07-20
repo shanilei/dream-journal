@@ -1,12 +1,14 @@
 import HomeScreenClient from "@/components/HomeScreenClient";
 import { listDreams } from "@/dreams-store";
+import { requireUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
 const MOOD_TYPES = ["Fear", "Confused", "Sweet", "Sad", "Angry"] as const;
 
 export default async function GalleryPage() {
-  const dreams = await listDreams().catch(() => []);
+  const user = await requireUser();
+  const dreams = await listDreams(user.id).catch(() => []);
 
   const toCard = (dream: (typeof dreams)[number]) => ({
     id: dream.id,

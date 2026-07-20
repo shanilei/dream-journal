@@ -1,5 +1,6 @@
 import YourJourneyScreen, { type JourneyStats, type PatternCard } from "@/components/YourJourneyScreen";
 import { listDreams } from "@/dreams-store";
+import { requireUser } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
 
@@ -82,7 +83,8 @@ function computeStats(dreams: Awaited<ReturnType<typeof listDreams>>): JourneySt
 }
 
 export default async function UserPage() {
-  const dreams = await listDreams().catch(() => []);
+  const user = await requireUser();
+  const dreams = await listDreams(user.id).catch(() => []);
   const stats = computeStats(dreams);
   return <YourJourneyScreen stats={stats} />;
 }

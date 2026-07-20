@@ -1,4 +1,4 @@
-import { getSupabaseAdmin } from "./supabase-admin";
+import { createClient } from "./lib/supabase/server";
 
 export interface DreamEntry {
   id: string;
@@ -66,8 +66,18 @@ function fromRow(row: DreamRow): DreamEntry {
   };
 }
 
-export async function saveDream(entry: DreamEntry): Promise<void> {
-  const { error } = await getSupabaseAdmin().from("dreams").insert({
+// Every function below uses the request-scoped server client (anon key +
+// the caller's own session cookies), never the admin/service-role client
+// — see src/supabase-admin.ts, which is now reserved for genuinely
+// admin-only work. RLS isn't enabled yet (a later phase), so the
+// `.eq("user_id", userId)` filter on every query below is currently the
+// *only* thing enforcing "you only see your own dreams" — it's not just
+// a performance/convenience filter, it's the actual ownership boundary
+// until RLS lands as defense-in-depth on top of it.
+
+export async function saveDream(entry: DreamEntry & { userId: string }): Promise<void> {
+  const supabase = await createClient();
+  const { error } = await supabase.from("dreams").insert({
     id: entry.id,
     created_at: entry.createdAt,
     image_url: entry.imageUrl,
@@ -85,6 +95,7 @@ export async function saveDream(entry: DreamEntry): Promise<void> {
     show_date: entry.showDate ?? true,
     show_time: entry.showTime ?? true,
     display_at: entry.displayAt ?? null,
+    user_id: entry.userId,
   });
   if (error) throw error;
 }
@@ -100,7 +111,7 @@ export interface DreamOverlayPatch {
   printImageUrl?: string;
 }
 
-export async function updateDream(id: string, patch: DreamOverlayPatch): Promise<void> {
+export async function updateDream(id: string, patch: DreamOverlayPatch, userId: string): Promise<void> {
   const update: Record<string, unknown> = {};
   if ("captionOverride" in patch) update.caption_override = patch.captionOverride ?? null;
   if ("showDate" in patch) update.show_date = patch.showDate;
@@ -108,7 +119,13 @@ export async function updateDream(id: string, patch: DreamOverlayPatch): Promise
   if ("displayAt" in patch) update.display_at = patch.displayAt ?? null;
   if ("printImageUrl" in patch) update.print_image_url = patch.printImageUrl;
 
-  const { error } = await getSupabaseAdmin().from("dreams").update(update).eq("id", id);
+  const supabase = await createClient();
+  // Scoped by both id AND user_id — a signed-in user can't update a
+  // dream that isn't theirs by guessing its id (the WHERE clause simply
+  // matches zero rows for anyone else's dream, so this silently no-ops
+  // rather than erroring — the caller's own getDream(id, userId) call
+  // beforehand is what actually surfaces a 404 for that case).
+  const { error } = await supabase.from("dreams").update(update).eq("id", id).eq("user_id", userId);
   if (error) throw error;
 }
 
@@ -119,17 +136,32 @@ export async function updateDream(id: string, patch: DreamOverlayPatch): Promise
 // list was pure wasted payload that got slower as the table grew.
 const LIST_COLUMNS = "id, created_at, image_url, mood, name, summary_text, symbols, keywords";
 
-export async function listDreams(): Promise<DreamEntry[]> {
-  const { data, error } = await getSupabaseAdmin()
+export async function listDreams(userId: string): Promise<DreamEntry[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
     .from("dreams")
     .select(LIST_COLUMNS)
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
   if (error) throw error;
   return (data ?? []).map((row) => fromRow(row as DreamRow));
 }
 
-export async function getDream(id: string): Promise<DreamEntry | undefined> {
-  const { data, error } = await getSupabaseAdmin().from("dreams").select("*").eq("id", id).maybeSingle();
+export async function getDream(id: string, userId: string): Promise<DreamEntry | undefined> {
+  const supabase = await createClient();
+  // Matching on id AND user_id together (not id alone, then checking
+  // ownership after) means a dream belonging to someone else simply
+  // doesn't match the query at all — it comes back exactly the same as
+  // "id doesn't exist", so callers can't distinguish "not yours" from
+  // "never existed" and every call site already treats undefined as a
+  // plain 404/notFound(), with no separate "unauthorized" branch to leak
+  // that distinction through.
+  const { data, error } = await supabase
+    .from("dreams")
+    .select("*")
+    .eq("id", id)
+    .eq("user_id", userId)
+    .maybeSingle();
   if (error) throw error;
   return data ? fromRow(data) : undefined;
 }

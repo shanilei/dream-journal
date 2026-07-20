@@ -2,8 +2,17 @@ import "dotenv/config";
 import { readFileSync } from "node:fs";
 import { randomUUID } from "node:crypto";
 import { getSupabaseAdmin } from "./supabase-admin";
-import { saveDream } from "./dreams-store";
 import { pickProfile } from "./generate-image";
+
+// This script runs standalone (via tsx, not through a Next.js request),
+// so it can't use dreams-store.ts's saveDream() — that now goes through
+// the request-scoped server client (src/lib/supabase/server.ts), which
+// depends on next/headers's cookies() and only works inside an actual
+// Next.js request. Inserting directly via the admin client here instead
+// is exactly the "genuinely administrative, server-only" use that
+// client is still reserved for. Note: since dreams-store.ts's reads are
+// now scoped by user_id, a dream seeded here (with no owner) won't show
+// up in anyone's gallery until it's explicitly assigned to an account.
 
 const MOOD_LABELS = { sweet: "Sweet", confused: "Confused", fear: "Fear", sad: "Sad", angry: "Angry" } as const;
 
@@ -27,18 +36,19 @@ async function main() {
   const summaryText = (analysis.themes ?? []).slice(0, 2).join(". ") + ".";
   const symbols = (analysis.symbols ?? []).slice(0, 3).map((s: string) => s.split(" - ")[0].trim());
 
-  await saveDream({
+  const { error: insertError } = await getSupabaseAdmin().from("dreams").insert({
     id: randomUUID(),
-    createdAt: new Date().toISOString(),
-    imageUrl,
-    clearImageUrl,
+    created_at: new Date().toISOString(),
+    image_url: imageUrl,
+    clear_image_url: clearImageUrl,
     mood,
-    summaryText,
+    summary_text: summaryText,
     symbols,
-    dreamText: "חלמתי שמישהו עומד מולי עם מסכה ואני בים",
-    interpretationText: "הים שמסביבך — נזיל, משתנה, חסר קרקע — אולי מייצג מקום שבו הדברים אינם יציבים, שבו קשה לדעת מה נכון. מול זה עומדת דמות שמסתירה את פניה. מה אם יש מישהו — או משהו — בחייך שאתה/את מרגיש/ה שאינך רואה כפי שהוא באמת? אולי יש גם תחושת בדידות בתוך העימות הזה, עמידה לבד מול הלא-נודע. שווה לשאול: מה מסתתר מאחורי המסכה, ומה היית רוצה לגלות שם?",
+    dream_text: "חלמתי שמישהו עומד מולי עם מסכה ואני בים",
+    interpretation_text: "הים שמסביבך — נזיל, משתנה, חסר קרקע — אולי מייצג מקום שבו הדברים אינם יציבים, שבו קשה לדעת מה נכון. מול זה עומדת דמות שמסתירה את פניה. מה אם יש מישהו — או משהו — בחייך שאתה/את מרגיש/ה שאינך רואה כפי שהוא באמת? אולי יש גם תחושת בדידות בתוך העימות הזה, עמידה לבד מול הלא-נודע. שווה לשאול: מה מסתתר מאחורי המסכה, ומה היית רוצה לגלות שם?",
     keywords: ["ים", "מסכה", "אי-ודאות", "הסתרת זהות", "בדידות", "עימות עם הלא-נודע", "חוסר יציבות"],
   });
+  if (insertError) throw insertError;
 
   console.log("✓ Dream saved. imageUrl:", imageUrl);
 }

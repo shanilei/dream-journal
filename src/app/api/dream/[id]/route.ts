@@ -3,6 +3,7 @@ import { getDream, updateDream } from "@/dreams-store";
 import { shortSymbol } from "@/lib/dream-format";
 import { generatePrintImage } from "@/print-image";
 import { getSupabaseAdmin } from "@/supabase-admin";
+import { getCurrentUser } from "@/lib/auth";
 import { randomUUID } from "node:crypto";
 
 // generatePrintImage uses @napi-rs/canvas, which needs the Node runtime.
@@ -17,8 +18,14 @@ export const runtime = "nodejs";
 // overlay's fetched content and the real route's server-rendered
 // content are identical — no visible difference when the two hand off.
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { id } = await params;
-  const dream = await getDream(id);
+  // getDream already scopes by user_id — a dream owned by someone else
+  // comes back as undefined here, identical to a nonexistent id, so this
+  // 404 never reveals whether the dream exists under another account.
+  const dream = await getDream(id, user.id);
   if (!dream) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return NextResponse.json({
     ...dream,
@@ -36,13 +43,16 @@ const CAPTION_MAX_CHARS = 80;
 // falls back to the live layered layout, which already reads the same
 // edited fields (see DreamResultScreen.tsx).
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const user = await getCurrentUser();
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
   const { id } = await params;
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const dream = await getDream(id);
+  const dream = await getDream(id, user.id);
   if (!dream) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
   const captionOverride =
@@ -96,9 +106,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     ...(showTime !== undefined ? { showTime } : {}),
     ...(displayAt !== undefined ? { displayAt } : {}),
     ...(printImageUrl !== undefined ? { printImageUrl } : {}),
-  });
+  }, user.id);
 
-  const updated = await getDream(id);
+  const updated = await getDream(id, user.id);
   return NextResponse.json({
     ...updated,
     symbols: updated?.symbols.slice(0, 3).map(shortSymbol) ?? [],
