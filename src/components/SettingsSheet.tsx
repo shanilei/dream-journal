@@ -7,6 +7,7 @@ import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
 import { clearOnboarded } from "@/lib/onboarding";
 import { loadSelectedVoiceId, saveSelectedVoiceId } from "@/lib/voicePreference";
+import { createClient } from "@/lib/supabase/client";
 import {
   AlarmIcon,
   LanguageAIcon,
@@ -304,6 +305,26 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
             <div className={styles.rowGroup}>
               <ActionRow label={t.settingsExport} flip={isHe} />
               <ActionRow label={t.settingsDelete} flip={isHe} />
+            </div>
+          </section>
+
+          {/* ── Account ───────────────────────────────────────────────────
+              Sign-out only, for now — nothing in the app is gated behind
+              a session yet (Phase 2 is authentication only), so this row
+              is harmless to show/tap regardless of whether the visitor
+              actually has a session; signOut() on a signed-out browser
+              client is a safe no-op. */}
+          <section className={styles.section}>
+            <p className={sectionLabelClass}>{t.settingsAccount}</p>
+            <div className={styles.rowGroup}>
+              <ActionRow
+                label={t.signOut}
+                flip={isHe}
+                onClick={async () => {
+                  await createClient().auth.signOut();
+                  window.location.href = "/signin";
+                }}
+              />
             </div>
           </section>
 

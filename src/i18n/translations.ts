@@ -78,6 +78,13 @@ export const translations = {
     showTimeLabel: "Show time",
     saveChanges: "Save changes",
     detailsUpdated: "Details updated",
+    // Sign-in screen
+    signInSubtitle: "A private place for your dreams.",
+    signInExplainer: "Sign in to keep your own journal — just for you, on any device.",
+    continueWithGoogle: "Continue with Google",
+    signInError: "Something went wrong — please try again.",
+    settingsAccount: "Account",
+    signOut: "Sign out",
     // Your Journey screen
     journeyTitle: "Dream Insights",
     goodMorning: "Good morning",
@@ -231,6 +238,13 @@ export const translations = {
     showTimeLabel: "הצג שעה",
     saveChanges: "שמור שינויים",
     detailsUpdated: "הפרטים עודכנו",
+    // Sign-in screen
+    signInSubtitle: "מקום פרטי לחלומות שלך.",
+    signInExplainer: "התחברו כדי לשמור את היומן שלכם — פרטי, בכל מכשיר.",
+    continueWithGoogle: "המשך עם Google",
+    signInError: "משהו השתבש — נסו שוב.",
+    settingsAccount: "חשבון",
+    signOut: "התנתקות",
     // Your Journey screen
     journeyTitle: "המסע שלך",
     goodMorning: "בוקר טוב",

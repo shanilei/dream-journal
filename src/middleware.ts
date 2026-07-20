@@ -33,5 +33,15 @@ export const config = {
   // Skip the onboarding route itself (avoid a redirect loop), API routes,
   // Next internals, and anything that looks like a static file (has a
   // dot in its last path segment — covers /images/*, favicons, etc.).
-  matcher: ["/((?!onboarding|api|_next|.*\\..*).*)"],
+  //
+  // "auth" is also skipped (added for Phase 2's Google sign-in): Google/
+  // Supabase redirect the browser straight to /auth/callback?code=... to
+  // finish a sign-in, at any point, regardless of whether this browser
+  // has ever completed onboarding — if that request got caught by the
+  // onboarding redirect above instead of reaching the callback route
+  // handler, the OAuth code would never get exchanged and sign-in would
+  // silently fail. /signin itself is intentionally NOT in this list, so
+  // it still goes through the normal onboarding gate like every other
+  // screen.
+  matcher: ["/((?!onboarding|auth|api|_next|.*\\..*).*)"],
 };

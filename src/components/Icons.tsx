@@ -479,3 +479,29 @@ export function CheckmarkIcon({ size = 13, color = "#000" }: { size?: number; co
     </svg>
   );
 }
+
+// Standard multi-color Google "G" mark — brand colors are fixed
+// (this is the one place in the app a hardcoded palette is correct,
+// since it's a third-party logo, not part of Lucid's own design system).
+export function GoogleIcon({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path
+        d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.51h6.47c-.28 1.48-1.13 2.73-2.4 3.58v2.98h3.87c2.27-2.09 3.58-5.17 3.58-8.8z"
+        fill="#4285F4"
+      />
+      <path
+        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.87-2.98c-1.07.72-2.45 1.15-4.06 1.15-3.13 0-5.78-2.11-6.73-4.96H1.27v3.09C3.25 21.3 7.31 24 12 24z"
+        fill="#34A853"
+      />
+      <path
+        d="M5.27 14.3a7.19 7.19 0 010-4.6V6.61H1.27a12 12 0 000 10.78l4-3.09z"
+        fill="#FBBC05"
+      />
+      <path
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43C17.94 1.19 15.24 0 12 0 7.31 0 3.25 2.7 1.27 6.61l4 3.09C6.22 6.86 8.87 4.75 12 4.75z"
+        fill="#EA4335"
+      />
+    </svg>
+  );
+}
