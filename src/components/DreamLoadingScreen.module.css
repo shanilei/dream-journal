@@ -24,13 +24,22 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 28px;
+  /* Was 28px — a bit more breathing room to match the bigger orb/text
+     below, so the enlarged message text doesn't read as cramped against
+     its neighbors. */
+  gap: 36px;
   overflow: hidden;
 }
 
+/* position:fixed (not absolute) so this spans the true viewport instead
+   of just .screen's own centered box — otherwise on any viewport wider
+   than the shell (tablet, desktop browser), the gutter beside the
+   centered content shows the plain page background instead of this
+   gradient. No-op visually on phones, where the shell already ~= the
+   viewport. */
 .screen::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
   /* Same 2.4s rate as the moon ring's own chase (see CHASE_DURATION_MS in
@@ -71,8 +80,10 @@
 .orbWrap {
   position: relative;
   z-index: 1;
-  width: 170px;
-  height: 170px;
+  /* Was 170px — kept in step with MOON_RING_RADIUS_PX's own +10px bump in
+     DreamLoadingScreen.tsx (same ~20px margin around the ring as before). */
+  width: 190px;
+  height: 190px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -111,7 +122,9 @@
   width: 100%;
   padding: 0 var(--shell-padding);
   box-sizing: border-box;
-  gap: 6px;
+  /* Was 6px — the larger 14px message text (below) needs more room
+     between rows or the lines read as crowded/overlapping. */
+  gap: 12px;
 }
 
 /* Each row spans the full width and centers its icon+text as a group,
@@ -131,7 +144,8 @@
 
 .messageText {
   margin: 0;
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 1.4;
   color: inherit;
   white-space: nowrap;
 }

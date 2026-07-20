@@ -74,9 +74,14 @@
   background: #050A1A;
 }
 
+/* position:fixed (not absolute) so this spans the true viewport instead
+   of just .screen's own centered box — see the removed tablet-only
+   override below for the history here; now unconditional since it's
+   correct at every viewport size (a no-op visually on phones, where the
+   shell already ~= the viewport). */
 .screen::before {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: linear-gradient(348.69deg, #050A1A 0%, #080C36 52.67%, #6871FF 105.33%);
   animation: gradientFade 4.5s ease-in-out infinite;
@@ -86,7 +91,7 @@
 
 .screen::after {
   content: '';
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: linear-gradient(168.69deg, #050A1A 0%, #080C36 52.67%, #3B3F9E 105.33%);
   animation: gradientFade 4.5s ease-in-out infinite;
@@ -96,7 +101,7 @@
 }
 
 .starfield {
-  position: absolute;
+  position: fixed;
   inset: 0;
   background: url("/images/onboarding/starfield.png") center top / cover no-repeat;
   mix-blend-mode: plus-lighter;
@@ -511,19 +516,10 @@
     box-sizing: border-box;
   }
 
-  /* .screen itself stays capped at --shell-max-width (same shared shell
-     pattern every screen uses) and centered, but on an iPad that's
-     narrower than the viewport, so the background gradient/starfield —
-     normally sized to .screen's own box via `inset: 0` — left plain
-     page-background (#090a13, near black) showing on both sides. Fixed
-     positioning paints them across the full viewport instead, while the
-     actual content (prompt/orb/nav) stays exactly where it was, still
-     shell-width-constrained. */
-  .screen::before,
-  .screen::after,
-  .starfield {
-    position: fixed;
-  }
+  /* .screen::before/::after/.starfield are position:fixed unconditionally
+     now (see their base rules above), so nothing tablet-specific is
+     needed here anymore — this block used to be where that got turned
+     on only for this breakpoint. */
 
   .prompt,
   .promptHe {

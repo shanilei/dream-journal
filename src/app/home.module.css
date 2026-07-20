@@ -1453,6 +1453,16 @@
     grid-template-columns: repeat(3, minmax(0, 200px));
     gap: 14px;
   }
+
+  /* Gallery "Dream History" grid — 3 columns (phone default, unchanged
+     above) leaves an iPad's extra width mostly unused; 4 fits
+     comfortably within the tablet --shell-max-width range without cards
+     getting uncomfortably narrow. iPad only, per the same tablet
+     detection as everything else in this block — phone's
+     repeat(3, 1fr) is untouched. */
+  .collectionGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 @media print {

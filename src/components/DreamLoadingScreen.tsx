@@ -6,7 +6,8 @@ import { SparkleIcon, MoonPhaseIcon } from "./Icons";
 import { useLanguage } from "./LanguageProvider";
 
 const MOON_RING_COUNT = 28;
-const MOON_RING_RADIUS_PX = 64;
+// +10px per request — was 64. .orbWrap's box (module.css) is sized to match.
+const MOON_RING_RADIUS_PX = 74;
 const CHASE_DURATION_MS = 2400;
 const moonRingIcons = Array.from({ length: MOON_RING_COUNT }, (_, i) => {
   const angle = (i / MOON_RING_COUNT) * 2 * Math.PI - Math.PI / 2;
