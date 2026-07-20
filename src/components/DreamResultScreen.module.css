@@ -547,6 +547,11 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 12px;
+  /* +2px specifically between the photo and the headline — adds to
+     (doesn't replace) .content's own 14px gap, and only affects this one
+     edge (the image-to-title gap), not the divider gaps below (those are
+     driven by .block's own margin-top, a separate mechanism). */
+  margin-top: 2px;
 }
 
 .titleRow {
