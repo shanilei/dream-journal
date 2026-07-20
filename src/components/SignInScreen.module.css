@@ -13,24 +13,24 @@
   position: relative;
   z-index: 1;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 40px;
-  padding: 0 var(--shell-padding);
   text-align: center;
 }
 
-/* Same sprite-crop technique as the onboarding SplashScreen's logo, for
-   an identical lockup — see that component's CSS comment for why the
-   source asset is cropped this way. */
+/* Pinned independently of .group below now (was previously just centered
+   together with it in one flex column) — 30.3% matches exactly where it
+   was already rendering, so it doesn't visually move now that .group is
+   anchored to the bottom on its own. A percentage (not a fixed px top)
+   so it stays proportionally in the same spot across viewport heights,
+   consistent with how other absolute-positioned elements in this app
+   (e.g. record.module.css) anchor relative to the screen. */
 .logoWindow {
-  position: relative;
+  position: absolute;
+  top: 30.3%;
+  left: 50%;
+  transform: translateX(-50%);
   width: 220px;
   height: 72px;
   overflow: hidden;
-  margin-bottom: 8px;
 }
 
 .logo {
@@ -42,12 +42,18 @@
   max-width: none;
 }
 
+/* Anchored to the bottom independently of the logo above — see
+   .logoWindow's comment. */
 .group {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 100px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 20px;
-  width: 100%;
+  padding: 0 var(--shell-padding);
 }
 
 .textBlock {
