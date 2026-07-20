@@ -42,40 +42,45 @@ export default function SignInScreen() {
           <img src="/images/onboarding/lucid-logo.png" alt="Lucid" className={styles.logo} />
         </div>
 
-        <div className={styles.textBlock}>
-          <p className={styles.subtitle}>
-            {t.signInSubtitleBefore}
-            <span className={styles.subtitleAccent}>{t.signInSubtitleAccent}</span>
-            {t.signInSubtitleAfter}
-          </p>
-          <p className={styles.explainer}>{t.signInExplainer}</p>
-        </div>
+        {/* Text + buttons are one Figma group (node 1699:26067) — a 20px
+            gap between them, distinct from the larger gap separating the
+            logo above from this whole group. */}
+        <div className={styles.group}>
+          <div className={styles.textBlock}>
+            <p className={styles.subtitle}>
+              {t.signInSubtitleBefore}
+              <span className={styles.subtitleAccent}>{t.signInSubtitleAccent}</span>
+              {t.signInSubtitleAfter}
+            </p>
+            <p className={styles.explainer}>{t.signInExplainer}</p>
+          </div>
 
-        {hadError && <p className={styles.error}>{t.signInError}</p>}
+          {hadError && <p className={styles.error}>{t.signInError}</p>}
 
-        <div className={styles.buttons}>
-          <button
-            type="button"
-            className={styles.cta}
-            onClick={() => handleSignIn("apple")}
-            disabled={loadingProvider !== null}
-          >
-            <span className={styles.ctaIcon}>
-              <AppleIcon size={18} />
-            </span>
-            <span className={styles.ctaLabel}>{t.signInWithApple}</span>
-          </button>
-          <button
-            type="button"
-            className={styles.cta}
-            onClick={() => handleSignIn("google")}
-            disabled={loadingProvider !== null}
-          >
-            <span className={styles.ctaIcon}>
-              <GoogleIcon size={18} />
-            </span>
-            <span className={styles.ctaLabel}>{t.signInWithGoogle}</span>
-          </button>
+          <div className={styles.buttons}>
+            <button
+              type="button"
+              className={styles.cta}
+              onClick={() => handleSignIn("apple")}
+              disabled={loadingProvider !== null}
+            >
+              <span className={styles.ctaIcon}>
+                <AppleIcon size={18} />
+              </span>
+              <span className={styles.ctaLabel}>{t.signInWithApple}</span>
+            </button>
+            <button
+              type="button"
+              className={styles.cta}
+              onClick={() => handleSignIn("google")}
+              disabled={loadingProvider !== null}
+            >
+              <span className={styles.ctaIcon}>
+                <GoogleIcon size={18} />
+              </span>
+              <span className={styles.ctaLabel}>{t.signInWithGoogle}</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

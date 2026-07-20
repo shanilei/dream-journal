@@ -42,6 +42,14 @@
   max-width: none;
 }
 
+.group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
 .textBlock {
   display: flex;
   flex-direction: column;
