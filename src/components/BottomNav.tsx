@@ -5,7 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./BottomNav.module.css";
-import { AddAIIcon, CalendarIcon, UserIcon, CloseIcon, MicIcon, PencilIcon } from "./Icons";
+import { AddAIIcon, GalleryIcon, UserIcon, CloseIcon, MicIcon, PencilIcon } from "./Icons";
 import { useLanguage } from "./LanguageProvider";
 
 type NavKey = "record" | "user" | "dreams";
@@ -117,7 +117,7 @@ export default function BottomNav({
 
   const items: { key: NavKey; href: string; icon: (color: string) => React.ReactNode }[] = [
     { key: "user", href: "/user", icon: (c) => <UserIcon color={c} size={22} /> },
-    { key: "dreams", href: "/gallery", icon: (c) => <CalendarIcon color={c} size={22} /> },
+    { key: "dreams", href: "/gallery", icon: (c) => <GalleryIcon color={c} size={22} /> },
   ];
 
   return (
