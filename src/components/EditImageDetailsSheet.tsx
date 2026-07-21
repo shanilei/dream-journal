@@ -3,8 +3,64 @@
 import { useState } from "react";
 import styles from "./EditImageDetailsSheet.module.css";
 import { useLanguage } from "./LanguageProvider";
-import { CAPTION_MAX_CHARS } from "@/lib/caption";
+import {
+  CAPTION_MAX_CHARS,
+  CAPTION_FONT_SIZE_MIN,
+  CAPTION_FONT_SIZE_MAX,
+  META_FONT_SIZE_MIN,
+  META_FONT_SIZE_MAX,
+} from "@/lib/caption";
 import { CloseIcon } from "./Icons";
+
+// Numeric +/- stepper — deliberately not a slider and not Small/Medium/
+// Large presets, per spec. min/max just disable the relevant button
+// instead of silently clamping past it, so the limit is visible.
+function FontSizeStepper({
+  label,
+  value,
+  onChange,
+  min,
+  max,
+  decreaseLabel,
+  increaseLabel,
+  isHe,
+}: {
+  label: string;
+  value: number;
+  onChange: (value: number) => void;
+  min: number;
+  max: number;
+  decreaseLabel: string;
+  increaseLabel: string;
+  isHe?: boolean;
+}) {
+  return (
+    <div className={styles.field}>
+      <span className={`${styles.fieldLabel} ${isHe ? styles.fieldLabelHe : ""}`}>{label}</span>
+      <div className={styles.stepperRow}>
+        <button
+          type="button"
+          className={styles.stepperBtn}
+          onClick={() => onChange(Math.max(min, value - 1))}
+          disabled={value <= min}
+          aria-label={decreaseLabel}
+        >
+          A−
+        </button>
+        <span className={styles.stepperValue}>{value} px</span>
+        <button
+          type="button"
+          className={styles.stepperBtn}
+          onClick={() => onChange(Math.min(max, value + 1))}
+          disabled={value >= max}
+          aria-label={increaseLabel}
+        >
+          A+
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function Toggle({
   checked,
@@ -40,6 +96,10 @@ export default function EditImageDetailsSheet({
   onShowDateChange,
   showTime,
   onShowTimeChange,
+  captionFontSize,
+  onCaptionFontSizeChange,
+  metaFontSize,
+  onMetaFontSizeChange,
   saving = false,
   onSave,
   onCancel,
@@ -54,6 +114,10 @@ export default function EditImageDetailsSheet({
   onShowDateChange: (value: boolean) => void;
   showTime: boolean;
   onShowTimeChange: (value: boolean) => void;
+  captionFontSize: number;
+  onCaptionFontSizeChange: (value: number) => void;
+  metaFontSize: number;
+  onMetaFontSizeChange: (value: number) => void;
   saving?: boolean;
   onSave: () => void;
   onCancel: () => void;
@@ -99,6 +163,17 @@ export default function EditImageDetailsSheet({
             </div>
           </div>
 
+          <FontSizeStepper
+            label={t.captionSizeLabel}
+            value={captionFontSize}
+            onChange={onCaptionFontSizeChange}
+            min={CAPTION_FONT_SIZE_MIN}
+            max={CAPTION_FONT_SIZE_MAX}
+            decreaseLabel={t.decreaseSize}
+            increaseLabel={t.increaseSize}
+            isHe={isHe}
+          />
+
           <div className={styles.row2}>
             <div className={styles.field}>
               <label className={`${styles.fieldLabel} ${isHe ? styles.fieldLabelHe : ""}`} htmlFor="edit-image-date">
@@ -125,6 +200,17 @@ export default function EditImageDetailsSheet({
               />
             </div>
           </div>
+
+          <FontSizeStepper
+            label={t.dateTimeSizeLabel}
+            value={metaFontSize}
+            onChange={onMetaFontSizeChange}
+            min={META_FONT_SIZE_MIN}
+            max={META_FONT_SIZE_MAX}
+            decreaseLabel={t.decreaseSize}
+            increaseLabel={t.increaseSize}
+            isHe={isHe}
+          />
 
           <div className={styles.toggleRow}>
             <span className={`${styles.toggleLabel} ${isHe ? styles.toggleLabelHe : ""}`}>{t.showDateLabel}</span>

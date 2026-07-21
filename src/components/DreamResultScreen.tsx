@@ -11,7 +11,20 @@ import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
 import { translateMood, formatDreamDate, formatDreamTime } from "@/i18n/translations";
 
-import { CAPTION_MAX_WORDS, getCaptionWords, wrapCaptionLines, pickCaptionLayout, isHebrewText } from "@/lib/caption";
+import {
+  CAPTION_MAX_WORDS,
+  getCaptionWords,
+  wrapCaptionLines,
+  pickCaptionLayout,
+  isHebrewText,
+  clampFontSize,
+  CAPTION_FONT_SIZE_DEFAULT,
+  CAPTION_FONT_SIZE_MIN,
+  CAPTION_FONT_SIZE_MAX,
+  META_FONT_SIZE_DEFAULT,
+  META_FONT_SIZE_MIN,
+  META_FONT_SIZE_MAX,
+} from "@/lib/caption";
 import { toDateInputValue, toTimeInputValue, combineDateAndTime } from "@/lib/dream-format";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
 import { loadSelectedVoiceId } from "@/lib/voicePreference";
@@ -81,6 +94,8 @@ export default function DreamResultScreen({
   showDate: savedShowDate,
   showTime: savedShowTime,
   displayAt: savedDisplayAt,
+  captionFontSize: savedCaptionFontSize,
+  metaFontSize: savedMetaFontSize,
   onBack,
   skipEntrance = false,
 }: {
@@ -101,6 +116,8 @@ export default function DreamResultScreen({
   showDate?: boolean;
   showTime?: boolean;
   displayAt?: string;
+  captionFontSize?: number;
+  metaFontSize?: number;
   onBack: () => void;
   // True only when this mount immediately follows the Gallery overlay's
   // own already-played entrance — see the file-level comment above.
@@ -412,12 +429,16 @@ export default function DreamResultScreen({
     showTime: savedShowTime ?? true,
     dateInput: toDateInputValue(savedDisplayAt ?? createdAt),
     timeInput: toTimeInputValue(savedDisplayAt ?? createdAt),
+    captionFontSize: savedCaptionFontSize ?? CAPTION_FONT_SIZE_DEFAULT,
+    metaFontSize: savedMetaFontSize ?? META_FONT_SIZE_DEFAULT,
   }));
   const [captionOverride, setCaptionOverride] = useState(lastSaved.captionOverride);
   const [showDateOn, setShowDateOn] = useState(lastSaved.showDate);
   const [showTimeOn, setShowTimeOn] = useState(lastSaved.showTime);
   const [dateInput, setDateInput] = useState(lastSaved.dateInput);
   const [timeInput, setTimeInput] = useState(lastSaved.timeInput);
+  const [captionFontSize, setCaptionFontSize] = useState(lastSaved.captionFontSize);
+  const [metaFontSize, setMetaFontSize] = useState(lastSaved.metaFontSize);
   const [printImageUrlState, setPrintImageUrlState] = useState(printImageUrl);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
@@ -436,6 +457,8 @@ export default function DreamResultScreen({
     setShowTimeOn(lastSaved.showTime);
     setDateInput(lastSaved.dateInput);
     setTimeInput(lastSaved.timeInput);
+    setCaptionFontSize(lastSaved.captionFontSize);
+    setMetaFontSize(lastSaved.metaFontSize);
     setShowEditSheet(false);
   }
 
@@ -455,6 +478,8 @@ export default function DreamResultScreen({
           showDate: showDateOn,
           showTime: showTimeOn,
           displayAt: nextDisplayAt,
+          captionFontSize,
+          metaFontSize,
         }),
       });
       if (!res.ok) throw new Error("save failed");
@@ -466,6 +491,8 @@ export default function DreamResultScreen({
         showTime: showTimeOn,
         dateInput,
         timeInput,
+        captionFontSize,
+        metaFontSize,
       });
       setShowEditSheet(false);
       setDetailsUpdated(true);
@@ -833,7 +860,10 @@ export default function DreamResultScreen({
                 } ${isHebrew ? styles.captionOverlayRtl : ""}`}
               >
                 {captionLines.length > 0 && (
-                  <p className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}>
+                  <p
+                    className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}
+                    style={{ fontSize: `${captionFontSize}px` }}
+                  >
                     {captionLines.map((line, i) => (
                       <span
                         key={i}
@@ -847,12 +877,18 @@ export default function DreamResultScreen({
                 {(overlayDateLabel || overlayTimeLabel) && (
                   <div className={styles.captionMeta}>
                     {overlayDateLabel && (
-                      <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                      <span
+                        className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}
+                        style={{ fontSize: `${metaFontSize}px` }}
+                      >
                         {overlayDateLabel}
                       </span>
                     )}
                     {overlayTimeLabel && (
-                      <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                      <span
+                        className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}
+                        style={{ fontSize: `${metaFontSize}px` }}
+                      >
                         {overlayTimeLabel}
                       </span>
                     )}
@@ -977,6 +1013,10 @@ export default function DreamResultScreen({
           onShowDateChange={setShowDateOn}
           showTime={showTimeOn}
           onShowTimeChange={setShowTimeOn}
+          captionFontSize={captionFontSize}
+          onCaptionFontSizeChange={setCaptionFontSize}
+          metaFontSize={metaFontSize}
+          onMetaFontSizeChange={setMetaFontSize}
           saving={savingEdit}
           onSave={saveEditSheet}
           onCancel={cancelEditSheet}
@@ -1028,7 +1068,10 @@ export default function DreamResultScreen({
                   } ${isHebrew ? styles.captionOverlayRtl : ""}`}
                 >
                   {captionLines.length > 0 && (
-                    <p className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}>
+                    <p
+                    className={`${styles.captionText} ${isHebrew ? styles.captionTextHe : ""} ${textColor === "black" ? styles.captionTextDark : ""}`}
+                    style={{ fontSize: `${captionFontSize}px` }}
+                  >
                       {captionLines.map((line, i) => (
                         <span
                           key={i}
@@ -1042,12 +1085,18 @@ export default function DreamResultScreen({
                   {(overlayDateLabel || overlayTimeLabel) && (
                     <div className={styles.captionMeta}>
                       {overlayDateLabel && (
-                        <span className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                        <span
+                        className={`${styles.captionMetaDate} ${isHebrew ? styles.captionMetaDateHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}
+                        style={{ fontSize: `${metaFontSize}px` }}
+                      >
                           {overlayDateLabel}
                         </span>
                       )}
                       {overlayTimeLabel && (
-                        <span className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}>
+                        <span
+                        className={`${styles.captionMetaTime} ${isHebrew ? styles.captionMetaTimeHe : ""} ${textColor === "black" ? styles.captionMetaDark : ""}`}
+                        style={{ fontSize: `${metaFontSize}px` }}
+                      >
                           {overlayTimeLabel}
                         </span>
                       )}

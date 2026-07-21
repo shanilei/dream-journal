@@ -40,6 +40,8 @@ export default async function DreamDetailPage({
       showDate={dream.showDate}
       showTime={dream.showTime}
       displayAt={dream.displayAt}
+      captionFontSize={dream.captionFontSize}
+      metaFontSize={dream.metaFontSize}
       skipEntrance={transitioned === "1"}
     />
   );

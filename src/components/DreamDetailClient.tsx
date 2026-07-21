@@ -20,6 +20,8 @@ export default function DreamDetailClient({
   showDate,
   showTime,
   displayAt,
+  captionFontSize,
+  metaFontSize,
   skipEntrance = false,
 }: {
   id: string;
@@ -37,6 +39,8 @@ export default function DreamDetailClient({
   showDate?: boolean;
   showTime?: boolean;
   displayAt?: string;
+  captionFontSize?: number;
+  metaFontSize?: number;
   skipEntrance?: boolean;
 }) {
   const router = useRouter();
@@ -69,6 +73,8 @@ export default function DreamDetailClient({
       showDate={showDate}
       showTime={showTime}
       displayAt={displayAt}
+      captionFontSize={captionFontSize}
+      metaFontSize={metaFontSize}
       onBack={() => router.push("/gallery")}
       skipEntrance={skipEntrance}
     />

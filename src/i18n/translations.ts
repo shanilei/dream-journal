@@ -77,6 +77,10 @@ export const translations = {
     timeFieldLabel: "Time",
     showDateLabel: "Show date",
     showTimeLabel: "Show time",
+    captionSizeLabel: "Caption size",
+    dateTimeSizeLabel: "Date & Time size",
+    decreaseSize: "Decrease size",
+    increaseSize: "Increase size",
     saveChanges: "Save changes",
     detailsUpdated: "Details updated",
     // Sign-in screen
@@ -237,6 +241,10 @@ export const translations = {
     timeFieldLabel: "שעה",
     showDateLabel: "הצג תאריך",
     showTimeLabel: "הצג שעה",
+    captionSizeLabel: "גודל הכיתוב",
+    dateTimeSizeLabel: "גודל תאריך ושעה",
+    decreaseSize: "הקטן גודל",
+    increaseSize: "הגדל גודל",
     saveChanges: "שמור שינויים",
     detailsUpdated: "הפרטים עודכנו",
     // Sign-in screen

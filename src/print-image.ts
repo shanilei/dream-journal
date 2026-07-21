@@ -1,6 +1,15 @@
 import { createCanvas, GlobalFonts, loadImage, type SKRSContext2D } from "@napi-rs/canvas";
 import { join } from "path";
-import { CAPTION_MAX_WORDS, getCaptionWords, wrapCaptionLines, pickCaptionLayout, isHebrewText } from "./lib/caption";
+import {
+  CAPTION_MAX_WORDS,
+  getCaptionWords,
+  wrapCaptionLines,
+  pickCaptionLayout,
+  isHebrewText,
+  CAPTION_FONT_SIZE_DEFAULT,
+  META_FONT_SIZE_DEFAULT,
+  PRINT_FONT_SCALE,
+} from "./lib/caption";
 import { formatDreamDate, formatDreamTime, langFromText } from "./i18n/translations";
 
 // 2x the on-screen card's 338:475 box for print sharpness.
@@ -90,6 +99,12 @@ export interface PrintImageParams {
   showDate?: boolean;
   showTime?: boolean;
   displayAt?: string;
+  // On-screen CSS px — multiplied by PRINT_FONT_SCALE below to match this
+  // canvas's 2x resolution. Undefined falls back to the same defaults the
+  // live preview uses (see lib/caption.ts), so an un-customized dream's
+  // print image still matches its on-screen appearance exactly.
+  captionFontSize?: number;
+  metaFontSize?: number;
 }
 
 export async function generatePrintImage({
@@ -101,6 +116,8 @@ export async function generatePrintImage({
   captionOverride,
   showDate = true,
   showTime = true,
+  captionFontSize = CAPTION_FONT_SIZE_DEFAULT,
+  metaFontSize = META_FONT_SIZE_DEFAULT,
   displayAt,
 }: PrintImageParams): Promise<Buffer> {
   ensureFontsRegistered();
@@ -135,7 +152,10 @@ export async function generatePrintImage({
   const timeColor = textColor === "black" ? "rgba(0,0,0,0.55)" : isHebrew ? "#fff" : "rgba(255,255,255,0.65)";
   const captionFamily = isHebrew ? "PloniRegular" : "AlumniRegular";
   const dateFamily = isHebrew ? "PloniDemibold" : "AlumniSemibold";
-  const timeFontSize = isHebrew ? 26 : 22;
+  // Date and time share one size (metaFontSize) — matches the live
+  // preview, where both spans now take the same font-size override.
+  const printCaptionFontSize = captionFontSize * PRINT_FONT_SCALE;
+  const printMetaFontSize = metaFontSize * PRINT_FONT_SCALE;
 
   // Scrim gradient, mirrors the CSS: non-Hebrew darkens from the right
   // ("to left"), Hebrew flips it.
@@ -154,13 +174,13 @@ export async function generatePrintImage({
 
   const captionTextLines: TextLine[] = captionLines.map((text) => ({
     text,
-    fontSize: 24,
+    fontSize: printCaptionFontSize,
     family: captionFamily,
     color: fg,
   }));
   const metaLines: TextLine[] = [
-    ...(dateLabel ? [{ text: dateLabel, fontSize: 26, family: dateFamily, color: fg }] : []),
-    ...(timeLabel ? [{ text: timeLabel, fontSize: timeFontSize, family: dateFamily, color: timeColor }] : []),
+    ...(dateLabel ? [{ text: dateLabel, fontSize: printMetaFontSize, family: dateFamily, color: fg }] : []),
+    ...(timeLabel ? [{ text: timeLabel, fontSize: printMetaFontSize, family: dateFamily, color: timeColor }] : []),
   ];
 
   const laidOutCaption = layoutLines(captionTextLines, anchorY, bottomAligned, 1.4);

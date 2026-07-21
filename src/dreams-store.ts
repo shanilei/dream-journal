@@ -24,6 +24,12 @@ export interface DreamEntry {
   showDate?: boolean;
   showTime?: boolean;
   displayAt?: string;
+  // Font sizes for the caption / date+time text drawn on the image (see
+  // "Edit image details"), in on-screen CSS px — undefined means "use the
+  // app's own default" (CAPTION_FONT_SIZE_DEFAULT/META_FONT_SIZE_DEFAULT
+  // in lib/caption.ts), not 0/null.
+  captionFontSize?: number;
+  metaFontSize?: number;
 }
 
 interface DreamRow {
@@ -44,6 +50,8 @@ interface DreamRow {
   show_date: boolean | null;
   show_time: boolean | null;
   display_at: string | null;
+  caption_font_size: number | null;
+  meta_font_size: number | null;
 }
 
 function fromRow(row: DreamRow): DreamEntry {
@@ -65,6 +73,8 @@ function fromRow(row: DreamRow): DreamEntry {
     showDate: row.show_date ?? true,
     showTime: row.show_time ?? true,
     displayAt: row.display_at ?? undefined,
+    captionFontSize: row.caption_font_size ?? undefined,
+    metaFontSize: row.meta_font_size ?? undefined,
   };
 }
 
@@ -97,6 +107,8 @@ export async function saveDream(entry: DreamEntry & { userId: string }): Promise
     show_date: entry.showDate ?? true,
     show_time: entry.showTime ?? true,
     display_at: entry.displayAt ?? null,
+    caption_font_size: entry.captionFontSize ?? null,
+    meta_font_size: entry.metaFontSize ?? null,
     user_id: entry.userId,
   });
   if (error) throw error;
@@ -110,6 +122,8 @@ export interface DreamOverlayPatch {
   showDate?: boolean;
   showTime?: boolean;
   displayAt?: string | null;
+  captionFontSize?: number | null;
+  metaFontSize?: number | null;
   printImageUrl?: string;
 }
 
@@ -119,6 +133,8 @@ export async function updateDream(id: string, patch: DreamOverlayPatch, userId: 
   if ("showDate" in patch) update.show_date = patch.showDate;
   if ("showTime" in patch) update.show_time = patch.showTime;
   if ("displayAt" in patch) update.display_at = patch.displayAt ?? null;
+  if ("captionFontSize" in patch) update.caption_font_size = patch.captionFontSize ?? null;
+  if ("metaFontSize" in patch) update.meta_font_size = patch.metaFontSize ?? null;
   if ("printImageUrl" in patch) update.print_image_url = patch.printImageUrl;
 
   const supabase = await createClient();

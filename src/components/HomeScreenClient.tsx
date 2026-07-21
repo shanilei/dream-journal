@@ -585,6 +585,8 @@ function DreamAnalysisOverlay({ card, lang, onClose }: { card: Card; lang: Lang;
     showDate?: boolean;
     showTime?: boolean;
     displayAt?: string;
+    captionFontSize?: number;
+    metaFontSize?: number;
   } | null>(null);
 
   useEffect(() => {
@@ -605,6 +607,8 @@ function DreamAnalysisOverlay({ card, lang, onClose }: { card: Card; lang: Lang;
           showDate: data.showDate,
           showTime: data.showTime,
           displayAt: data.displayAt,
+          captionFontSize: data.captionFontSize,
+          metaFontSize: data.metaFontSize,
         });
       })
       .catch(() => {
@@ -642,6 +646,8 @@ function DreamAnalysisOverlay({ card, lang, onClose }: { card: Card; lang: Lang;
         showDate={full?.showDate}
         showTime={full?.showTime}
         displayAt={full?.displayAt}
+        captionFontSize={full?.captionFontSize}
+        metaFontSize={full?.metaFontSize}
         onBack={onClose}
       />
     </motion.div>

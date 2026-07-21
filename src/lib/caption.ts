@@ -7,6 +7,26 @@ export const CAPTION_MAX_WORDS = 7;
 export const CAPTION_MAX_CHARS = 80;
 const CAPTION_WORDS_PER_LINE = 4;
 
+// Caption/date-time font size (see the "Edit image details" sheet's +/-
+// steppers) — on-screen CSS px. print-image.ts's canvas is drawn at 2x the
+// on-screen card's dimensions for print sharpness, so it multiplies these
+// same values by PRINT_FONT_SCALE rather than keeping its own separate
+// numbers, which is what keeps the printed image matching the live
+// preview exactly. Date and time share one size (metaFontSize) — there's
+// no separate control for each, per the feature's own "Date & Time"
+// grouping.
+export const CAPTION_FONT_SIZE_DEFAULT = 12; // matches the size this already shipped with
+export const CAPTION_FONT_SIZE_MIN = 10;
+export const CAPTION_FONT_SIZE_MAX = 32;
+export const META_FONT_SIZE_DEFAULT = 13; // matches .captionMetaDate's existing size
+export const META_FONT_SIZE_MIN = 10;
+export const META_FONT_SIZE_MAX = 24;
+export const PRINT_FONT_SCALE = 2;
+
+export function clampFontSize(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+
 function capitalizeFirst(text: string): string {
   return text.length ? text[0].toUpperCase() + text.slice(1) : text;
 }

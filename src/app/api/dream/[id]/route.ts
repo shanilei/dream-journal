@@ -5,6 +5,15 @@ import { generatePrintImage } from "@/print-image";
 import { getSupabaseAdmin } from "@/supabase-admin";
 import { getCurrentUser } from "@/lib/auth";
 import { randomUUID } from "node:crypto";
+import {
+  clampFontSize,
+  CAPTION_FONT_SIZE_DEFAULT,
+  CAPTION_FONT_SIZE_MIN,
+  CAPTION_FONT_SIZE_MAX,
+  META_FONT_SIZE_DEFAULT,
+  META_FONT_SIZE_MIN,
+  META_FONT_SIZE_MAX,
+} from "@/lib/caption";
 
 // generatePrintImage uses @napi-rs/canvas, which needs the Node runtime.
 export const runtime = "nodejs";
@@ -60,11 +69,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const showDate = typeof body.showDate === "boolean" ? body.showDate : undefined;
   const showTime = typeof body.showTime === "boolean" ? body.showTime : undefined;
   const displayAt = typeof body.displayAt === "string" && body.displayAt ? body.displayAt : undefined;
+  const captionFontSize =
+    typeof body.captionFontSize === "number" && Number.isFinite(body.captionFontSize)
+      ? clampFontSize(body.captionFontSize, CAPTION_FONT_SIZE_MIN, CAPTION_FONT_SIZE_MAX)
+      : undefined;
+  const metaFontSize =
+    typeof body.metaFontSize === "number" && Number.isFinite(body.metaFontSize)
+      ? clampFontSize(body.metaFontSize, META_FONT_SIZE_MIN, META_FONT_SIZE_MAX)
+      : undefined;
 
   const effectiveCaption = captionOverride !== undefined ? captionOverride : dream.captionOverride;
   const effectiveShowDate = showDate !== undefined ? showDate : dream.showDate ?? true;
   const effectiveShowTime = showTime !== undefined ? showTime : dream.showTime ?? true;
   const effectiveDisplayAt = displayAt !== undefined ? displayAt : dream.displayAt;
+  const effectiveCaptionFontSize = captionFontSize !== undefined ? captionFontSize : dream.captionFontSize ?? CAPTION_FONT_SIZE_DEFAULT;
+  const effectiveMetaFontSize = metaFontSize !== undefined ? metaFontSize : dream.metaFontSize ?? META_FONT_SIZE_DEFAULT;
 
   let printImageUrl: string | undefined;
   if (dream.printImageUrl) {
@@ -83,6 +102,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
         showDate: effectiveShowDate,
         showTime: effectiveShowTime,
         displayAt: effectiveDisplayAt,
+        captionFontSize: effectiveCaptionFontSize,
+        metaFontSize: effectiveMetaFontSize,
       });
 
       const printStoragePath = `${randomUUID()}.png`;
@@ -105,6 +126,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     ...(showDate !== undefined ? { showDate } : {}),
     ...(showTime !== undefined ? { showTime } : {}),
     ...(displayAt !== undefined ? { displayAt } : {}),
+    ...(captionFontSize !== undefined ? { captionFontSize } : {}),
+    ...(metaFontSize !== undefined ? { metaFontSize } : {}),
     ...(printImageUrl !== undefined ? { printImageUrl } : {}),
   }, user.id);
 
