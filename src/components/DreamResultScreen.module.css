@@ -209,13 +209,13 @@
 
 .imageWrap {
   position: relative;
-  /* Scopes repaint to just this box — the touch/mouse reveal below
-     rewrites 6 CSS custom properties every animation frame, which forces
-     the browser to recompute a multi-layer mask; without `contain`
-     Safari has to consider whether that invalidates layout/paint further
-     up the tree (title, symbols, dream text, etc. below the image),
-     which it never actually does since every masked/blurred layer here
-     is absolutely positioned and clipped to this box. */
+  /* Scopes repaint to just this box — the drag reveal below rewrites
+     --reveal-progress every animation frame while easing, which forces
+     the browser to recompute .imageClear's opacity+blur; without
+     `contain` Safari has to consider whether that invalidates layout/
+     paint further up the tree (title, symbols, dream text, etc. below
+     the image), which it never actually does since that layer is
+     absolutely positioned and clipped to this box. */
   contain: layout paint style;
 }
 
@@ -256,21 +256,15 @@
   backface-visibility: hidden;
 }
 
-/* The unblurred photo, stacked on top of .image — revealed only inside a
-   soft, irregular, mist-like shape that glides toward the pointer/finger,
-   like fog gently clearing off glass. --mask-x/--mask-y/--mask-r are
-   written directly onto .imageWrap by a rAF easing loop, so the shape
-   glides and fades rather than snapping to the pointer.
-
-   The organic shape is 3 overlapping radial gradients, each offset from
-   the pointer by a different amount/direction and sized to a different
-   fraction of --mask-r — every offset and size is itself a fraction of
-   --mask-r (not a fixed px value), so the whole cluster scales up/down
-   together in proportion as the reveal grows/shrinks, instead of the
-   blobs drifting apart or overlapping oddly at small radii. Deliberately
-   no perfect circle, no hard edge, no ring — each blob fades out over
-   its own outer 60% so the composite edge is heavily feathered and
-   asymmetrical rather than one crisp circular boundary. */
+/* The unblurred photo, stacked on top of .image — its clarity is driven
+   by a single global "how much has the user explored this dream" value
+   (--reveal-progress, 0-1), not by where a finger currently is. Opacity
+   fades it in and blur sharpens it at the same time, uniformly across the
+   whole image — like mist dissolving off glass, not a flashlight/scratch-
+   card hole. --reveal-progress is written directly onto .imageWrap by a
+   rAF easing loop in DreamResultScreen.tsx, driven by cumulative drag
+   distance (every drag gesture adds to the same running total; it only
+   ever increases). */
 .imageClear {
   display: block;
   position: absolute;
@@ -279,152 +273,28 @@
   height: 100%;
   object-fit: cover;
   border-radius: 26px;
-  filter: blur(2px);
-  /* This layer's mask-image is rewritten every animation frame while the
-     reveal is moving (see --mask-x/y/r in DreamResultScreen.tsx) — these
-     four properties push it onto its own compositor layer up front and
-     scope repaint to just its own box, instead of Safari re-evaluating
-     blur+mask compositing against a plain, unpromoted paint layer on
-     every frame. */
-  will-change: mask-image, -webkit-mask-image;
+  opacity: var(--reveal-progress, 0);
+  filter: blur(calc((1 - var(--reveal-progress, 0)) * 16px));
+  /* --reveal-progress updates every frame while revealing — its own
+     compositor layer keeps that scoped to just this box instead of
+     Safari re-evaluating blur+opacity compositing against a plain,
+     unpromoted paint layer on every frame. */
+  will-change: opacity, filter;
   transform: translateZ(0);
   backface-visibility: hidden;
   contain: paint;
-  -webkit-mask-image:
-    radial-gradient(
-      circle calc(var(--mask-r, 0px) * 0.95) at
-        calc(var(--mask-x, 50%) - var(--mask-r, 0px) * 0.22)
-        calc(var(--mask-y, 50%) - var(--mask-r, 0px) * 0.16),
-      #000 0%, transparent 62%
-    ),
-    radial-gradient(
-      circle calc(var(--mask-r, 0px) * 0.8) at
-        calc(var(--mask-x, 50%) + var(--mask-r, 0px) * 0.26)
-        calc(var(--mask-y, 50%) + var(--mask-r, 0px) * 0.1),
-      #000 0%, transparent 62%
-    ),
-    radial-gradient(
-      circle calc(var(--mask-r, 0px) * 0.7) at
-        calc(var(--mask-x, 50%) - var(--mask-r, 0px) * 0.06)
-        calc(var(--mask-y, 50%) + var(--mask-r, 0px) * 0.3),
-      #000 0%, transparent 62%
-    );
-  mask-image:
-    radial-gradient(
-      circle calc(var(--mask-r, 0px) * 0.95) at
-        calc(var(--mask-x, 50%) - var(--mask-r, 0px) * 0.22)
-        calc(var(--mask-y, 50%) - var(--mask-r, 0px) * 0.16),
-      #000 0%, transparent 62%
-    ),
-    radial-gradient(
-      circle calc(var(--mask-r, 0px) * 0.8) at
-        calc(var(--mask-x, 50%) + var(--mask-r, 0px) * 0.26)
-        calc(var(--mask-y, 50%) + var(--mask-r, 0px) * 0.1),
-      #000 0%, transparent 62%
-    ),
-    radial-gradient(
-      circle calc(var(--mask-r, 0px) * 0.7) at
-        calc(var(--mask-x, 50%) - var(--mask-r, 0px) * 0.06)
-        calc(var(--mask-y, 50%) + var(--mask-r, 0px) * 0.3),
-      #000 0%, transparent 62%
-    );
   pointer-events: none;
 }
 
-/* Soft, larger echo that lags behind .imageClear (slower easing target in
-   DreamResultScreen.tsx) — reads as the reveal being "pulled" along. Same
-   organic-cluster technique as .imageClear, on --trail-x/y/r, with its
-   own slightly different offsets/proportions so it doesn't read as a
-   mechanical duplicate of the main shape. */
-.imageClearTrail {
-  display: block;
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 26px;
-  filter: blur(6px);
-  opacity: 0.45;
-  /* Same reasoning as .imageClear above — its own compositor layer,
-     scoped repaint, since --trail-x/y/r also update every frame. */
-  will-change: mask-image, -webkit-mask-image;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  contain: paint;
-  -webkit-mask-image:
-    radial-gradient(
-      circle calc(var(--trail-r, 0px) * 0.9) at
-        calc(var(--trail-x, 50%) + var(--trail-r, 0px) * 0.18)
-        calc(var(--trail-y, 50%) - var(--trail-r, 0px) * 0.24),
-      #000 0%, transparent 65%
-    ),
-    radial-gradient(
-      circle calc(var(--trail-r, 0px) * 0.75) at
-        calc(var(--trail-x, 50%) - var(--trail-r, 0px) * 0.2)
-        calc(var(--trail-y, 50%) + var(--trail-r, 0px) * 0.14),
-      #000 0%, transparent 65%
-    ),
-    radial-gradient(
-      circle calc(var(--trail-r, 0px) * 0.65) at
-        calc(var(--trail-x, 50%) + var(--trail-r, 0px) * 0.04)
-        calc(var(--trail-y, 50%) + var(--trail-r, 0px) * 0.28),
-      #000 0%, transparent 65%
-    );
-  mask-image:
-    radial-gradient(
-      circle calc(var(--trail-r, 0px) * 0.9) at
-        calc(var(--trail-x, 50%) + var(--trail-r, 0px) * 0.18)
-        calc(var(--trail-y, 50%) - var(--trail-r, 0px) * 0.24),
-      #000 0%, transparent 65%
-    ),
-    radial-gradient(
-      circle calc(var(--trail-r, 0px) * 0.75) at
-        calc(var(--trail-x, 50%) - var(--trail-r, 0px) * 0.2)
-        calc(var(--trail-y, 50%) + var(--trail-r, 0px) * 0.14),
-      #000 0%, transparent 65%
-    ),
-    radial-gradient(
-      circle calc(var(--trail-r, 0px) * 0.65) at
-        calc(var(--trail-x, 50%) + var(--trail-r, 0px) * 0.04)
-        calc(var(--trail-y, 50%) + var(--trail-r, 0px) * 0.28),
-      #000 0%, transparent 65%
-    );
-  pointer-events: none;
-}
-
-/* Inverse of .imageClear's hole — scrim covers everything except where
-   the reveal shows through. Kept as a single soft circle (not the same
-   3-blob cluster) sized/feathered generously enough to fully envelop the
-   organic shape above, since a mismatch here would only ever show up as
-   scrim peeking back in slightly early at the shape's widest lobes —
-   pushing the radius/feather out a bit removes any margin for that
-   without needing exact per-blob inversion math. */
+/* Scrim for caption legibility — unconditional now (the reveal is global,
+   not a hole to cut around), same as before the interactive reveal
+   existed. */
 .imageScrimDark,
 .imageScrimLight {
   position: absolute;
   inset: 0;
   border-radius: 26px;
   pointer-events: none;
-  /* Also mask-animated every frame during the reveal (inverse hole
-     around --mask-x/y/r) — same GPU-layer/repaint-scoping reasoning as
-     .imageClear/.imageClearTrail above. */
-  will-change: mask-image, -webkit-mask-image;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  contain: paint;
-  -webkit-mask-image: radial-gradient(
-    circle at var(--mask-x, 50%) var(--mask-y, 50%),
-    transparent 0,
-    transparent calc(var(--mask-r, 0px) * 1.35 - 16px),
-    #000 calc(var(--mask-r, 0px) * 1.35)
-  );
-  mask-image: radial-gradient(
-    circle at var(--mask-x, 50%) var(--mask-y, 50%),
-    transparent 0,
-    transparent calc(var(--mask-r, 0px) * 1.35 - 16px),
-    #000 calc(var(--mask-r, 0px) * 1.35)
-  );
 }
 
 .imageOverlayHidden {

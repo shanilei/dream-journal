@@ -150,12 +150,12 @@ export default function DreamResultScreen({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
-  // Not React state on purpose — it only gates a couple of pointer-move
-  // guards below and never affects what's rendered, so it was causing a
-  // full re-render of this whole (fairly large) screen on every touch/
-  // mouse enter and leave for no visual benefit. A ref gives identical
-  // behavior with zero re-renders.
-  const revealedRef = useRef(false);
+  // Not React state on purpose — it only gates pointer-move guards below
+  // and never affects what's rendered directly (the actual reveal amount
+  // is written straight to a CSS custom property, see tickReveal below),
+  // so it was causing a full re-render of this whole (fairly large)
+  // screen on every touch/mouse interaction for no visual benefit.
+  const isDraggingRef = useRef(false);
   // Starts hidden — keeps focus on the artwork/interpretation the moment
   // this screen opens, before the user has scrolled at all. Reveals with
   // BottomNav's existing slide-up/fade `hidden` prop (same mechanism
@@ -184,125 +184,77 @@ export default function DreamResultScreen({
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-  const REVEAL_RADIUS = 65; // 130px spotlight (mouse)
-  // Touch needs to be obviously bigger than mouse: a mouse pointer is
-  // already precisely where the user is looking, but a finger covers the
-  // touch point itself and the page can shift slightly the moment a
-  // touch starts — a same-size reveal is easy to miss entirely. ~60%
-  // bigger, within the 50–70% range.
-  const TOUCH_REVEAL_RADIUS = REVEAL_RADIUS * 1.6; // ~208px spotlight (touch)
-  // On touch release, the circle should linger a beat before it starts
-  // closing — a same-instant fade reads as flickery on a finger release,
-  // where the user is still looking at the spot they just touched.
-  const TOUCH_RELEASE_HOLD_MS = 1100;
-  const targetMaskRef = useRef({ x: 0, y: 0, r: 0 });
-  const displayMaskRef = useRef({ x: 0, y: 0, r: 0 });
-  // Trails behind the main circle with slower easing and a larger target
-  // radius, so it visually "lags" and gets dragged along — the pull effect.
-  const trailMaskRef = useRef({ x: 0, y: 0, r: 0 });
-  const maskRafRef = useRef<number | null>(null);
-  // Set true only while the touch-release fade is playing, so that close
-  // alone eases slower than every other radius change (grow-in, mouse
-  // leave) without touching those.
-  const slowFadeRef = useRef(false);
-  const releaseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Cumulative drag distance (px) needed to fully reveal the image — a
+  // handful of unhurried swipes across it, not a quick flick. Every drag
+  // gesture, anywhere on the image, adds to the same running total; it
+  // never resets or decreases while this screen stays mounted, so the
+  // image gradually and permanently clears the more the user explores it,
+  // like slowly revealing a memory rather than shining a flashlight on it.
+  const REVEAL_DISTANCE_PX = 1400;
+  const revealProgressRef = useRef(0); // 0-1, monotonically non-decreasing
+  const displayProgressRef = useRef(0); // eased value actually painted
+  const lastDragPointRef = useRef<{ x: number; y: number } | null>(null);
+  const revealRafRef = useRef<number | null>(null);
   // Whether the rAF loop below is currently scheduled — lets every
-  // interaction handler safely call ensureTicking() without ever
+  // interaction handler safely call ensureRevealTicking() without ever
   // double-scheduling a second parallel chain of frames.
-  const tickingRef = useRef(false);
+  const revealTickingRef = useRef(false);
+  const REVEAL_EPSILON = 0.001; // below this, the difference isn't visible
 
-  // Was previously an unconditional `requestAnimationFrame(tick)` at the
-  // end of tick() itself, forever — i.e. this ran every single frame for
-  // the entire lifetime of the screen, whether or not the reveal was
-  // actually moving, because the exponential-ease formulas below never
-  // reach their target *exactly*, only asymptotically closer. Every one
-  // of those frames wrote 6 CSS custom properties consumed inside
-  // mask-image's radial-gradient()s (see .imageClear/.imageClearTrail/
-  // .imageScrimDark/.imageScrimLight in the stylesheet) — recomputing a
-  // multi-layer CSS mask is one of the more expensive things a browser
-  // can be asked to repaint, and Safari in particular struggled to keep
-  // that at 60fps indefinitely, which is what made the *interactive*
-  // part of a touch feel like it was dropping frames even after the
-  // finger had stopped moving.
-  //
-  // Now: once every value is within a visually-imperceptible epsilon of
-  // its target, tick() snaps to the exact target, writes it one final
-  // time, and simply stops rescheduling itself — no more idle cost.
-  // Every place that changes a target value below calls ensureTicking()
-  // to resume the loop; it's a no-op if already running.
-  const MASK_EPSILON = 0.05; // px — below this, the difference isn't visible
-
-  function tick() {
-    const target = targetMaskRef.current;
-    const display = displayMaskRef.current;
-    display.x += (target.x - display.x) * 0.22;
-    display.y += (target.y - display.y) * 0.22;
-    display.r += (target.r - display.r) * (slowFadeRef.current ? 0.018 : 0.15);
-
-    const trail = trailMaskRef.current;
-    trail.x += (target.x - trail.x) * 0.07;
-    trail.y += (target.y - trail.y) * 0.07;
-    trail.r += (target.r * 1.4 - trail.r) * 0.06;
-
-    const settled =
-      Math.abs(target.x - display.x) < MASK_EPSILON &&
-      Math.abs(target.y - display.y) < MASK_EPSILON &&
-      Math.abs(target.r - display.r) < MASK_EPSILON &&
-      Math.abs(target.x - trail.x) < MASK_EPSILON &&
-      Math.abs(target.y - trail.y) < MASK_EPSILON &&
-      Math.abs(target.r * 1.4 - trail.r) < MASK_EPSILON;
-
-    if (settled) {
-      display.x = target.x;
-      display.y = target.y;
-      display.r = target.r;
-      trail.x = target.x;
-      trail.y = target.y;
-      trail.r = target.r * 1.4;
-    }
+  // Runs only while displayProgressRef is still easing toward
+  // revealProgressRef, then stops rescheduling itself entirely — no idle
+  // per-frame cost once the reveal settles (same reasoning as every other
+  // rAF loop in this app: a CSS custom property write every frame is not
+  // free, so don't do it once nothing is actually changing).
+  function tickReveal() {
+    const target = revealProgressRef.current;
+    const display = displayProgressRef.current;
+    const next = display + (target - display) * 0.12;
+    const settled = Math.abs(target - next) < REVEAL_EPSILON;
+    displayProgressRef.current = settled ? target : next;
 
     const el = wrapRef.current;
-    if (el) {
-      el.style.setProperty("--mask-x", `${display.x}px`);
-      el.style.setProperty("--mask-y", `${display.y}px`);
-      el.style.setProperty("--mask-r", `${display.r}px`);
-      el.style.setProperty("--trail-x", `${trail.x}px`);
-      el.style.setProperty("--trail-y", `${trail.y}px`);
-      el.style.setProperty("--trail-r", `${trail.r}px`);
-    }
+    if (el) el.style.setProperty("--reveal-progress", String(displayProgressRef.current));
 
     if (settled) {
-      tickingRef.current = false;
-      maskRafRef.current = null;
+      revealTickingRef.current = false;
+      revealRafRef.current = null;
       return;
     }
-    maskRafRef.current = requestAnimationFrame(tick);
+    revealRafRef.current = requestAnimationFrame(tickReveal);
   }
 
-  function ensureTicking() {
-    if (tickingRef.current) return;
-    tickingRef.current = true;
-    maskRafRef.current = requestAnimationFrame(tick);
+  function ensureRevealTicking() {
+    if (revealTickingRef.current) return;
+    revealTickingRef.current = true;
+    revealRafRef.current = requestAnimationFrame(tickReveal);
   }
 
   useEffect(() => {
-    // Paints the initial at-rest state once, then stops immediately (both
-    // target and display start at r:0, so the very first tick() is
-    // already "settled").
-    ensureTicking();
+    // Paints the initial at-rest (fully hidden) state once, then stops
+    // immediately — both target and display start at 0, so the very
+    // first tickReveal() is already "settled".
+    ensureRevealTicking();
     return () => {
-      if (maskRafRef.current) cancelAnimationFrame(maskRafRef.current);
-      if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
-      tickingRef.current = false;
+      if (revealRafRef.current) cancelAnimationFrame(revealRafRef.current);
+      revealTickingRef.current = false;
     };
   }, []);
 
-  function updateMaskPos(clientX: number, clientY: number) {
-    const rect = wrapRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    targetMaskRef.current.x = clientX - rect.left;
-    targetMaskRef.current.y = clientY - rect.top;
-    ensureTicking();
+  // Called on every pointer/touch move while actively dragging — adds
+  // however far the finger/cursor moved since the last sample to the
+  // global reveal progress. Position on the image is never read for
+  // anything visual; only the distance travelled matters.
+  function addDragProgress(clientX: number, clientY: number) {
+    const last = lastDragPointRef.current;
+    if (last && revealProgressRef.current < 1) {
+      const dx = clientX - last.x;
+      const dy = clientY - last.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      revealProgressRef.current = Math.min(1, revealProgressRef.current + dist / REVEAL_DISTANCE_PX);
+      ensureRevealTicking();
+    }
+    lastDragPointRef.current = { x: clientX, y: clientY };
   }
   const [copied, setCopied] = useState(false);
 
@@ -649,65 +601,41 @@ export default function DreamResultScreen({
           <div
             ref={wrapRef}
             className={styles.imageWrap}
-            onMouseEnter={(e) => {
+            onMouseDown={(e) => {
               if (!clearImageUrl) return;
-              updateMaskPos(e.clientX, e.clientY);
-              targetMaskRef.current.r = REVEAL_RADIUS;
-              ensureTicking();
-              revealedRef.current = true;
+              isDraggingRef.current = true;
+              lastDragPointRef.current = { x: e.clientX, y: e.clientY };
             }}
-            onMouseMove={(e) => revealedRef.current && updateMaskPos(e.clientX, e.clientY)}
+            onMouseMove={(e) => {
+              if (!isDraggingRef.current) return;
+              addDragProgress(e.clientX, e.clientY);
+            }}
+            onMouseUp={() => {
+              isDraggingRef.current = false;
+              lastDragPointRef.current = null;
+            }}
             onMouseLeave={() => {
-              targetMaskRef.current.r = 0;
-              ensureTicking();
-              revealedRef.current = false;
+              isDraggingRef.current = false;
+              lastDragPointRef.current = null;
             }}
             onTouchStart={(e) => {
               if (!clearImageUrl) return;
-              if (releaseTimerRef.current) {
-                clearTimeout(releaseTimerRef.current);
-                releaseTimerRef.current = null;
-              }
-              slowFadeRef.current = false;
+              isDraggingRef.current = true;
               const touch = e.touches[0];
-              if (touch) updateMaskPos(touch.clientX, touch.clientY);
-              targetMaskRef.current.r = TOUCH_REVEAL_RADIUS;
-              // Snap straight to the target on first touch instead of
-              // easing in from wherever the last interaction left off —
-              // otherwise the initial reveal can still read as small/
-              // subtle for the first several frames, exactly the "easy
-              // to miss" problem this is meant to fix. Position/radius
-              // only for this one starting frame; the rAF loop's normal
-              // easing takes back over immediately after (touchmove,
-              // and the trail layer, are both untouched).
-              displayMaskRef.current.x = targetMaskRef.current.x;
-              displayMaskRef.current.y = targetMaskRef.current.y;
-              displayMaskRef.current.r = TOUCH_REVEAL_RADIUS;
-              ensureTicking();
-              revealedRef.current = true;
+              lastDragPointRef.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
             }}
             onTouchMove={(e) => {
-              if (!revealedRef.current) return;
+              if (!isDraggingRef.current) return;
               const touch = e.touches[0];
-              if (touch) updateMaskPos(touch.clientX, touch.clientY);
+              if (touch) addDragProgress(touch.clientX, touch.clientY);
             }}
             onTouchEnd={() => {
-              revealedRef.current = false;
-              if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
-              releaseTimerRef.current = setTimeout(() => {
-                slowFadeRef.current = true;
-                targetMaskRef.current.r = 0;
-                ensureTicking();
-              }, TOUCH_RELEASE_HOLD_MS);
+              isDraggingRef.current = false;
+              lastDragPointRef.current = null;
             }}
             onTouchCancel={() => {
-              revealedRef.current = false;
-              if (releaseTimerRef.current) clearTimeout(releaseTimerRef.current);
-              releaseTimerRef.current = setTimeout(() => {
-                slowFadeRef.current = true;
-                targetMaskRef.current.r = 0;
-                ensureTicking();
-              }, TOUCH_RELEASE_HOLD_MS);
+              isDraggingRef.current = false;
+              lastDragPointRef.current = null;
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -743,10 +671,6 @@ export default function DreamResultScreen({
                 transition={{ duration: 2, ease: EASE }}
                 onAnimationComplete={() => setMistVisible(false)}
               />
-            )}
-            {clearImageUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img className={styles.imageClearTrail} src={clearImageUrl} alt="" aria-hidden="true" />
             )}
             {clearImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
