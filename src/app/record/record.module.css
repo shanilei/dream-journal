@@ -568,8 +568,8 @@
     position: relative;
     left: auto;
     top: auto;
-    width: 400px;
-    height: 400px;
+    width: 394px;
+    height: 394px;
     margin-bottom: 24px;
   }
 
@@ -636,8 +636,8 @@
   }
 
   .recordButtonWrap {
-    width: 340px;
-    height: 340px;
+    width: 334px;
+    height: 334px;
     margin-bottom: 16px;
   }
 }
