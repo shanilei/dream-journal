@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import styles from "./SettingsSheet.module.css";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
@@ -67,6 +67,7 @@ function ValueRow({
   selectedValue,
   onSelectOption,
   onPreview,
+  previewStatus = "idle",
 }: {
   icon: React.ReactNode;
   label: string;
@@ -78,6 +79,7 @@ function ValueRow({
   /** Optional small play button before the value/chevron — e.g. previewing
       the currently selected voice without opening the dropdown. */
   onPreview?: () => void;
+  previewStatus?: "idle" | "loading" | "playing" | "error";
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -99,14 +101,20 @@ function ValueRow({
             <span
               role="button"
               tabIndex={0}
-              className={styles.rowPreviewBtn}
+              className={`${styles.rowPreviewBtn} ${previewStatus === "error" ? styles.rowPreviewBtnError : ""}`}
               aria-label="Preview voice"
               onClick={(e) => { e.stopPropagation(); onPreview(); }}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); e.preventDefault(); onPreview(); }
               }}
             >
-              <PlayIcon size={12} color="rgba(255,255,255,0.7)" />
+              {previewStatus === "loading" ? (
+                <span className={styles.rowPreviewSpinner} />
+              ) : previewStatus === "error" ? (
+                <span className={styles.rowPreviewErrorMark}>!</span>
+              ) : (
+                <PlayIcon size={12} color="rgba(255,255,255,0.7)" />
+              )}
             </span>
           )}
           <span className={styles.rowValue}>{value}</span>
@@ -179,20 +187,30 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
   const [interpLength, setInterpLength] = useState<InterpLength>("long");
   const [voices, setVoices] = useState<{ id: string; name: string; previewUrl?: string }[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
+  const [previewStatus, setPreviewStatus] = useState<"idle" | "loading" | "playing" | "error">("idle");
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const isHe = lang === "he";
 
   // Only the voices actually added to the ElevenLabs account show up
   // here (see /api/voices) — not the full default library. Defaults to
-  // whichever was picked last time; if nothing's been picked yet, falls
-  // back to the first voice in the list once it loads.
+  // whichever was picked last time; if nothing's been picked yet, or the
+  // saved id no longer exists in this account's list (deleted/renamed in
+  // ElevenLabs since it was picked), falls back to the first voice.
   useEffect(() => {
-    setSelectedVoiceId(loadSelectedVoiceId());
+    const saved = loadSelectedVoiceId();
+    setSelectedVoiceId(saved);
     fetch("/api/voices")
       .then((res) => res.json())
       .then((data: { voices?: { id: string; name: string; previewUrl?: string }[] }) => {
         const list = data.voices ?? [];
         setVoices(list);
-        setSelectedVoiceId((current) => current ?? list[0]?.id ?? null);
+        setSelectedVoiceId((current) => {
+          const stillValid = current && list.some((v) => v.id === current);
+          if (stillValid) return current;
+          const fallback = list[0]?.id ?? null;
+          if (fallback) saveSelectedVoiceId(fallback);
+          return fallback;
+        });
       })
       .catch(() => {});
   }, []);
@@ -202,13 +220,58 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
     saveSelectedVoiceId(voiceId);
   }
 
+  const PREVIEW_SENTENCE = "Your dream is ready to be heard.";
+
   // Narration is English-only for now (see the hidden listening button on
   // dream results in Hebrew) — no point offering a voice picker for a
   // feature that isn't available in the current language.
-  function handlePreviewVoice() {
-    const url = voices.find((v) => v.id === selectedVoiceId)?.previewUrl;
-    if (url) new Audio(url).play().catch(() => {});
+  async function handlePreviewVoice() {
+    if (previewStatus === "loading") return;
+
+    // Stop whatever preview (if any) is already playing before starting
+    // the next one — never two previews overlapping.
+    previewAudioRef.current?.pause();
+
+    if (!previewAudioRef.current) previewAudioRef.current = new Audio();
+    const audio = previewAudioRef.current;
+    // Same iOS Safari unlock as the main Listen button — see
+    // DreamResultScreen.tsx's handleListen for why this call, which
+    // immediately fails since there's no source yet, still matters.
+    audio.play().catch(() => {});
+    audio.pause();
+
+    const voice = voices.find((v) => v.id === selectedVoiceId);
+    console.log("[voice-preview] start", { voiceId: selectedVoiceId, hasPreviewUrl: !!voice?.previewUrl });
+    setPreviewStatus("loading");
+    try {
+      let src = voice?.previewUrl;
+      if (!src) {
+        // No preview_url on this voice — generate a short one through the
+        // same TTS route instead of failing silently.
+        const res = await fetch("/api/tts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: PREVIEW_SENTENCE, voiceId: selectedVoiceId }),
+        });
+        if (!res.ok) throw new Error(`tts fallback failed: ${res.status}`);
+        const blob = await res.blob();
+        if (blob.size === 0) throw new Error("tts fallback returned empty audio");
+        src = URL.createObjectURL(blob);
+      }
+      audio.src = src;
+      audio.onended = () => setPreviewStatus("idle");
+      await audio.play();
+      setPreviewStatus("playing");
+    } catch (err) {
+      console.error("[voice-preview] error", (err as Error)?.message);
+      setPreviewStatus("error");
+      setTimeout(() => setPreviewStatus((s) => (s === "error" ? "idle" : s)), 2000);
+    }
   }
+
+  useEffect(() => {
+    return () => { previewAudioRef.current?.pause(); };
+  }, []);
 
   function handleClose() {
     setIsClosing(true);
@@ -302,6 +365,7 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
                   selectedValue={selectedVoiceId ?? ""}
                   onSelectOption={handleSelectVoice}
                   onPreview={selectedVoiceId ? handlePreviewVoice : undefined}
+                  previewStatus={previewStatus}
                 />
               )}
               <ToggleRow

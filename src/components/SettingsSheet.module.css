@@ -238,6 +238,30 @@ button.row:active {
   flex-shrink: 0;
 }
 
+.rowPreviewBtnError {
+  background: rgba(255, 107, 107, 0.18);
+}
+
+.rowPreviewSpinner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.8);
+  animation: rowPreviewSpin 0.7s linear infinite;
+}
+
+@keyframes rowPreviewSpin {
+  to { transform: rotate(360deg); }
+}
+
+.rowPreviewErrorMark {
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 1;
+  color: #ff8b8d;
+}
+
 /* ── Toggle ─────────────────────────────────────────────────────────────── */
 .toggleTrack {
   position: relative;

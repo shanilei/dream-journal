@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
   const requestedVoiceId = typeof body?.voiceId === "string" && body.voiceId.trim() ? body.voiceId : null;
   const voiceId = requestedVoiceId || process.env.ELEVENLABS_VOICE_ID || DEFAULT_VOICE_ID;
 
+  console.log("[tts] request", { voiceId, textLength: text.length });
+
   const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`, {
     method: "POST",
     headers: {
@@ -37,13 +39,16 @@ export async function POST(req: NextRequest) {
     }),
   });
 
+  console.log("[tts] elevenlabs response", { status: res.status, contentType: res.headers.get("content-type") });
+
   if (!res.ok) {
     const errText = await res.text().catch(() => "");
-    console.error("ElevenLabs TTS failed:", res.status, errText);
+    console.error("[tts] ElevenLabs TTS failed:", res.status, errText);
     return NextResponse.json({ error: "tts_failed" }, { status: 502 });
   }
 
   const audioBuffer = await res.arrayBuffer();
+  console.log("[tts] audio bytes", audioBuffer.byteLength);
   return new NextResponse(audioBuffer, {
     headers: { "Content-Type": "audio/mpeg", "Cache-Control": "no-store" },
   });

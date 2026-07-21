@@ -470,8 +470,17 @@ export default function DreamResultScreen({
     }
   }
 
-  const [ttsStatus, setTtsStatus] = useState<"idle" | "loading" | "playing" | "unavailable">("idle");
+  const [ttsStatus, setTtsStatus] = useState<"idle" | "loading" | "playing" | "unavailable" | "error">("idle");
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioUrlRef = useRef<string | null>(null);
+  const ttsAbortRef = useRef<AbortController | null>(null);
+
+  function revokeAudioUrl() {
+    if (audioUrlRef.current) {
+      URL.revokeObjectURL(audioUrlRef.current);
+      audioUrlRef.current = null;
+    }
+  }
 
   async function handleListen() {
     if (ttsStatus === "playing") {
@@ -484,36 +493,67 @@ export default function DreamResultScreen({
     const text = interpretationText || summaryText;
     if (!text) return;
 
+    // Cancel any in-flight request from a previous tap before starting a
+    // new one — repeated taps must never race two responses against
+    // each other.
+    ttsAbortRef.current?.abort();
+    const abortController = new AbortController();
+    ttsAbortRef.current = abortController;
+
+    if (!audioRef.current) audioRef.current = new Audio();
+    const audio = audioRef.current;
+
+    // iOS Safari only allows audio.play() without a fresh user gesture if
+    // an earlier play() call already happened synchronously within a
+    // gesture handler on this exact <audio> element — the fetch below
+    // breaks that direct gesture chain, so "unlock" the element right now
+    // (the call rejects immediately since there's no source yet, which is
+    // expected and safe to ignore) before doing any async work.
+    audio.play().catch(() => {});
+    audio.pause();
+
     setTtsStatus("loading");
+    const voiceId = loadSelectedVoiceId();
+    console.log("[tts] request start", { voiceId, textLength: text.length });
     try {
-      const voiceId = loadSelectedVoiceId();
       const res = await fetch("/api/tts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, voiceId }),
+        signal: abortController.signal,
       });
+      console.log("[tts] response", { status: res.status, contentType: res.headers.get("content-type") });
       if (res.status === 501) {
         setTtsStatus("unavailable");
         setTimeout(() => setTtsStatus("idle"), 2500);
         return;
       }
-      if (!res.ok) throw new Error("tts request failed");
+      if (!res.ok) throw new Error(`tts request failed: ${res.status}`);
       const blob = await res.blob();
+      console.log("[tts] audio blob", { bytes: blob.size, type: blob.type });
+      if (blob.size === 0) throw new Error("tts returned empty audio");
+
+      revokeAudioUrl();
       const url = URL.createObjectURL(blob);
-      if (!audioRef.current) audioRef.current = new Audio();
-      const audio = audioRef.current;
+      audioUrlRef.current = url;
       audio.src = url;
       audio.onended = () => setTtsStatus("idle");
       await audio.play();
+      console.log("[tts] playback started");
       setTtsStatus("playing");
-    } catch {
-      setTtsStatus("idle");
+    } catch (err) {
+      if ((err as Error)?.name === "AbortError") return;
+      console.error("[tts] playback error", (err as Error)?.message);
+      setTtsStatus("error");
+      setTimeout(() => setTtsStatus((s) => (s === "error" ? "idle" : s)), 2500);
     }
   }
 
   useEffect(() => {
     return () => {
+      ttsAbortRef.current?.abort();
       audioRef.current?.pause();
+      revokeAudioUrl();
     };
   }, []);
 
@@ -807,6 +847,8 @@ export default function DreamResultScreen({
                     ? t.reading
                     : ttsStatus === "loading"
                     ? t.loadingAudio
+                    : ttsStatus === "error"
+                    ? t.audioError
                     : t.listen}
                 </button>
               )}
