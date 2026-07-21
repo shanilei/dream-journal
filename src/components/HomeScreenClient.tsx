@@ -8,7 +8,7 @@ import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
 import FavoriteButton from "@/components/FavoriteButton";
 import DreamResultScreen from "@/components/DreamResultScreen";
-import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon, CrescentMoonIcon } from "@/components/Icons";
+import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
@@ -129,27 +129,9 @@ function ChevronIcon() {
 
 // ── FIRST-TIME EMPTY STATE ──────────────────────────────────────────────────
 // Only ever shown when gridCards.length === 0 (see the render below) — a
-// brand-new account, or every dream deleted. Not a card/bordered container
-// itself (per spec); the little illustration below reuses the same flat-
-// glass tokens as every other card in the app (rgba(255,255,255,0.05-0.06)
-// fill, rgba(255,255,255,0.1-0.12) border, blur(20px), soft shadow, no glow
-// halo) so it reads as "part of this app" rather than a generic empty state.
-function GalleryEmptyIllustration() {
-  return (
-    <div className={styles.emptyIllustration} aria-hidden="true">
-      <div className={`${styles.emptyCard} ${styles.emptyCardLeft}`} />
-      <div className={`${styles.emptyCard} ${styles.emptyCardRight}`} />
-      <div className={styles.emptyMoon}>
-        <CrescentMoonIcon size={40} color="var(--accent-primary, #5244F3)" />
-      </div>
-      <span className={`${styles.emptyStar} ${styles.emptyStar1}`} />
-      <span className={`${styles.emptyStar} ${styles.emptyStar2}`} />
-      <span className={`${styles.emptyStar} ${styles.emptyStar3}`} />
-      <span className={`${styles.emptyStar} ${styles.emptyStar4}`} />
-    </div>
-  );
-}
-
+// brand-new account, or every dream deleted. No illustration, no card/
+// bordered container — just headline, supporting text, and the CTA, resting
+// directly on the existing gradient/starfield background.
 function GalleryEmptyState({ t }: { t: ReturnType<typeof useLanguage>["t"] }) {
   return (
     <motion.div
@@ -158,7 +140,6 @@ function GalleryEmptyState({ t }: { t: ReturnType<typeof useLanguage>["t"] }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE }}
     >
-      <GalleryEmptyIllustration />
       <p className={styles.emptyTitle}>{t.galleryEmptyTitle}</p>
       <p className={styles.emptyBody}>{t.galleryEmptyBody}</p>
       {/* Same destination as the bottom nav's Record button — this CTA
