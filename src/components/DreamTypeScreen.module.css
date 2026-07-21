@@ -203,3 +203,21 @@
 :global([lang="he"]) .textarea::placeholder {
   font-family: var(--font-ploni), serif;
 }
+
+/* ===================== TABLET / IPAD ===================== */
+/* Same tablet detection as every other screen's own TABLET/IPAD block
+   (kept in sync with TABLET_QUERY in src/lib/useIsTablet.ts). .screen was
+   capped to the app-wide --shell-max-width, leaving a bare-background
+   border on both sides of a real iPad's width — .backButton/.inputPill
+   are positioned off var(--shell-padding) relative to .screen itself, so
+   widening .screen is enough to bring them back in step with the
+   background instead of looking disconnected from it. Phone/desktop
+   breakpoints are untouched. */
+@media
+  (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
+  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
+{
+  .screen {
+    max-width: 100%;
+  }
+}

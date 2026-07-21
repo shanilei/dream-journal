@@ -8,3 +8,22 @@
   overflow: hidden;
   background: var(--bg-base);
 }
+
+/* ===================== TABLET / IPAD ===================== */
+/* Same tablet detection as every other screen's own TABLET/IPAD block
+   (kept in sync with TABLET_QUERY in src/lib/useIsTablet.ts). .shell was
+   capped to the app-wide --shell-max-width (640-900px), leaving
+   OnboardingBackground — sized to fill .shell's own box via
+   position:absolute — short of a real iPad's width, showing bare
+   var(--bg-base) as a border on both sides. OnboardingBackground scales
+   with .shell automatically since it's absolutely positioned within it,
+   so widening .shell alone is enough; no other onboarding screen needs
+   its own override. Phone/desktop breakpoints are untouched. */
+@media
+  (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
+  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
+{
+  .shell {
+    max-width: 100%;
+  }
+}
