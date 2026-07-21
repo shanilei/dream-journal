@@ -28,6 +28,13 @@ const urbanist = Urbanist({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700", "800"],
   variable: "--font-urbanist",
+  // Next's default ("swap") shows a fallback font first and swaps to
+  // Urbanist once it's ready — visible on the loader (and everywhere
+  // else) as a brief flash/reflow. "optional" only ever uses Urbanist if
+  // it's already loaded in time for the very first paint; otherwise it
+  // sticks with the fallback for that render instead of swapping in
+  // later, so there's never a visible font jump either way.
+  display: "optional",
 });
 
 const alumniSans = Alumni_Sans({
@@ -43,6 +50,8 @@ const ploni = localFont({
     { path: "../../font/ploni-demibold-aaa.otf", weight: "600" },
   ],
   variable: "--font-ploni",
+  // Same reasoning as Urbanist above — no visible swap either direction.
+  display: "optional",
 });
 
 export const metadata: Metadata = {
@@ -58,7 +67,10 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#090A13",
+  // Matches manifest.ts's background_color — same loader background, not
+  // --bg-base, so the browser/status-bar chrome tint agrees with what's
+  // actually painted underneath it.
+  themeColor: "#050A1A",
 };
 
 export default function RootLayout({
