@@ -197,8 +197,9 @@ export default function DreamResultScreen({
   const MAX_CLARITY = 0.9;
   const BRUSH_RADIUS = WIPE_BUFFER_W * 0.22;
   const BRUSH_ALPHA = 0.5;
-  const DECAY_PER_SEC = 0.22; // fraction of remaining alpha lost per second once idle
-  const FOG_RETURN_MS = 15000; // how long to keep ticking the fade-back after the last touch
+  const DECAY_PER_SEC = 0.6; // fraction of remaining alpha lost per second, once the fade actually starts
+  const RESET_HOLD_MS = 5000; // how long the revealed state holds untouched after the user lets go
+  const FADE_DURATION_MS = 4000; // how long the fade-back itself takes once it starts
 
   const wipeCanvasRef = useRef<HTMLCanvasElement>(null);
   const wipeBufferRef = useRef<HTMLCanvasElement | null>(null);
@@ -207,7 +208,32 @@ export default function DreamResultScreen({
   const wipeRafRef = useRef<number | null>(null);
   const wipeTickingRef = useRef(false);
   const lastWipeFrameTimeRef = useRef(0);
-  const lastInteractionAtRef = useRef(0);
+  // Single pending-reset timer — armed RESET_HOLD_MS after the user lets
+  // go, cleared/re-armed on every subsequent interaction so there's never
+  // more than one in flight at once.
+  const resetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const fadingBackRef = useRef(false);
+  const fadeStartAtRef = useRef(0);
+
+  function cancelPendingReset() {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+      resetTimerRef.current = null;
+    }
+    // Also cancels an already-in-progress fade-back, not just a still-
+    // pending countdown — touching again mid-fade stops it where it is.
+    fadingBackRef.current = false;
+  }
+
+  function armPendingReset() {
+    if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
+    resetTimerRef.current = setTimeout(() => {
+      resetTimerRef.current = null;
+      fadingBackRef.current = true;
+      fadeStartAtRef.current = performance.now();
+      ensureWipeTicking();
+    }, RESET_HOLD_MS);
+  }
 
   // Preloaded once outside the DOM purely as a canvas draw source — never
   // read back (no getImageData/toDataURL), so a cross-origin image here
@@ -292,28 +318,36 @@ export default function DreamResultScreen({
     bctx.fill();
   }
 
-  // Runs only while actively dragging, or for a while after (so the fade-
-  // back can finish), then stops rescheduling itself entirely — no idle
-  // per-frame cost once the wipe has settled back down.
+  // Runs only while actively dragging or actively fading back — never
+  // during the RESET_HOLD_MS hold itself, since nothing changes then —
+  // and stops rescheduling entirely once neither applies, so there's no
+  // idle per-frame cost while the revealed state is just sitting there.
   function tickWipe(now: number) {
-    const buf = getWipeBuffer();
-    const bctx = buf.getContext("2d");
-    const last = lastWipeFrameTimeRef.current || now;
-    const dt = Math.min((now - last) / 1000, 0.1);
-    lastWipeFrameTimeRef.current = now;
-
-    if (bctx && !isDraggingRef.current) {
-      bctx.save();
-      bctx.globalCompositeOperation = "destination-out";
-      bctx.fillStyle = `rgba(0,0,0,${DECAY_PER_SEC * dt})`;
-      bctx.fillRect(0, 0, buf.width, buf.height);
-      bctx.restore();
+    if (fadingBackRef.current) {
+      const buf = getWipeBuffer();
+      const bctx = buf.getContext("2d");
+      const elapsed = now - fadeStartAtRef.current;
+      if (elapsed >= FADE_DURATION_MS) {
+        // Exact restoration — fully cleared, not an asymptotic trickle
+        // that never quite reaches zero, so the end state matches the
+        // original pre-interaction appearance precisely.
+        bctx?.clearRect(0, 0, buf.width, buf.height);
+        fadingBackRef.current = false;
+      } else if (bctx) {
+        const last = lastWipeFrameTimeRef.current || now;
+        const dt = Math.min((now - last) / 1000, 0.1);
+        bctx.save();
+        bctx.globalCompositeOperation = "destination-out";
+        bctx.fillStyle = `rgba(0,0,0,${DECAY_PER_SEC * dt})`;
+        bctx.fillRect(0, 0, buf.width, buf.height);
+        bctx.restore();
+      }
     }
+    lastWipeFrameTimeRef.current = now;
 
     drawWipeFrame();
 
-    const stillFading = now - lastInteractionAtRef.current < FOG_RETURN_MS;
-    if (isDraggingRef.current || stillFading) {
+    if (isDraggingRef.current || fadingBackRef.current) {
       wipeRafRef.current = requestAnimationFrame(tickWipe);
     } else {
       wipeTickingRef.current = false;
@@ -323,7 +357,6 @@ export default function DreamResultScreen({
   }
 
   function ensureWipeTicking() {
-    lastInteractionAtRef.current = performance.now();
     if (wipeTickingRef.current) return;
     wipeTickingRef.current = true;
     lastWipeFrameTimeRef.current = 0;
@@ -333,6 +366,7 @@ export default function DreamResultScreen({
   useEffect(() => {
     return () => {
       if (wipeRafRef.current) cancelAnimationFrame(wipeRafRef.current);
+      if (resetTimerRef.current) clearTimeout(resetTimerRef.current);
       wipeTickingRef.current = false;
     };
   }, []);
@@ -710,6 +744,7 @@ export default function DreamResultScreen({
             className={styles.imageWrap}
             onMouseDown={(e) => {
               if (!clearImageUrl) return;
+              cancelPendingReset();
               isDraggingRef.current = true;
               lastDragPointRef.current = null;
               addWipePoint(e.clientX, e.clientY);
@@ -721,13 +756,17 @@ export default function DreamResultScreen({
             onMouseUp={() => {
               isDraggingRef.current = false;
               lastDragPointRef.current = null;
+              armPendingReset();
             }}
             onMouseLeave={() => {
+              if (!isDraggingRef.current) return;
               isDraggingRef.current = false;
               lastDragPointRef.current = null;
+              armPendingReset();
             }}
             onTouchStart={(e) => {
               if (!clearImageUrl) return;
+              cancelPendingReset();
               isDraggingRef.current = true;
               lastDragPointRef.current = null;
               const touch = e.touches[0];
@@ -741,10 +780,12 @@ export default function DreamResultScreen({
             onTouchEnd={() => {
               isDraggingRef.current = false;
               lastDragPointRef.current = null;
+              armPendingReset();
             }}
             onTouchCancel={() => {
               isDraggingRef.current = false;
               lastDragPointRef.current = null;
+              armPendingReset();
             }}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
