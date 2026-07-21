@@ -8,7 +8,7 @@ import styles from "@/app/home.module.css";
 import BottomNav from "@/components/BottomNav";
 import FavoriteButton from "@/components/FavoriteButton";
 import DreamResultScreen from "@/components/DreamResultScreen";
-import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon } from "@/components/Icons";
+import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon, CrescentMoonIcon } from "@/components/Icons";
 import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
@@ -126,6 +126,51 @@ function ChevronIcon() {
     </svg>
   );
 }
+
+// ── FIRST-TIME EMPTY STATE ──────────────────────────────────────────────────
+// Only ever shown when gridCards.length === 0 (see the render below) — a
+// brand-new account, or every dream deleted. Not a card/bordered container
+// itself (per spec); the little illustration below reuses the same flat-
+// glass tokens as every other card in the app (rgba(255,255,255,0.05-0.06)
+// fill, rgba(255,255,255,0.1-0.12) border, blur(20px), soft shadow, no glow
+// halo) so it reads as "part of this app" rather than a generic empty state.
+function GalleryEmptyIllustration() {
+  return (
+    <div className={styles.emptyIllustration} aria-hidden="true">
+      <div className={`${styles.emptyCard} ${styles.emptyCardLeft}`} />
+      <div className={`${styles.emptyCard} ${styles.emptyCardRight}`} />
+      <div className={styles.emptyMoon}>
+        <CrescentMoonIcon size={40} color="var(--accent-primary, #5244F3)" />
+      </div>
+      <span className={`${styles.emptyStar} ${styles.emptyStar1}`} />
+      <span className={`${styles.emptyStar} ${styles.emptyStar2}`} />
+      <span className={`${styles.emptyStar} ${styles.emptyStar3}`} />
+      <span className={`${styles.emptyStar} ${styles.emptyStar4}`} />
+    </div>
+  );
+}
+
+function GalleryEmptyState({ t }: { t: ReturnType<typeof useLanguage>["t"] }) {
+  return (
+    <motion.div
+      className={styles.emptyState}
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE }}
+    >
+      <GalleryEmptyIllustration />
+      <p className={styles.emptyTitle}>{t.galleryEmptyTitle}</p>
+      <p className={styles.emptyBody}>{t.galleryEmptyBody}</p>
+      {/* Same destination as the bottom nav's Record button — this CTA
+          doesn't start a separate flow, it's just another entry point
+          into the exact same one. */}
+      <Link href="/record" className={styles.emptyCta}>
+        {t.galleryEmptyCta}
+      </Link>
+    </motion.div>
+  );
+}
+// ──────────────────────────────────────────────────────────────────────────
 
 // ── CALENDAR VIEW ──────────────────────────────────────────────────────────
 const DAY_LABELS_EN = ["S", "M", "T", "W", "T", "F", "S"];
@@ -926,9 +971,16 @@ export default function HomeScreenClient({
         </div>
         </motion.div>
 
+        {/* Brand-new account (or every dream deleted) — replace everything
+            below the filters with the first-time welcome, instead of the
+            normal list/calendar/grid views. Header/toggle/search/filters
+            above are untouched. */}
+        {gridCards.length === 0 && <GalleryEmptyState t={t} />}
+
         {/* Gallery cards (list view rows here; grid view further below in
             the second .contentWrapper) simply fade out — no movement,
             per the transition spec's "Gallery cards fade out". */}
+        {gridCards.length > 0 && (
         <motion.div
           animate={{ opacity: openingCard ? 0 : 1 }}
           transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
@@ -1001,15 +1053,17 @@ export default function HomeScreenClient({
         )}
 
         </motion.div>
+        )}
       </div>
 
       {/* ── DATE: Calendar view (same in both list and grid view modes) ── */}
-      {!isSearching && filter === "date" && (
+      {gridCards.length > 0 && !isSearching && filter === "date" && (
         <ViewTransition viewKey="calendar">
           <CalendarView gridCards={gridCards} />
         </ViewTransition>
       )}
 
+      {gridCards.length > 0 && (
       <motion.div
         className={styles.contentWrapper}
         animate={{ opacity: openingCard ? 0 : 1 }}
@@ -1143,6 +1197,7 @@ export default function HomeScreenClient({
         )}
         </ViewTransition>
       </motion.div>
+      )}
 
       </motion.div>
 

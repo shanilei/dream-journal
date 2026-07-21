@@ -1312,6 +1312,115 @@
   color: rgba(255,255,255,0.6);
 }
 
+/* ===================== FIRST-TIME GALLERY EMPTY STATE =====================
+   Not a card itself (no background/border/blur on .emptyState) — only the
+   little illustration below reuses the app's flat-glass tokens, per the
+   design system: rgba(255,255,255,0.05-0.06) fill, rgba(255,255,255,0.1-0.12)
+   border, blur(20px), soft shadow only, no glow halo behind the icon. */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 56px 24px 0;
+}
+
+.emptyIllustration {
+  position: relative;
+  width: 200px;
+  height: 140px;
+  margin-bottom: 28px;
+}
+
+.emptyCard {
+  position: absolute;
+  top: 10px;
+  width: 104px;
+  height: 120px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+}
+
+.emptyCardLeft {
+  left: 18px;
+  transform: rotate(-10deg);
+}
+
+.emptyCardRight {
+  right: 18px;
+  transform: rotate(9deg);
+}
+
+.emptyMoon {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.emptyStar {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.emptyStar1 { top: 6px;   left: 30px;  width: 2.5px; height: 2.5px; opacity: 0.5; }
+.emptyStar2 { top: 18px;  right: 12px; opacity: 0.35; }
+.emptyStar3 { bottom: 8px; left: 6px;  opacity: 0.3; }
+.emptyStar4 { bottom: 0;  right: 34px; width: 1.5px; height: 1.5px; opacity: 0.4; }
+
+.emptyTitle {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 30px;
+  color: #ffffff;
+}
+
+.emptyBody {
+  margin: 0 0 28px;
+  max-width: 280px;
+  font-size: 14px;
+  line-height: 21px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.emptyCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 24px;
+  border-radius: 30px;
+  background: #ffffff;
+  color: var(--accent-primary, #5244F3);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+
+.emptyCta:active {
+  transform: scale(0.96);
+}
+
 /* ===================== HEBREW (RTL) OVERRIDES ===================== */
 
 /* Gallery title — Ploni DemiBold */
@@ -1411,6 +1520,17 @@
 :global([lang="he"]) .calMonthName,
 :global([lang="he"]) .calDayHeader,
 :global([lang="he"]) .calCellNum {
+  font-family: var(--font-ploni), serif;
+}
+
+/* First-time Gallery empty state */
+:global([lang="he"]) .emptyTitle,
+:global([lang="he"]) .emptyCta {
+  font-family: var(--font-ploni), serif;
+  font-weight: 600;
+}
+
+:global([lang="he"]) .emptyBody {
   font-family: var(--font-ploni), serif;
 }
 
