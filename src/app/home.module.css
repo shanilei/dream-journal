@@ -1518,15 +1518,11 @@
     gap: 14px;
   }
 
-  /* Gallery "Dream History" grid — 3 columns (phone default, unchanged
-     above) leaves an iPad's extra width mostly unused; 4 fits
-     comfortably within the tablet --shell-max-width range without cards
-     getting uncomfortably narrow. iPad only, per the same tablet
-     detection as everything else in this block — phone's
-     repeat(3, 1fr) is untouched. */
-  .collectionGrid {
-    grid-template-columns: repeat(4, 1fr);
-  }
+  /* Gallery "Dream History" grid's column count is computed in JS instead
+     (see effectiveGridColumns in HomeScreenClient.tsx) — .collectionGrid
+     always gets an inline grid-template-columns for the 2/3 phone toggle,
+     and inline style beats any class rule here regardless of specificity,
+     so a plain override in this block would never actually apply. */
 }
 
 @media print {

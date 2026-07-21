@@ -13,6 +13,7 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
 import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
+import { useIsTablet } from "@/lib/useIsTablet";
 import { toGalleryThumbnailUrl } from "@/lib/thumbnail";
 import { useState, useEffect, useRef } from "react";
 
@@ -669,6 +670,13 @@ export default function HomeScreenClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [gridColumns, setGridColumns] = useState<2 | 3>(3);
+  // The CSS module's own iPad 4-column override for .collectionGrid can
+  // never win against the inline gridTemplateColumns below (inline style
+  // always beats a class, media query or not) — so tablet has to be
+  // resolved here in JS instead. The 2/3 toggle is a phone-only affordance;
+  // iPad always gets 4, regardless of what was last picked on a phone.
+  const isTablet = useIsTablet();
+  const effectiveGridColumns = isTablet ? 4 : gridColumns;
   // Which Type-grid mood is expanded into <CategoryOverlay>. Not a route
   // param — the overlay renders in place over the still-mounted Gallery
   // so the shared-element transition has both ends of the animation
@@ -1053,7 +1061,7 @@ export default function HomeScreenClient({
         <ViewTransition viewKey={`grid-${isSearching ? "search" : filter}`}>
         {/* ── SEARCH RESULTS ── */}
         {isSearching && (
-          <div className={styles.collectionGrid} style={{ paddingTop: 36, gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}>
+          <div className={styles.collectionGrid} style={{ paddingTop: 36, gridTemplateColumns: `repeat(${effectiveGridColumns}, 1fr)` }}>
             {searchResults.length === 0 ? (
               <motion.p
                 className={styles.comingSoon}
@@ -1074,7 +1082,7 @@ export default function HomeScreenClient({
 
         {/* ── GRID + FAVORITE ── */}
         {!isSearching && viewMode === "grid" && filter === "favorite" && (
-          <div className={styles.collectionGrid} style={{ paddingTop: 8, gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}>
+          <div className={styles.collectionGrid} style={{ paddingTop: 8, gridTemplateColumns: `repeat(${effectiveGridColumns}, 1fr)` }}>
             {favoriteCards.length === 0 ? (
               <motion.p
                 className={styles.comingSoon}
@@ -1149,25 +1157,30 @@ export default function HomeScreenClient({
               <>
                 <div className={styles.sectionHeaderRow}>
                   <p className={`${styles.sectionLabel} ${styles.sectionLabelInRow}`}>{t.moreCollection}</p>
-                  <div className={styles.columnToggle}>
-                    <span>{t.galleryColumnsLabel}</span>
-                    <button
-                      type="button"
-                      className={gridColumns === 2 ? styles.columnToggleActive : ""}
-                      onClick={() => setGridColumns(2)}
-                    >
-                      2
-                    </button>
-                    <button
-                      type="button"
-                      className={gridColumns === 3 ? styles.columnToggleActive : ""}
-                      onClick={() => setGridColumns(3)}
-                    >
-                      3
-                    </button>
-                  </div>
+                  {/* Phone-only — iPad is always 4 columns (see
+                      effectiveGridColumns above), so this toggle would be
+                      dead UI there. */}
+                  {!isTablet && (
+                    <div className={styles.columnToggle}>
+                      <span>{t.galleryColumnsLabel}</span>
+                      <button
+                        type="button"
+                        className={gridColumns === 2 ? styles.columnToggleActive : ""}
+                        onClick={() => setGridColumns(2)}
+                      >
+                        2
+                      </button>
+                      <button
+                        type="button"
+                        className={gridColumns === 3 ? styles.columnToggleActive : ""}
+                        onClick={() => setGridColumns(3)}
+                      >
+                        3
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <div className={styles.collectionGrid} style={{ gridTemplateColumns: `repeat(${gridColumns}, 1fr)` }}>
+                <div className={styles.collectionGrid} style={{ gridTemplateColumns: `repeat(${effectiveGridColumns}, 1fr)` }}>
                   {collectionCards.map((card, i) =>
                     renderCard(card, styles.gridCard, styles.gridImg, styles.gridBody, styles.gridCardHeading, styles.gridCardSubheading, i)
                   )}
