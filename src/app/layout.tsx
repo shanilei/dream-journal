@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Urbanist, Alumni_Sans } from "next/font/google";
 import localFont from "next/font/local";
 import Script from "next/script";
@@ -47,6 +47,17 @@ const ploni = localFont({
 export const metadata: Metadata = {
   title: "Lucid — Dream Journal",
   description: "Record your dreams and let Lucid interpret them.",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Lucid",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#090A13",
 };
 
 export default function RootLayout({
