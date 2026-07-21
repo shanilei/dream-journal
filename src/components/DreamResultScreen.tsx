@@ -212,7 +212,8 @@ export default function DreamResultScreen({
   const WIPE_BUFFER_W = 169;
   const WIPE_BUFFER_H = 238; // matches the card's 338:475 aspect ratio
   const MAX_CLARITY = 0.9;
-  const BRUSH_RADIUS = WIPE_BUFFER_W * 0.22;
+  // -10 per request — was WIPE_BUFFER_W * 0.22 (~37px), now ~27px.
+  const BRUSH_RADIUS = WIPE_BUFFER_W * 0.22 - 10;
   const BRUSH_ALPHA = 0.5;
   const DECAY_PER_SEC = 0.6; // fraction of remaining alpha lost per second, once the fade actually starts
   const RESET_HOLD_MS = 3000; // how long the revealed state holds untouched after the user lets go
