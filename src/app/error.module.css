@@ -1,0 +1,64 @@
+/* No background of its own — AppBackground (mounted once in the root
+   layout) is already behind this, same as every other screen. */
+.screen {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 var(--shell-padding, 20px);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  max-width: 320px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 30px;
+  color: var(--text-primary, #fff);
+}
+
+.body {
+  margin: 0 0 28px;
+  font-size: 14px;
+  line-height: 21px;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 48px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 30px;
+  background: #ffffff;
+  color: var(--accent-primary, #5244F3);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.retryBtn:active {
+  transform: scale(0.96);
+}
+
+:global([lang="he"]) .title,
+:global([lang="he"]) .retryBtn {
+  font-family: var(--font-ploni), serif;
+  font-weight: 600;
+}
+
+:global([lang="he"]) .body {
+  font-family: var(--font-ploni), serif;
+}

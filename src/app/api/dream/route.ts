@@ -11,6 +11,12 @@ import { generatePrintImage } from "@/print-image";
 import { getCurrentUser } from "@/lib/auth";
 
 export const runtime = "nodejs";
+// This route runs Claude + Gemini + two Supabase uploads before responding
+// — 60s is Vercel's own cap on the Hobby plan (and comfortably under Pro/
+// Enterprise's higher ceilings too), giving real headroom over a slow
+// Gemini response instead of risking a platform-level kill mid-request
+// with no graceful error possible. Doesn't change the pipeline itself.
+export const maxDuration = 60;
 
 const MOOD_LABELS = { sweet: "Sweet", confused: "Confused", fear: "Fear", sad: "Sad", angry: "Angry" } as const;
 

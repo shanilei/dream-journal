@@ -2,6 +2,10 @@ export type Lang = "en" | "he";
 
 export const translations = {
   en: {
+    // Global error boundary (see src/app/error.tsx)
+    errorPageTitle: "Something went quiet",
+    errorPageBody: "We couldn't load this right now. Let's try again.",
+    errorPageRetry: "Try again",
     userTitle: "User Dreams",
     myGoals: "My goals",
     thisMonth: "This month",
@@ -158,6 +162,10 @@ export const translations = {
     onboardingStartDreaming: "Start dreaming",
   },
   he: {
+    // Global error boundary (see src/app/error.tsx)
+    errorPageTitle: "רגע של שקט",
+    errorPageBody: "לא הצלחנו לטעון את זה כרגע. בואו ננסה שוב.",
+    errorPageRetry: "נסו שוב",
     userTitle: "חלומות המשתמש",
     myGoals: "המטרות שלי",
     thisMonth: "החודש",

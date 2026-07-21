@@ -250,8 +250,11 @@ export async function generateImage(
   const styleText = STYLES[styleName] ?? STYLES["botanical-print"];
   const prompt = buildPrompt(analysis, profile, styleText, styleName);
 
+  // Deliberately not logging the prompt itself — it's built from the
+  // dream's own symbols/themes/locations, so printing it would put
+  // sensitive dream content in production logs. The mood profile alone
+  // is enough to see which branch was picked.
   console.log(`פרופיל נבחר: ${profile}`);
-  console.log("Prompt:\n" + prompt + "\n");
 
   const ext = extname(outputPath);
   const base = join(dirname(outputPath), basename(outputPath, ext));
@@ -356,7 +359,9 @@ export async function generateImage(
   const parts = response.candidates?.[0]?.content?.parts ?? [];
   for (const part of parts) {
     if (part.text) {
-      console.log("תגובת טקסט מהמודל:", part.text);
+      // Not logging the text itself — the model's response can echo back
+      // content derived from the dream-based prompt above.
+      console.log(`תגובת טקסט מהמודל (${part.text.length} תווים)`);
     } else if (part.inlineData?.data) {
       const clearImage = Buffer.from(part.inlineData.data, "base64");
       const rawImage = await applyFrostedGlassLayer(await applyMotionBlurLayer(clearImage));
