@@ -521,19 +521,18 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Exact spacing per design reference: 380px from the top of the
-       screen to the headline, 53px headline→orb, 53px orb→"OR/Type it".
-       Fixed px (not dvh/centering) per that reference, not an arbitrary
-       percentage — the one gap intentionally left to flex with viewport
-       height is between "Type it" and BottomNav (a separate fixed-
-       position element outside this column), which is what actually
-       keeps this from breaking on a taller/shorter iPad: the top offset
-       and both inter-element gaps stay exact, BottomNav's own distance
-       from the safe area stays exact (see its own iPad block), and only
-       the middle whitespace absorbs whatever height difference remains. */
-    justify-content: flex-start;
-    padding-top: 380px;
-    gap: 53px;
+    /* Title/orb/"OR-Type it" true-centered as one block within the full
+       screen height (not a fixed padding-top guess), so "top → title"
+       scales with whatever height a given iPad actually has instead of
+       being right at only one specific size. BottomNav is a separate
+       fixed-position element that can't be a flex child of this column,
+       so it's positioned independently (see its own iPad block) with a
+       modest, consistent offset from the safe area — it isn't part of
+       what's being centered here, only what sits below it. Gaps between
+       the three centered children are graduated (medium title→orb,
+       small orb→"type it"), not a single uniform value — see their own
+       margin-bottom below. */
+    justify-content: center;
     padding-left: 64px;
     padding-right: 64px;
     box-sizing: border-box;
@@ -554,6 +553,7 @@
     max-width: 520px;
     font-size: 36px;
     line-height: 46px;
+    margin-bottom: 48px;
   }
 
   .promptHe {
@@ -571,6 +571,7 @@
     top: auto;
     width: 400px;
     height: 400px;
+    margin-bottom: 24px;
   }
 
   .typeFallback {
@@ -625,12 +626,19 @@
   (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse) and (max-height: 900px)
 {
   .screen {
-    gap: 32px;
     padding-bottom: 140px;
+  }
+
+  /* Smaller graduated gaps than the portrait default (48px/24px) — same
+     proportion, scaled down for the shorter landscape viewport. */
+  .prompt,
+  .promptHe {
+    margin-bottom: 28px;
   }
 
   .recordButtonWrap {
     width: 340px;
     height: 340px;
+    margin-bottom: 16px;
   }
 }

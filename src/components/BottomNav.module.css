@@ -205,11 +205,11 @@
 {
   .nav {
     /* .circle sits inside 12px of vertical padding, so the box itself
-       needs to land 12px short of the target — the visible circles'
-       own bottom edge is what should sit 111px above the safe area, per
-       the design reference's "bottom navigation → bottom of screen"
-       spacing, not this transparent box's edge. */
-    bottom: calc(99px + env(safe-area-inset-bottom));
+       needs to land 12px short of the target — the visible circles' own
+       bottom edge is what should sit ~72px above the safe area (within
+       the requested 60-80px range, matching record.module.css's own
+       .controlRow precedent), not this transparent box's edge. */
+    bottom: calc(60px + env(safe-area-inset-bottom));
     gap: 20px;
     padding: 12px 28px;
   }
