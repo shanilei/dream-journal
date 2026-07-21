@@ -198,7 +198,7 @@ export default function DreamResultScreen({
   const BRUSH_RADIUS = WIPE_BUFFER_W * 0.22;
   const BRUSH_ALPHA = 0.5;
   const DECAY_PER_SEC = 0.6; // fraction of remaining alpha lost per second, once the fade actually starts
-  const RESET_HOLD_MS = 5000; // how long the revealed state holds untouched after the user lets go
+  const RESET_HOLD_MS = 3000; // how long the revealed state holds untouched after the user lets go
   const FADE_DURATION_MS = 4000; // how long the fade-back itself takes once it starts
 
   const wipeCanvasRef = useRef<HTMLCanvasElement>(null);
