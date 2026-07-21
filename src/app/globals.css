@@ -101,7 +101,7 @@ html {
      bounce. Most visible on iPad, where content is taller and scroll
      momentum is stronger, but harmless everywhere else since it's simply
      filling in a previously-unset value. */
-  background: #090a13;
+  background: #050A1A;
   overflow-x: hidden;
   overscroll-behavior-x: none;
   touch-action: pan-y;
@@ -112,7 +112,7 @@ body {
   font-family: var(--font-urbanist), -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   color: #333;
-  background: #090a13;
+  background: #050A1A;
   overflow-x: hidden;
   overscroll-behavior-x: none;
   max-width: 100%;

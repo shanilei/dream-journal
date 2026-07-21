@@ -521,13 +521,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Figma's iPad reference (node 1258:7054) sits the content group in
-       the upper portion of the screen, not vertically centered — title
-       top edge lands at ~28% of the frame height, leaving generous empty
-       space below before BottomNav rather than splitting it evenly
-       above/below the orb. */
-    justify-content: flex-start;
-    padding-top: 22dvh;
+    /* Previously pinned to the upper 22dvh per Figma's iPad reference —
+       on a tall iPad that read as sitting too low/off-balance rather than
+       "upper," so this now centers the group vertically instead. gap is
+       untouched, so spacing between title/orb/type-fallback is identical
+       to before, just the whole block's position shifts. */
+    justify-content: center;
     gap: 56px;
     padding-left: 64px;
     padding-right: 64px;

@@ -1,0 +1,16 @@
+/* Root-layout-level, mounted once above every route (see AppBackground.tsx)
+   — never remounts on navigation between Record/Gallery/Type/etc, unlike
+   each screen's own ::before gradient which fades in fresh on every mount.
+   This sits behind everything at all times, painted with the exact same
+   gradient those screens use, so the moment between one screen's exit and
+   the next screen's entrance (screenIn's opacity/blur fade-in) never dips
+   down to a mismatched flat color — the real cause of the reported
+   flashing, not a GPU/repaint quirk. No animation of its own: a static,
+   always-painted layer is the fix, not something else to keep in sync. */
+.bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--gallery-gradient);
+  pointer-events: none;
+}

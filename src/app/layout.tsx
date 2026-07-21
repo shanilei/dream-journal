@@ -5,6 +5,7 @@ import Script from "next/script";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { PhotoBorderProvider } from "@/components/PhotoBorderProvider";
+import AppBackground from "@/components/AppBackground";
 import "./globals.css";
 
 const THEME_INIT_SCRIPT = `
@@ -74,6 +75,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${urbanist.variable} ${alumniSans.variable} ${ploni.variable}`}>
+        <AppBackground />
         <ThemeProvider>
           <LanguageProvider>
             {/* Onboarding gating now happens in middleware.ts (server-side,
