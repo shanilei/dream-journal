@@ -5,10 +5,10 @@ import { useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { useLanguage } from "./LanguageProvider";
 import OnboardingBackground from "./onboarding/OnboardingBackground";
-import { AppleIcon, GoogleIcon } from "./Icons";
+import { GoogleIcon } from "./Icons";
 import styles from "./SignInScreen.module.css";
 
-type Provider = "apple" | "google";
+type Provider = "google";
 
 export default function SignInScreen() {
   const { t, lang } = useLanguage();
@@ -58,17 +58,9 @@ export default function SignInScreen() {
           {hadError && <p className={styles.error}>{t.signInError}</p>}
 
           <div className={styles.buttons}>
-            <button
-              type="button"
-              className={styles.cta}
-              onClick={() => handleSignIn("apple")}
-              disabled={loadingProvider !== null}
-            >
-              <span className={styles.ctaIcon}>
-                <AppleIcon size={18} />
-              </span>
-              <span className={styles.ctaLabel}>{t.signInWithApple}</span>
-            </button>
+            {/* Apple sign-in removed — the Apple provider was never
+                enabled on the Supabase project, so the button was
+                non-functional; Google is the only working option. */}
             <button
               type="button"
               className={styles.cta}

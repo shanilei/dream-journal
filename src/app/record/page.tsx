@@ -254,10 +254,28 @@ export default function RecordPage() {
               appears to orbit while the core stays put, centered and
               unchanged. */}
           <div className={styles.orbLayers}>
+            {/* srcSet/sizes so the box that grows to 400px on iPad (see
+                record.module.css's TABLET/IPAD block) gets a source with
+                enough real pixels instead of the 320px original stretched
+                ~1.5-2x beyond its native resolution — that stretch, on a
+                2x-DPR iPad, is what actually reads as "pixelated" (a real
+                resolution gap, not a filter/rendering issue to mask). */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/orb-static-keyed.png" alt="" className={styles.orbRings} />
+            <img
+              src="/images/orb-static-keyed.png"
+              srcSet="/images/orb-static-keyed.png 320w, /images/orb-static-keyed@3x.png 960w"
+              sizes="(min-width: 768px) 400px, 260px"
+              alt=""
+              className={styles.orbRings}
+            />
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/orb-static-keyed.png" alt="" className={styles.orbCore} />
+            <img
+              src="/images/orb-static-keyed.png"
+              srcSet="/images/orb-static-keyed.png 320w, /images/orb-static-keyed@3x.png 960w"
+              sizes="(min-width: 768px) 400px, 260px"
+              alt=""
+              className={styles.orbCore}
+            />
           </div>
         </button>
       </div>

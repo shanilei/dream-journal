@@ -204,7 +204,11 @@
   (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
 {
   .nav {
-    bottom: calc(36px + env(safe-area-inset-bottom));
+    /* .circle sits inside 12px of vertical padding, so the box itself
+       needs to land 12px short of the target — the visible circles'
+       own bottom edge is what should sit 30px above the safe area,
+       not this transparent box's edge. */
+    bottom: calc(18px + env(safe-area-inset-bottom));
     gap: 20px;
     padding: 12px 28px;
   }

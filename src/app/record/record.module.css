@@ -499,6 +499,24 @@
   (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
   (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
 {
+  /* iOS Safari's most visible repaint flicker on this screen comes from
+     re-compositing the largest animated/blurred layers on every frame —
+     the two pulsing gradient pseudo-elements, the twinkling starfield,
+     the orbiting glow blobs, and the continuously-rotating orb rings.
+     Promoting each to its own GPU layer up front (instead of Safari
+     deciding to promote/demote it mid-animation) is what actually stops
+     the flash, not more animation — nothing here changes timing, easing,
+     or the visuals themselves. iPad only: these layers are smaller on
+     phone and this hasn't been reported there. */
+  .screen::before,
+  .screen::after,
+  .starfield,
+  .glowBlue,
+  .glowPurple,
+  .orbRings {
+    will-change: transform, opacity;
+  }
+
   .screen {
     display: flex;
     flex-direction: column;

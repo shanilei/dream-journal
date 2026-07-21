@@ -94,6 +94,14 @@ body {
    (filter-chip strips) opt back in locally — see .filterRow / .row in
    GalleryFilterChips.module.css. */
 html {
+  /* Matches body's own background below — iOS Safari's elastic overscroll
+     bounce reveals whatever's behind <body> at the top/bottom edges
+     during a rubber-band scroll, and with no background of its own here
+     that was the browser's default white, showing as a flash on every
+     bounce. Most visible on iPad, where content is taller and scroll
+     momentum is stronger, but harmless everywhere else since it's simply
+     filling in a previously-unset value. */
+  background: #090a13;
   overflow-x: hidden;
   overscroll-behavior-x: none;
   touch-action: pan-y;

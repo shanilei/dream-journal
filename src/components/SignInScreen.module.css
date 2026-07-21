@@ -136,3 +136,22 @@
 :global([lang="he"]) .ctaLabel {
   font-family: var(--font-ploni), serif;
 }
+
+/* ===================== TABLET / IPAD ===================== */
+/* Same tablet detection as every other screen's own TABLET/IPAD block
+   (kept in sync with TABLET_QUERY in src/lib/useIsTablet.ts). .screen
+   was capped to the app-wide --shell-max-width (640-900px), which left
+   OnboardingBackground's gradient/starfield — sized to fill .screen's
+   own box — short of a real iPad's width, showing bare page background
+   (near-black) as bars on both sides. Widening just .screen here fixes
+   that; .textBlock/.buttons keep their own natural centered widths
+   below, so the actual content doesn't stretch or redesign, only the
+   canvas it sits on does. Phone/desktop breakpoints are untouched. */
+@media
+  (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
+  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
+{
+  .screen {
+    max-width: 100%;
+  }
+}
