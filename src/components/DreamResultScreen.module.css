@@ -218,12 +218,12 @@
      entirely (not just re-allowing pan-y) is deliberate: any drag that
      starts on the image is for the reveal, not for scrolling past it. */
   touch-action: none;
-  /* Scopes repaint to just this box — the drag reveal below rewrites
-     --reveal-progress every animation frame while easing, which forces
-     the browser to recompute .imageClear's opacity+blur; without
-     `contain` Safari has to consider whether that invalidates layout/
-     paint further up the tree (title, symbols, dream text, etc. below
-     the image), which it never actually does since that layer is
+  /* Scopes repaint to just this box — the drag reveal repaints the wipe
+     canvas every animation frame while actively wiping or fading back,
+     which forces the browser to consider whether that invalidates
+     layout/paint further up the tree (title, symbols, dream text, etc.
+     below the image); without `contain` Safari re-checks that on every
+     frame even though it never actually does, since the canvas is
      absolutely positioned and clipped to this box. */
   contain: layout paint style;
 }
@@ -265,34 +265,27 @@
   backface-visibility: hidden;
 }
 
-/* The unblurred photo, stacked on top of .image — its clarity is driven
-   by a single global "how much has the user explored this dream" value
-   (--reveal-progress, 0-1), not by where a finger currently is. Opacity
-   fades it in and blur sharpens it at the same time, uniformly across the
-   whole image — like mist dissolving off glass, not a flashlight/scratch-
-   card hole. --reveal-progress is written directly onto .imageWrap by a
-   rAF easing loop in DreamResultScreen.tsx, driven by cumulative drag
-   distance (every drag gesture adds to the same running total; it only
-   ever increases). */
-.imageClear {
+/* The unblurred photo, stacked on top of .image — painted onto a canvas
+   and masked by a "wipe buffer" that accumulates soft, feathered brush
+   stamps along wherever the finger/cursor has actually dragged (see
+   drawWipeFrame/stampWipe in DreamResultScreen.tsx), never a hole that
+   just follows the current pointer position. Capped at 90% opacity even
+   at full wipe — a faint frost always remains — and left alone, the
+   buffer fades back down on its own like condensation slowly returning
+   to a wiped mirror. All the compositing happens in JS/canvas, not CSS
+   mask-image, specifically to avoid Safari's per-frame multi-layer-mask
+   repaint cost. */
+.imageWipeCanvas {
   display: block;
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
   border-radius: 26px;
-  opacity: var(--reveal-progress, 0);
-  filter: blur(calc((1 - var(--reveal-progress, 0)) * 16px));
-  /* --reveal-progress updates every frame while revealing — its own
-     compositor layer keeps that scoped to just this box instead of
-     Safari re-evaluating blur+opacity compositing against a plain,
-     unpromoted paint layer on every frame. */
-  will-change: opacity, filter;
+  pointer-events: none;
   transform: translateZ(0);
   backface-visibility: hidden;
   contain: paint;
-  pointer-events: none;
 }
 
 /* Scrim for caption legibility — unconditional now (the reveal is global,
@@ -741,7 +734,7 @@
 
 /* Image: full rounded-24 corners (no card padding to push into) */
 :global([lang="he"]) .image,
-:global([lang="he"]) .imageClear {
+:global([lang="he"]) .imageWipeCanvas {
   border-radius: 24px !important;
 }
 

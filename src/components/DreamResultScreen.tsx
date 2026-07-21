@@ -151,10 +151,10 @@ export default function DreamResultScreen({
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
   // Not React state on purpose — it only gates pointer-move guards below
-  // and never affects what's rendered directly (the actual reveal amount
-  // is written straight to a CSS custom property, see tickReveal below),
-  // so it was causing a full re-render of this whole (fairly large)
-  // screen on every touch/mouse interaction for no visual benefit.
+  // and never affects what's rendered directly (the wipe reveal is
+  // painted straight onto a canvas, see drawWipeFrame below), so it was
+  // causing a full re-render of this whole (fairly large) screen on every
+  // touch/mouse interaction for no visual benefit.
   const isDraggingRef = useRef(false);
   // Starts hidden — keeps focus on the artwork/interpretation the moment
   // this screen opens, before the user has scrolled at all. Reveals with
@@ -184,77 +184,184 @@ export default function DreamResultScreen({
     return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Cumulative drag distance (px) needed to fully reveal the image — a
-  // handful of unhurried swipes across it, not a quick flick. Every drag
-  // gesture, anywhere on the image, adds to the same running total; it
-  // never resets or decreases while this screen stays mounted, so the
-  // image gradually and permanently clears the more the user explores it,
-  // like slowly revealing a memory rather than shining a flashlight on it.
-  const REVEAL_DISTANCE_PX = 1400;
-  const revealProgressRef = useRef(0); // 0-1, monotonically non-decreasing
-  const displayProgressRef = useRef(0); // eased value actually painted
+  // ── Condensation-wipe reveal ────────────────────────────────────────────
+  // The clear image is painted onto a canvas, masked by a small offscreen
+  // "wipe buffer" that accumulates soft, feathered brush stamps wherever
+  // the finger/cursor has actually dragged — never a hard-edged circle,
+  // never just wherever the pointer currently sits. Capped so even a
+  // fully-wiped spot only reaches MAX_CLARITY: a faint frost always
+  // remains over the artwork. Left alone, the buffer slowly fades back
+  // down (condensation returning to a wiped mirror).
+  const WIPE_BUFFER_W = 169;
+  const WIPE_BUFFER_H = 238; // matches the card's 338:475 aspect ratio
+  const MAX_CLARITY = 0.9;
+  const BRUSH_RADIUS = WIPE_BUFFER_W * 0.22;
+  const BRUSH_ALPHA = 0.5;
+  const DECAY_PER_SEC = 0.22; // fraction of remaining alpha lost per second once idle
+  const FOG_RETURN_MS = 15000; // how long to keep ticking the fade-back after the last touch
+
+  const wipeCanvasRef = useRef<HTMLCanvasElement>(null);
+  const wipeBufferRef = useRef<HTMLCanvasElement | null>(null);
+  const clearImgObjRef = useRef<HTMLImageElement | null>(null);
   const lastDragPointRef = useRef<{ x: number; y: number } | null>(null);
-  const revealRafRef = useRef<number | null>(null);
-  // Whether the rAF loop below is currently scheduled — lets every
-  // interaction handler safely call ensureRevealTicking() without ever
-  // double-scheduling a second parallel chain of frames.
-  const revealTickingRef = useRef(false);
-  const REVEAL_EPSILON = 0.001; // below this, the difference isn't visible
+  const wipeRafRef = useRef<number | null>(null);
+  const wipeTickingRef = useRef(false);
+  const lastWipeFrameTimeRef = useRef(0);
+  const lastInteractionAtRef = useRef(0);
 
-  // Runs only while displayProgressRef is still easing toward
-  // revealProgressRef, then stops rescheduling itself entirely — no idle
-  // per-frame cost once the reveal settles (same reasoning as every other
-  // rAF loop in this app: a CSS custom property write every frame is not
-  // free, so don't do it once nothing is actually changing).
-  function tickReveal() {
-    const target = revealProgressRef.current;
-    const display = displayProgressRef.current;
-    const next = display + (target - display) * 0.12;
-    const settled = Math.abs(target - next) < REVEAL_EPSILON;
-    displayProgressRef.current = settled ? target : next;
+  // Preloaded once outside the DOM purely as a canvas draw source — never
+  // read back (no getImageData/toDataURL), so a cross-origin image here
+  // never blocks rendering, only pixel readback we don't need.
+  useEffect(() => {
+    if (!clearImageUrl) return;
+    const img = new Image();
+    img.src = clearImageUrl;
+    img.onload = () => {
+      clearImgObjRef.current = img;
+      drawWipeFrame();
+    };
+    return () => {
+      clearImgObjRef.current = null;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clearImageUrl]);
 
-    const el = wrapRef.current;
-    if (el) el.style.setProperty("--reveal-progress", String(displayProgressRef.current));
-
-    if (settled) {
-      revealTickingRef.current = false;
-      revealRafRef.current = null;
-      return;
+  function getWipeBuffer(): HTMLCanvasElement {
+    if (!wipeBufferRef.current) {
+      const c = document.createElement("canvas");
+      c.width = WIPE_BUFFER_W;
+      c.height = WIPE_BUFFER_H;
+      wipeBufferRef.current = c;
     }
-    revealRafRef.current = requestAnimationFrame(tickReveal);
+    return wipeBufferRef.current;
   }
 
-  function ensureRevealTicking() {
-    if (revealTickingRef.current) return;
-    revealTickingRef.current = true;
-    revealRafRef.current = requestAnimationFrame(tickReveal);
+  // Composites one frame: the clear image drawn at MAX_CLARITY opacity,
+  // then multiplied (destination-in) by the wipe buffer's own alpha — the
+  // untouched blurred .image layer underneath shows through everywhere
+  // else, and even a saturated buffer spot can't exceed MAX_CLARITY.
+  function drawWipeFrame() {
+    const canvas = wipeCanvasRef.current;
+    const clearImg = clearImgObjRef.current;
+    if (!canvas || !clearImg) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const cssW = canvas.clientWidth;
+    const cssH = canvas.clientHeight;
+    if (!cssW || !cssH) return;
+    const pxW = Math.round(cssW * dpr);
+    const pxH = Math.round(cssH * dpr);
+    if (canvas.width !== pxW || canvas.height !== pxH) {
+      canvas.width = pxW;
+      canvas.height = pxH;
+    }
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const scale = Math.max(pxW / clearImg.naturalWidth, pxH / clearImg.naturalHeight);
+    const drawW = clearImg.naturalWidth * scale;
+    const drawH = clearImg.naturalHeight * scale;
+    const dx = (pxW - drawW) / 2;
+    const dy = (pxH - drawH) / 2;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.globalAlpha = MAX_CLARITY;
+    ctx.drawImage(clearImg, dx, dy, drawW, drawH);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(getWipeBuffer(), 0, 0, canvas.width, canvas.height);
+    ctx.restore();
+  }
+
+  // One soft, feathered circular stamp — a radial gradient, never a hard
+  // edge — added into the wipe buffer with 'lighter' so repeated passes
+  // over the same spot build up gradually instead of instantly maxing out.
+  function stampWipe(px: number, py: number) {
+    const buf = getWipeBuffer();
+    const bctx = buf.getContext("2d");
+    if (!bctx) return;
+    const gradient = bctx.createRadialGradient(px, py, 0, px, py, BRUSH_RADIUS);
+    gradient.addColorStop(0, `rgba(255,255,255,${BRUSH_ALPHA})`);
+    gradient.addColorStop(1, "rgba(255,255,255,0)");
+    bctx.globalCompositeOperation = "lighter";
+    bctx.fillStyle = gradient;
+    bctx.beginPath();
+    bctx.arc(px, py, BRUSH_RADIUS, 0, Math.PI * 2);
+    bctx.fill();
+  }
+
+  // Runs only while actively dragging, or for a while after (so the fade-
+  // back can finish), then stops rescheduling itself entirely — no idle
+  // per-frame cost once the wipe has settled back down.
+  function tickWipe(now: number) {
+    const buf = getWipeBuffer();
+    const bctx = buf.getContext("2d");
+    const last = lastWipeFrameTimeRef.current || now;
+    const dt = Math.min((now - last) / 1000, 0.1);
+    lastWipeFrameTimeRef.current = now;
+
+    if (bctx && !isDraggingRef.current) {
+      bctx.save();
+      bctx.globalCompositeOperation = "destination-out";
+      bctx.fillStyle = `rgba(0,0,0,${DECAY_PER_SEC * dt})`;
+      bctx.fillRect(0, 0, buf.width, buf.height);
+      bctx.restore();
+    }
+
+    drawWipeFrame();
+
+    const stillFading = now - lastInteractionAtRef.current < FOG_RETURN_MS;
+    if (isDraggingRef.current || stillFading) {
+      wipeRafRef.current = requestAnimationFrame(tickWipe);
+    } else {
+      wipeTickingRef.current = false;
+      wipeRafRef.current = null;
+      lastWipeFrameTimeRef.current = 0;
+    }
+  }
+
+  function ensureWipeTicking() {
+    lastInteractionAtRef.current = performance.now();
+    if (wipeTickingRef.current) return;
+    wipeTickingRef.current = true;
+    lastWipeFrameTimeRef.current = 0;
+    wipeRafRef.current = requestAnimationFrame(tickWipe);
   }
 
   useEffect(() => {
-    // Paints the initial at-rest (fully hidden) state once, then stops
-    // immediately — both target and display start at 0, so the very
-    // first tickReveal() is already "settled".
-    ensureRevealTicking();
     return () => {
-      if (revealRafRef.current) cancelAnimationFrame(revealRafRef.current);
-      revealTickingRef.current = false;
+      if (wipeRafRef.current) cancelAnimationFrame(wipeRafRef.current);
+      wipeTickingRef.current = false;
     };
   }, []);
 
-  // Called on every pointer/touch move while actively dragging — adds
-  // however far the finger/cursor moved since the last sample to the
-  // global reveal progress. Position on the image is never read for
-  // anything visual; only the distance travelled matters.
-  function addDragProgress(clientX: number, clientY: number) {
+  // Called on every pointer/touch move while actively dragging — stamps
+  // along the whole segment from the last sampled point to this one (not
+  // just the endpoint), so a fast swipe doesn't leave gaps in the wiped
+  // path.
+  function addWipePoint(clientX: number, clientY: number) {
+    const rect = wrapRef.current?.getBoundingClientRect();
+    if (!rect || !rect.width || !rect.height) return;
+    const px = ((clientX - rect.left) / rect.width) * WIPE_BUFFER_W;
+    const py = ((clientY - rect.top) / rect.height) * WIPE_BUFFER_H;
+
     const last = lastDragPointRef.current;
-    if (last && revealProgressRef.current < 1) {
-      const dx = clientX - last.x;
-      const dy = clientY - last.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      revealProgressRef.current = Math.min(1, revealProgressRef.current + dist / REVEAL_DISTANCE_PX);
-      ensureRevealTicking();
+    if (last) {
+      const lastPx = ((last.x - rect.left) / rect.width) * WIPE_BUFFER_W;
+      const lastPy = ((last.y - rect.top) / rect.height) * WIPE_BUFFER_H;
+      const dist = Math.hypot(px - lastPx, py - lastPy);
+      const steps = Math.max(1, Math.ceil(dist / (BRUSH_RADIUS * 0.5)));
+      for (let i = 1; i <= steps; i++) {
+        const t = i / steps;
+        stampWipe(lastPx + (px - lastPx) * t, lastPy + (py - lastPy) * t);
+      }
+    } else {
+      stampWipe(px, py);
     }
     lastDragPointRef.current = { x: clientX, y: clientY };
+    ensureWipeTicking();
   }
   const [copied, setCopied] = useState(false);
 
@@ -604,11 +711,12 @@ export default function DreamResultScreen({
             onMouseDown={(e) => {
               if (!clearImageUrl) return;
               isDraggingRef.current = true;
-              lastDragPointRef.current = { x: e.clientX, y: e.clientY };
+              lastDragPointRef.current = null;
+              addWipePoint(e.clientX, e.clientY);
             }}
             onMouseMove={(e) => {
               if (!isDraggingRef.current) return;
-              addDragProgress(e.clientX, e.clientY);
+              addWipePoint(e.clientX, e.clientY);
             }}
             onMouseUp={() => {
               isDraggingRef.current = false;
@@ -621,13 +729,14 @@ export default function DreamResultScreen({
             onTouchStart={(e) => {
               if (!clearImageUrl) return;
               isDraggingRef.current = true;
+              lastDragPointRef.current = null;
               const touch = e.touches[0];
-              lastDragPointRef.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+              if (touch) addWipePoint(touch.clientX, touch.clientY);
             }}
             onTouchMove={(e) => {
               if (!isDraggingRef.current) return;
               const touch = e.touches[0];
-              if (touch) addDragProgress(touch.clientX, touch.clientY);
+              if (touch) addWipePoint(touch.clientX, touch.clientY);
             }}
             onTouchEnd={() => {
               isDraggingRef.current = false;
@@ -673,13 +782,7 @@ export default function DreamResultScreen({
               />
             )}
             {clearImageUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                className={styles.imageClear}
-                src={clearImageUrl}
-                alt=""
-                aria-hidden="true"
-              />
+              <canvas ref={wipeCanvasRef} className={styles.imageWipeCanvas} aria-hidden="true" />
             )}
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
             {(captionText || overlayDateLabel) && (
