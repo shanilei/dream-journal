@@ -1,6 +1,7 @@
 import HomeScreenClient from "@/components/HomeScreenClient";
 import { listDreams } from "@/dreams-store";
 import { requireUser } from "@/lib/auth";
+import { effectiveDreamDate } from "@/lib/dreamDate";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,11 @@ export default async function GalleryPage() {
     image: dream.imageUrl,
     mood: dream.mood,
     name: dream.name,
-    createdAt: dream.createdAt,
+    // The Gallery's Card type only ever uses this for grouping/sorting/
+    // display, never as a literal "row inserted at" timestamp, so it's
+    // safe (and required) to carry the effective date here — see
+    // effectiveDreamDate() in lib/dreamDate.ts.
+    createdAt: effectiveDreamDate(dream),
     summary: dream.summaryText,
     symbols: dream.symbols,
     keywords: dream.keywords,

@@ -11,6 +11,38 @@ function capitalizeFirst(text: string): string {
   return text.length ? text[0].toUpperCase() + text.slice(1) : text;
 }
 
+// Connector/function words that read as an unfinished thought if a caption
+// gets cut off right after them (e.g. hard-truncating to CAPTION_MAX_WORDS
+// mid-sentence). Hebrew includes both standalone words and the common
+// single-letter prefixes (ו/ש/ה/ל) for the rare case tokenization leaves
+// one dangling on its own.
+const TRAILING_CONNECTORS_EN = new Set([
+  "and", "then", "than", "but", "or", "because", "with", "to", "of", "the",
+  "a", "an", "in", "on", "at", "for", "as", "from", "into", "onto",
+  "that", "which", "is", "are",
+]);
+
+const TRAILING_CONNECTORS_HE = new Set([
+  "עם", "או", "אבל", "כי", "של", "אל", "עד", "כמו", "בין", "גם", "רק",
+  "אז", "כש", "אם", "בלי", "ל", "ו", "ש", "ה",
+]);
+
+// Trims connector/function words off the end, one at a time, until the
+// caption ends on a real word — not just hiding the last word visually,
+// this changes the actual word list before it's ever joined/saved.
+function stripTrailingConnectors(words: string[]): string[] {
+  const trimmed = [...words];
+  while (trimmed.length > 1) {
+    const last = trimmed[trimmed.length - 1];
+    if (TRAILING_CONNECTORS_EN.has(last.toLowerCase()) || TRAILING_CONNECTORS_HE.has(last)) {
+      trimmed.pop();
+    } else {
+      break;
+    }
+  }
+  return trimmed;
+}
+
 // Groups words into wordsPerLine-sized lines, then rebalances the last
 // line so a single word never wraps alone (steals one from the line
 // before it, or ties the last two words together if it's the only line).
@@ -39,11 +71,12 @@ function groupIntoLines(words: string[], wordsPerLine: number): string[] {
 }
 
 export function getCaptionWords(text: string, maxWords: number = CAPTION_MAX_WORDS): string {
-  const words = text
+  const allWords = text
     .replace(/[.,!?\-–—]/g, '')
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, maxWords);
+  const words = stripTrailingConnectors(allWords);
 
   return capitalizeFirst(groupIntoLines(words, CAPTION_WORDS_PER_LINE).join('\n'));
 }

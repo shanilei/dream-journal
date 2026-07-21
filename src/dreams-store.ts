@@ -1,4 +1,5 @@
 import { createClient } from "./lib/supabase/server";
+import { effectiveDreamDate } from "./lib/dreamDate";
 
 export interface DreamEntry {
   id: string;
@@ -16,8 +17,9 @@ export interface DreamEntry {
   keywords?: string[];
   // Overlay-only edits (see "Edit image details" on the Dream Result
   // screen) — these never touch the generated artwork itself, only what's
-  // drawn on top of it (and, for captionOverride/displayAt, only the
-  // caption/date/time shown — createdAt keeps controlling gallery order).
+  // drawn on top of it. displayAt, when set, is also the dream's date of
+  // record everywhere else (gallery grouping/sort, calendar, insights,
+  // print) — see effectiveDreamDate() in lib/dreamDate.ts.
   captionOverride?: string;
   showDate?: boolean;
   showTime?: boolean;
@@ -134,7 +136,7 @@ export async function updateDream(id: string, patch: DreamOverlayPatch, userId: 
 // large and are only needed on a single dream's detail page (getDream
 // below still selects "*" for that). Fetching them for every row in a
 // list was pure wasted payload that got slower as the table grew.
-const LIST_COLUMNS = "id, created_at, image_url, mood, name, summary_text, symbols, keywords";
+const LIST_COLUMNS = "id, created_at, display_at, image_url, mood, name, summary_text, symbols, keywords";
 
 export async function listDreams(userId: string): Promise<DreamEntry[]> {
   const supabase = await createClient();
@@ -144,7 +146,14 @@ export async function listDreams(userId: string): Promise<DreamEntry[]> {
     .eq("user_id", userId)
     .order("created_at", { ascending: false });
   if (error) throw error;
-  return (data ?? []).map((row) => fromRow(row as DreamRow));
+  const dreams = (data ?? []).map((row) => fromRow(row as DreamRow));
+  // Re-sort by the *effective* date (display_at when set, else created_at)
+  // — the DB-level order above is just a reasonable initial fetch order;
+  // an edited display date can move a dream earlier/later than its actual
+  // insertion order, and every list view (gallery, type filter, insights)
+  // needs that same order to agree.
+  dreams.sort((a, b) => (effectiveDreamDate(a) < effectiveDreamDate(b) ? 1 : -1));
+  return dreams;
 }
 
 export async function getDream(id: string, userId: string): Promise<DreamEntry | undefined> {

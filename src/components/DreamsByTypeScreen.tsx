@@ -7,6 +7,7 @@ import { ArrowLeftIcon } from "./Icons";
 import { useLanguage } from "./LanguageProvider";
 import { translateMood, formatDreamDate, langFromText } from "@/i18n/translations";
 import type { DreamEntry } from "@/dreams-store";
+import { effectiveDreamDate } from "@/lib/dreamDate";
 
 function HeartIcon() {
   return (
@@ -80,7 +81,7 @@ export default function DreamsByTypeScreen({ mood, dreams }: { mood: string; dre
               </div>
               <div className={styles.cardBody}>
                 <p className={styles.cardHeading}>{translateMood(dream.mood ?? mood, lang)}</p>
-                <p className={styles.cardSub}>{formatDreamDate(dream.createdAt, langFromText(dream.summaryText, lang))}</p>
+                <p className={styles.cardSub}>{formatDreamDate(effectiveDreamDate(dream), langFromText(dream.summaryText, lang))}</p>
               </div>
             </Link>
           ))}

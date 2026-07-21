@@ -89,7 +89,14 @@ export default function RecordPage() {
   // representing "I'm listening" shouldn't go idle-still mid-recording,
   // so it's excluded from the paused state below regardless of what the
   // hook's own idle timer is doing internally.
-  const { paused: idleAnimPaused, rootRef: screenRef, resume: resumeIdleAnim } = useIdleAnimationPause();
+  // This is the orb the user sees first when opening the app, so it gets a
+  // much longer idle window than other screens' background decoration
+  // (65s, not the 4s default) — it should keep breathing/rotating smoothly
+  // for at least a minute before settling still, not go static almost
+  // immediately. Still pauses eventually (same battery-conscious mechanism,
+  // just a later trigger), and pause/resume itself was already seamless
+  // (animation-play-state, never restarts from 0%).
+  const { paused: idleAnimPaused, rootRef: screenRef, resume: resumeIdleAnim } = useIdleAnimationPause({ idleMs: 65000 });
   const bgAnimPaused = idleAnimPaused && !isRecording;
 
   useEffect(() => {

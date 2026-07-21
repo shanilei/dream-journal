@@ -786,25 +786,30 @@ export default function DreamResultScreen({
           >
             <div className={styles.blockHeadingRow}>
               <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
-              <button
-                type="button"
-                className={styles.listenBtn}
-                onClick={handleListen}
-                aria-label={ttsStatus === "playing" ? t.reading : t.listen}
-              >
-                <span className={styles.listenBtnIcon}>
-                  {ttsStatus === "playing" ? (
-                    <VolumeIcon size={14} color="currentColor" />
-                  ) : (
-                    <PlayIcon size={14} color="currentColor" />
-                  )}
-                </span>
-                {ttsStatus === "playing"
-                  ? t.reading
-                  : ttsStatus === "loading"
-                  ? t.loadingAudio
-                  : t.listen}
-              </button>
+              {/* TTS doesn't work correctly in Hebrew yet — hidden there
+                  (not just disabled) so nothing implies it's available;
+                  English narration itself is untouched. */}
+              {lang !== "he" && (
+                <button
+                  type="button"
+                  className={styles.listenBtn}
+                  onClick={handleListen}
+                  aria-label={ttsStatus === "playing" ? t.reading : t.listen}
+                >
+                  <span className={styles.listenBtnIcon}>
+                    {ttsStatus === "playing" ? (
+                      <VolumeIcon size={14} color="currentColor" />
+                    ) : (
+                      <PlayIcon size={14} color="currentColor" />
+                    )}
+                  </span>
+                  {ttsStatus === "playing"
+                    ? t.reading
+                    : ttsStatus === "loading"
+                    ? t.loadingAudio
+                    : t.listen}
+                </button>
+              )}
             </div>
             <CollapsibleText text={interpretationText || summaryText} dark={false} />
           </motion.div>

@@ -2,7 +2,6 @@
 
 import { Fragment, useEffect, useState } from "react";
 import styles from "./SettingsSheet.module.css";
-import { useTheme } from "./ThemeProvider";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
 import { clearOnboarded } from "@/lib/onboarding";
@@ -11,13 +10,13 @@ import { createClient } from "@/lib/supabase/client";
 import {
   AlarmIcon,
   LanguageAIcon,
-  CrescentMoonIcon,
   DocumentIcon,
   SaveIcon,
   ChevronRightIcon,
   UpDownChevronIcon,
   CheckmarkIcon,
   VolumeIcon,
+  PlayIcon,
 } from "./Icons";
 
 type DropdownOption = { label: string; value: string };
@@ -67,6 +66,7 @@ function ValueRow({
   dropdownOptions,
   selectedValue,
   onSelectOption,
+  onPreview,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -75,6 +75,9 @@ function ValueRow({
   dropdownOptions?: DropdownOption[];
   selectedValue?: string;
   onSelectOption?: (value: string) => void;
+  /** Optional small play button before the value/chevron — e.g. previewing
+      the currently selected voice without opening the dropdown. */
+  onPreview?: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -92,6 +95,20 @@ function ValueRow({
         <span className={styles.rowIcon}>{icon}</span>
         <span className={styles.rowLabel}>{label}</span>
         <span className={styles.rowValueGroup}>
+          {onPreview && (
+            <span
+              role="button"
+              tabIndex={0}
+              className={styles.rowPreviewBtn}
+              aria-label="Preview voice"
+              onClick={(e) => { e.stopPropagation(); onPreview(); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") { e.stopPropagation(); e.preventDefault(); onPreview(); }
+              }}
+            >
+              <PlayIcon size={12} color="rgba(255,255,255,0.7)" />
+            </span>
+          )}
           <span className={styles.rowValue}>{value}</span>
           <UpDownChevronIcon size={16} />
         </span>
@@ -156,12 +173,11 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
 type InterpLength = "short" | "medium" | "long";
 
 export default function SettingsSheet({ onClose }: { onClose: () => void }) {
-  const { theme, toggleTheme } = useTheme();
   const { lang, t, toggleLang } = useLanguage();
   const { showBorder, toggleBorder } = usePhotoBorder();
   const [isClosing, setIsClosing] = useState(false);
   const [interpLength, setInterpLength] = useState<InterpLength>("long");
-  const [voices, setVoices] = useState<{ id: string; name: string }[]>([]);
+  const [voices, setVoices] = useState<{ id: string; name: string; previewUrl?: string }[]>([]);
   const [selectedVoiceId, setSelectedVoiceId] = useState<string | null>(null);
   const isHe = lang === "he";
 
@@ -173,7 +189,7 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
     setSelectedVoiceId(loadSelectedVoiceId());
     fetch("/api/voices")
       .then((res) => res.json())
-      .then((data: { voices?: { id: string; name: string }[] }) => {
+      .then((data: { voices?: { id: string; name: string; previewUrl?: string }[] }) => {
         const list = data.voices ?? [];
         setVoices(list);
         setSelectedVoiceId((current) => current ?? list[0]?.id ?? null);
@@ -184,6 +200,14 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
   function handleSelectVoice(voiceId: string) {
     setSelectedVoiceId(voiceId);
     saveSelectedVoiceId(voiceId);
+  }
+
+  // Narration is English-only for now (see the hidden listening button on
+  // dream results in Hebrew) — no point offering a voice picker for a
+  // feature that isn't available in the current language.
+  function handlePreviewVoice() {
+    const url = voices.find((v) => v.id === selectedVoiceId)?.previewUrl;
+    if (url) new Audio(url).play().catch(() => {});
   }
 
   function handleClose() {
@@ -197,11 +221,6 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
   const langOptions: DropdownOption[] = [
     { value: "he", label: "עברית" },
     { value: "en", label: isHe ? "אנגלית" : "English" },
-  ];
-
-  const modeOptions: DropdownOption[] = [
-    { value: "dark", label: t.settingsDark },
-    { value: "light", label: t.settingsLight },
   ];
 
   const interpOptions: DropdownOption[] = isHe
@@ -265,14 +284,6 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
                 onSelectOption={(v) => { if (v !== lang) toggleLang(); }}
               />
               <ValueRow
-                icon={<CrescentMoonIcon size={18} color="#fff" />}
-                label={t.settingsMode}
-                value={theme === "dark" ? t.settingsDark : t.settingsLight}
-                dropdownOptions={modeOptions}
-                selectedValue={theme}
-                onSelectOption={(v) => { if (v !== theme) toggleTheme(); }}
-              />
-              <ValueRow
                 icon={<DocumentIcon size={18} color="#fff" />}
                 label={t.settingsInterpLength}
                 value={interpLabel}
@@ -280,7 +291,9 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
                 selectedValue={interpLength}
                 onSelectOption={(v) => setInterpLength(v as InterpLength)}
               />
-              {voices.length > 0 && (
+              {/* English-only: narration doesn't work correctly in Hebrew
+                  yet (see the hidden listening button on dream results). */}
+              {!isHe && voices.length > 0 && (
                 <ValueRow
                   icon={<VolumeIcon size={18} color="#fff" />}
                   label={t.settingsVoice}
@@ -288,6 +301,7 @@ export default function SettingsSheet({ onClose }: { onClose: () => void }) {
                   dropdownOptions={voiceOptions}
                   selectedValue={selectedVoiceId ?? ""}
                   onSelectOption={handleSelectVoice}
+                  onPreview={selectedVoiceId ? handlePreviewVoice : undefined}
                 />
               )}
               <ToggleRow

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import styles from "./BottomNav.module.css";
 import { AddAIIcon, CalendarIcon, UserIcon, CloseIcon, MicIcon, PencilIcon } from "./Icons";
@@ -12,6 +13,24 @@ type NavKey = "record" | "user" | "dreams";
 const LONG_PRESS_MS = 3000;
 const EASE = [0.22, 1, 0.36, 1] as const;
 
+// Each tab's own "home" — tapping an already-active tab goes back here
+// instead of just re-navigating to wherever its Link happens to point.
+const ROOT_PATHS: Record<NavKey, string> = {
+  record: "/record",
+  user: "/user",
+  dreams: "/gallery",
+};
+
+// No single ref reaches every screen's own scroll container from here (most
+// screens scroll an inner `.content` div, not the window), so this just
+// resets whatever's actually scrolled instead of guessing a class name.
+function scrollActiveScreenToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  document.querySelectorAll<HTMLElement>("*").forEach((el) => {
+    if (el.scrollTop > 0) el.scrollTo({ top: 0, behavior: "smooth" });
+  });
+}
+
 export default function BottomNav({
   active,
   hidden = false,
@@ -20,7 +39,24 @@ export default function BottomNav({
   hidden?: boolean;
 }) {
   const { t } = useLanguage();
+  const pathname = usePathname();
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
+
+  // Tapping the tab you're already in: on its root page, just scroll back
+  // to the top; on a nested screen under that section (e.g. a dream detail
+  // page while "dreams" is active), replace to the section root instead of
+  // pushing — repeated taps then never pile up duplicate history entries.
+  function handleRootReselect(key: NavKey): boolean {
+    if (active !== key) return false;
+    const root = ROOT_PATHS[key];
+    if (pathname === root) {
+      scrollActiveScreenToTop();
+    } else {
+      router.replace(root);
+    }
+    return true;
+  }
   const longPressTimerRef = useRef<number | null>(null);
   const longPressFiredRef = useRef(false);
   // The timer can fire while the finger/pointer is still down — React
@@ -139,7 +175,10 @@ export default function BottomNav({
               className={`${styles.circle} ${active === items[0].key ? styles.active : ""}`}
               aria-disabled={expanded}
               tabIndex={expanded ? -1 : undefined}
-              onClick={(e) => expanded && e.preventDefault()}
+              onClick={(e) => {
+                if (expanded) { e.preventDefault(); return; }
+                if (handleRootReselect(items[0].key)) e.preventDefault();
+              }}
             >
               <span className={styles.iconLayer}>{items[0].icon(active === items[0].key ? "#000624" : "#fff")}</span>
             </Link>
@@ -169,10 +208,12 @@ export default function BottomNav({
               onPointerCancel={clearLongPressTimer}
               onPointerLeave={clearLongPressTimer}
               onClick={(e) => {
+                clearLongPressTimer();
                 if (longPressFiredRef.current) {
                   e.preventDefault();
+                  return;
                 }
-                clearLongPressTimer();
+                if (handleRootReselect("record")) e.preventDefault();
               }}
             >
               <span className={styles.iconLayer}>
@@ -212,7 +253,10 @@ export default function BottomNav({
               className={`${styles.circle} ${active === items[1].key ? styles.active : ""}`}
               aria-disabled={expanded}
               tabIndex={expanded ? -1 : undefined}
-              onClick={(e) => expanded && e.preventDefault()}
+              onClick={(e) => {
+                if (expanded) { e.preventDefault(); return; }
+                if (handleRootReselect(items[1].key)) e.preventDefault();
+              }}
             >
               <span className={styles.iconLayer}>{items[1].icon(active === items[1].key ? "#000624" : "#fff")}</span>
             </Link>

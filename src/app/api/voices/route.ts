@@ -30,10 +30,11 @@ export async function GET() {
   // browsing the whole catalog.
   const voices = allVoices
     .filter((v: { category?: string }) => v.category && v.category !== "premade")
-    .map((v: { voice_id: string; name: string; category?: string }) => ({
+    .map((v: { voice_id: string; name: string; category?: string; preview_url?: string }) => ({
       id: v.voice_id,
       name: v.name,
       category: v.category,
+      previewUrl: v.preview_url,
     }));
 
   return NextResponse.json({ voices });

@@ -1,6 +1,7 @@
 import YourJourneyScreen, { type JourneyStats, type PatternCard } from "@/components/YourJourneyScreen";
 import { listDreams } from "@/dreams-store";
 import { requireUser } from "@/lib/auth";
+import { effectiveDreamDate } from "@/lib/dreamDate";
 
 export const dynamic = "force-dynamic";
 
@@ -11,14 +12,14 @@ function computeStats(dreams: Awaited<ReturnType<typeof listDreams>>): JourneySt
   const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
   const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-  const dreamsThisMonth = dreams.filter((d) => new Date(d.createdAt) >= startOfMonth).length;
+  const dreamsThisMonth = dreams.filter((d) => new Date(effectiveDreamDate(d)) >= startOfMonth).length;
   const dreamsLastMonth = dreams.filter((d) => {
-    const date = new Date(d.createdAt);
+    const date = new Date(effectiveDreamDate(d));
     return date >= startOfLastMonth && date < startOfMonth;
   }).length;
-  const dreamsThisWeek = dreams.filter((d) => new Date(d.createdAt) >= oneWeekAgo).length;
+  const dreamsThisWeek = dreams.filter((d) => new Date(effectiveDreamDate(d)) >= oneWeekAgo).length;
   const dreamsLastWeek = dreams.filter((d) => {
-    const date = new Date(d.createdAt);
+    const date = new Date(effectiveDreamDate(d));
     return date >= twoWeeksAgo && date < oneWeekAgo;
   }).length;
 
@@ -60,7 +61,7 @@ function computeStats(dreams: Awaited<ReturnType<typeof listDreams>>): JourneySt
   const positiveCount = dreams.filter((d) => d.mood === "Sweet").length;
   const nightmareCount = dreams.filter((d) => d.mood === "Fear").length;
 
-  const oldest = dreams.length > 0 ? new Date(dreams[dreams.length - 1].createdAt) : now;
+  const oldest = dreams.length > 0 ? new Date(effectiveDreamDate(dreams[dreams.length - 1])) : now;
   const sinceDate = oldest.toLocaleDateString("en-US", { month: "long", year: "numeric" });
   const sinceDateHe = oldest.toLocaleDateString("he-IL", { month: "long", year: "numeric" });
 
