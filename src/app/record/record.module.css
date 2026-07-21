@@ -521,13 +521,19 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Previously pinned to the upper 22dvh per Figma's iPad reference —
-       on a tall iPad that read as sitting too low/off-balance rather than
-       "upper," so this now centers the group vertically instead. gap is
-       untouched, so spacing between title/orb/type-fallback is identical
-       to before, just the whole block's position shifts. */
-    justify-content: center;
-    gap: 56px;
+    /* Exact spacing per design reference: 380px from the top of the
+       screen to the headline, 53px headline→orb, 53px orb→"OR/Type it".
+       Fixed px (not dvh/centering) per that reference, not an arbitrary
+       percentage — the one gap intentionally left to flex with viewport
+       height is between "Type it" and BottomNav (a separate fixed-
+       position element outside this column), which is what actually
+       keeps this from breaking on a taller/shorter iPad: the top offset
+       and both inter-element gaps stay exact, BottomNav's own distance
+       from the safe area stays exact (see its own iPad block), and only
+       the middle whitespace absorbs whatever height difference remains. */
+    justify-content: flex-start;
+    padding-top: 380px;
+    gap: 53px;
     padding-left: 64px;
     padding-right: 64px;
     box-sizing: border-box;

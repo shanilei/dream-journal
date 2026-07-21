@@ -206,9 +206,10 @@
   .nav {
     /* .circle sits inside 12px of vertical padding, so the box itself
        needs to land 12px short of the target — the visible circles'
-       own bottom edge is what should sit 40px above the safe area (30px
-       + a further 10px raise), not this transparent box's edge. */
-    bottom: calc(28px + env(safe-area-inset-bottom));
+       own bottom edge is what should sit 111px above the safe area, per
+       the design reference's "bottom navigation → bottom of screen"
+       spacing, not this transparent box's edge. */
+    bottom: calc(99px + env(safe-area-inset-bottom));
     gap: 20px;
     padding: 12px 28px;
   }
