@@ -209,6 +209,15 @@
 
 .imageWrap {
   position: relative;
+  /* .screen (the scroll container this sits in) locks touch-action to
+     pan-y so nothing on the page scrolls sideways — without overriding
+     that back to none here, a touchmove that starts on the image is
+     claimed by the browser as a vertical scroll gesture before it ever
+     reaches the drag-reveal handlers below, so dragging on the image
+     just scrolled the page instead of revealing anything. Opting out
+     entirely (not just re-allowing pan-y) is deliberate: any drag that
+     starts on the image is for the reveal, not for scrolling past it. */
+  touch-action: none;
   /* Scopes repaint to just this box — the drag reveal below rewrites
      --reveal-progress every animation frame while easing, which forces
      the browser to recompute .imageClear's opacity+blur; without
