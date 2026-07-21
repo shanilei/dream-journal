@@ -279,6 +279,13 @@
   margin-bottom: 22px;
   overflow-x: auto;
   scrollbar-width: none;
+  /* Opts back into horizontal touch dragging against the global
+     touch-action:pan-y lockdown — see GalleryFilterChips.module.css's
+     .row for the same fix. Without this, the row can't be swiped on a
+     real touch device and pills past the fold (e.g. Favorites) are
+     stuck cut off at the screen edge. */
+  touch-action: pan-x;
+  overscroll-behavior-x: contain;
 }
 
 .filterRow::-webkit-scrollbar {
