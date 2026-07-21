@@ -521,18 +521,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    /* Title/orb/"OR-Type it" true-centered as one block within the full
-       screen height (not a fixed padding-top guess), so "top → title"
-       scales with whatever height a given iPad actually has instead of
-       being right at only one specific size. BottomNav is a separate
-       fixed-position element that can't be a flex child of this column,
-       so it's positioned independently (see its own iPad block) with a
-       modest, consistent offset from the safe area — it isn't part of
-       what's being centered here, only what sits below it. Gaps between
-       the three centered children are graduated (medium title→orb,
-       small orb→"type it"), not a single uniform value — see their own
+    /* Title/orb/"OR-Type it" centered as one block, biased upward via
+       padding-bottom (rather than a fixed padding-top, so it still
+       scales with whatever height a given iPad actually has) — per
+       request, this group sits higher while BottomNav's own position is
+       untouched (it's a separate fixed-position element, not a flex
+       child of this column — see its own iPad block). Gaps between the
+       three centered children are graduated (medium title→orb, small
+       orb→"type it"), not a single uniform value — see their own
        margin-bottom below. */
     justify-content: center;
+    padding-bottom: 140px;
     padding-left: 64px;
     padding-right: 64px;
     box-sizing: border-box;
