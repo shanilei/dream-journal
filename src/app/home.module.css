@@ -1483,6 +1483,16 @@
   (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
   (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
 {
+  /* The app-wide --shell-max-width breakpoints (globals.css) still cap
+     Gallery at 640-900px on a tablet-sized viewport, leaving a visible
+     gutter on both sides — every other screen is tuned for that narrower
+     column, but Gallery's whole point on a bigger screen is showing more
+     dreams at once, so this screen alone spans almost the full width
+     here instead. --shell-padding still provides the side breathing room. */
+  .screen {
+    max-width: 100%;
+  }
+
   .calMonth {
     max-width: 640px;
     gap: 20px;
