@@ -4,7 +4,7 @@
   transform: translateX(-50%);
   width: 100%;
   max-width: var(--shell-max-width);
-  bottom: calc(28px + env(safe-area-inset-bottom));
+  bottom: calc(32px + env(safe-area-inset-bottom));
   z-index: 5;
   display: flex;
   align-items: center;
