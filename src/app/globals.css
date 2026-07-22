@@ -222,3 +222,53 @@ h1, h2, h3, h4, h5, h6, p, li, span, label {
     background: #fff !important;
   }
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Entirely gated behind the `.exhibition` class, added only by
+   src/components/ExhibitionMode.tsx when the URL has `?exhibition=1` — no
+   effect whatsoever on the normal app (mobile/iPad/desktop/PWA), which
+   never gets this class. Rotates `body` itself (not a new wrapper div) by
+   90deg so every `position: fixed` descendant (AppBackground, BottomNav,
+   sheets, modals) rotates as one rigid piece: a transformed ancestor
+   becomes the containing block for its fixed descendants, so once `body`
+   is transformed, its fixed children position themselves relative to
+   body's own 100vh x 100vw box instead of the real (landscape) viewport —
+   exactly the ~1080x1920 portrait canvas this needs, with zero DOM
+   changes to any existing component.
+
+   The exhibition monitor stays logically 1920x1080 landscape (Windows
+   orientation can't change) but is physically mounted in portrait, so the
+   rendered page must be pre-rotated 90deg the opposite way the panel was
+   physically turned. Which way that is depends on how the specific unit
+   is mounted, so the direction is a single toggle (`.exhibition-cw` vs
+   `.exhibition-ccw`, driven by the EXHIBITION_ROTATION constant in
+   ExhibitionMode.tsx) rather than hardcoded — flip that one constant if
+   the image appears upside-down on the physical display. */
+html.exhibition,
+body.exhibition {
+  overflow: hidden;
+}
+
+body.exhibition {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vh;
+  height: 100vw;
+  transform-origin: top left;
+}
+
+/* Clockwise: rotate(90deg) sweeps the box to x:[-100vw, 0], y:[0, 100vh]
+   (relative to its own top-left origin) — translateX(100vw) then shifts
+   it back onto the real viewport, landing exactly at x:[0, 100vw],
+   y:[0, 100vh]. */
+body.exhibition.exhibition-cw {
+  transform: translateX(100vw) rotate(90deg);
+}
+
+/* Counter-clockwise: the mirror-image derivation — rotate(-90deg) sweeps
+   the box to x:[0, 100vw], y:[-100vh, 0], and translateY(100vh) shifts it
+   back onto the viewport the same way. */
+body.exhibition.exhibition-ccw {
+  transform: translateY(100vh) rotate(-90deg);
+}

@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { PhotoBorderProvider } from "@/components/PhotoBorderProvider";
 import AppBackground from "@/components/AppBackground";
+import ExhibitionMode from "@/components/ExhibitionMode";
 import "./globals.css";
 
 const THEME_INIT_SCRIPT = `
