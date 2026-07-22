@@ -220,3 +220,47 @@
     border-radius: 38px;
   }
 }
+
+/* ===================== EXHIBITION PORTRAIT ===================== */
+/* Same rig and same reasoning as record.module.css's exhibition block —
+   a physically-rotated large monitor, not gated on any-pointer since it
+   may be mouse-driven, and geometrically unable to also match a real
+   phone, iPad, or desktop-landscape viewport. Placed after the tablet
+   block so it wins the cascade if a touch-enabled exhibition monitor
+   also happens to satisfy the tablet query above. BottomNav's own
+   max-width: var(--shell-max-width) (globals.css) already keeps it from
+   stretching edge-to-edge at this width, so only the circle/icon/label
+   sizing and spacing change here. */
+@media (min-width: 900px) and (min-height: 1400px) and (orientation: portrait) {
+  .nav {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    gap: 24px;
+    padding: 14px 32px;
+  }
+
+  .circle {
+    width: 90px;
+    height: 90px;
+    border-radius: 45px;
+  }
+
+  .iconLayer svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .centerSlot .iconLayer svg {
+    width: 31px;
+    height: 31px;
+  }
+
+  .addMenuPillWrap {
+    margin-left: -70px;
+  }
+
+  .addMenuPill {
+    width: 140px;
+    padding: 15px 20px;
+    font-size: 15px;
+  }
+}
