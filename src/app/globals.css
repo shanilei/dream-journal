@@ -273,6 +273,23 @@ body.exhibition.exhibition-ccw {
   transform: translateY(100vh) rotate(-90deg);
 }
 
+/* Local preview (?exhibition=1&preview=1): same box (width:100vh x
+   height:100vw, set by the shared body.exhibition rule above) as the real
+   installation — deliberately reusing that exact sizing formula rather
+   than a hardcoded 1080x1920 keeps every `.exhibition`-scoped screen rule
+   (all the height:100vw-based scroll fixes, etc.) behaving identically in
+   both modes. This just skips the rotate() the real installation needs to
+   compensate for the physical monitor mount, and re-centers the box
+   horizontally instead of pinning it to the corner (the box is normally
+   taller than a landscape desktop viewport, so vertical centering isn't
+   meaningful — use the browser's own zoom/devtools scale to see the full
+   canvas, not app code). Higher specificity than the shared rule's own
+   `left: 0`, so this wins regardless of source order. */
+body.exhibition.exhibition-preview {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
 /* Portrait-composition pass: this is layout, not the rotation itself (see
    the rules above, untouched). Every screen already reads its content
    column's width from these two tokens (--shell-max-width/--shell-padding,

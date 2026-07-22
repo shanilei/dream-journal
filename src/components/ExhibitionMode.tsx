@@ -13,6 +13,11 @@ const EXHIBITION_ROTATION: "cw" | "ccw" = "cw";
 function ExhibitionModeInner() {
   const searchParams = useSearchParams();
   const active = searchParams.get("exhibition") === "1";
+  // Only meaningful alongside ?exhibition=1 — a local, upright stand-in
+  // for the physical installation (same .exhibition layout rules, no
+  // rotation) so spacing/scale/typography can be checked on a normal
+  // desktop browser without walking over to the rotated monitor.
+  const preview = active && searchParams.get("preview") === "1";
 
   useEffect(() => {
     const html = document.documentElement;
@@ -21,14 +26,15 @@ function ExhibitionModeInner() {
 
     if (active) {
       html.classList.add("exhibition");
-      body.classList.add("exhibition", rotationClass);
+      body.classList.add("exhibition");
+      body.classList.add(preview ? "exhibition-preview" : rotationClass);
     }
 
     return () => {
       html.classList.remove("exhibition");
-      body.classList.remove("exhibition", "exhibition-cw", "exhibition-ccw");
+      body.classList.remove("exhibition", "exhibition-cw", "exhibition-ccw", "exhibition-preview");
     };
-  }, [active]);
+  }, [active, preview]);
 
   return null;
 }
