@@ -690,3 +690,17 @@
     font-size: 22px;
   }
 }
+
+/* ===================== EXHIBITION MODE (rotation) ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — unrelated to,
+   and layered after, the exhibition-portrait breakpoint above (that one
+   is a *sizing* pass for a rotated-hardware viewport that genuinely
+   reports portrait dimensions; this one is the ?exhibition=1 rotation
+   mode, where the browser viewport itself stays landscape and the page is
+   rotated with CSS). `height: 100vh/100dvh` measures the wrong axis once
+   rotated — the real viewport's width is now the visual height — so this
+   flips to 100vw, same reasoning as every other screen's exhibition
+   block. */
+:global(.exhibition) .screen {
+  height: 100vw;
+}

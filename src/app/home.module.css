@@ -1538,3 +1538,28 @@
 @media print {
   .screen { display: none; }
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated entirely behind the `.exhibition` class ExhibitionMode.tsx toggles
+   on <body> (see globals.css) — no effect on the normal app. body.exhibition
+   is position:fixed with a concrete pixel size (width:100vh, height:100vw)
+   and overflow:hidden, so the page can no longer grow and let the *window*
+   scroll the way it normally does; every `.screen` here must become its
+   own real scrollport instead. It also means every `100vh`/`100dvh` used
+   for full-height sizing below is measuring the wrong axis post-rotation —
+   the real viewport's height is now the canvas's visual *width*, and the
+   real viewport's *width* (100vw) is the visual height — so each one flips
+   to 100vw. Nothing here changes the normal (non-exhibition) values above. */
+:global(.exhibition) .screen {
+  height: 100vw;
+  min-height: 0;
+  max-height: 100vw;
+}
+
+:global(.exhibition) .calScroll {
+  height: calc(100vw - 210px);
+}
+
+:global(.exhibition) .overlayPanel {
+  height: 100vw;
+}

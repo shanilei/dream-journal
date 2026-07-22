@@ -464,3 +464,17 @@
 .trendSubtitleHe {
   font-family: var(--font-ploni), serif;
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
+   the normal app. body.exhibition is position:fixed with overflow:hidden,
+   so this screen must become its own real scrollport (it can no longer
+   rely on the window growing/scrolling); `100vh`/`100dvh` also measure the
+   wrong axis after the 90deg rotation (the real viewport's width is now
+   the visual height), so this flips to 100vw the same way home.module.css
+   does for Gallery. */
+:global(.exhibition) .screen {
+  height: 100vw;
+  min-height: 0;
+  max-height: 100vw;
+}

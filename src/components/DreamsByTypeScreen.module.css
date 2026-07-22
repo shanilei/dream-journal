@@ -182,3 +182,13 @@
   font-size: 14px;
   color: rgba(255, 255, 255, 0.5);
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
+   the normal app. Same `100vh`→`100vw` axis-swap reasoning as
+   home.module.css's exhibition block. `.content`'s own `height: 100%`
+   already cascades correctly from this once `.screen` is fixed, so it
+   needs no separate override. */
+:global(.exhibition) .screen {
+  height: 100vw;
+}

@@ -864,3 +864,15 @@
    but its rules matched the same class names used by .printCard's markup
    and stretched them to fill the full viewport, blowing up the scrim
    gradient's dark region to cover almost the entire page. Removed. */
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
+   the normal app. Same reasoning as home.module.css's exhibition block:
+   `height: 100vh/100dvh` measures the wrong axis after the 90deg
+   rotation (the real viewport's width is now the visual height), so it
+   flips to 100vw here too — otherwise this screen (and BottomNav's
+   clearance within it) is confined to a box shorter than the actual
+   rotated canvas. */
+:global(.exhibition) .screen {
+  height: 100vw;
+}
