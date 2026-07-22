@@ -88,6 +88,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${urbanist.variable} ${alumniSans.variable} ${ploni.variable}`}>
+        <ExhibitionMode />
         <AppBackground />
         <ThemeProvider>
           <LanguageProvider>
