@@ -701,6 +701,66 @@
    rotated — the real viewport's width is now the visual height — so this
    flips to 100vw, same reasoning as every other screen's exhibition
    block. */
+/* Portrait composition pass — mobile's idle-state layout is hand-placed
+   absolute positioning tuned for a ~375-430px-wide phone (see .prompt/
+   .recordButtonWrap/.typeFallback above); at the rotated canvas's ~1080px
+   width that reads as tiny and off-center. Rather than retune those
+   absolute offsets, this switches the idle composition to the same
+   centered-flex-column structure the tablet block above already uses
+   (relative/static positioning + one `gap`-driven column), just at more
+   moderate sizes than that block's real-hardware-portrait numbers — this
+   is a simulated rotation at a real 1080px viewport width, not a genuinely
+   large physical panel. Deliberately independent of the tablet block's
+   `any-pointer: coarse` condition, since the exhibition kiosk may be
+   mouse-driven: this must apply whether or not that block also matches. */
 :global(.exhibition) .screen {
   height: 100vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 150px;
+  padding-left: 56px;
+  padding-right: 56px;
+  box-sizing: border-box;
+}
+
+:global(.exhibition) .prompt,
+:global(.exhibition) .promptHe {
+  position: static;
+  left: auto;
+  top: auto;
+  transform: none;
+  width: auto;
+  max-width: 480px;
+  font-size: 38px;
+  line-height: 48px;
+  margin-bottom: 44px;
+}
+
+:global(.exhibition) .promptHe {
+  font-size: 40px;
+  line-height: 48px;
+}
+
+:global(.exhibition) .recordButtonWrap {
+  position: relative;
+  left: auto;
+  top: auto;
+  width: 340px;
+  height: 340px;
+  margin-bottom: 24px;
+}
+
+:global(.exhibition) .typeFallback {
+  position: static;
+  left: auto;
+  top: auto;
+  transform: none;
+  gap: 6px;
+}
+
+:global(.exhibition) .typeFallbackOr,
+:global(.exhibition) .typeFallbackLink {
+  font-size: 17px;
 }

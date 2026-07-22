@@ -264,3 +264,44 @@
     font-size: 15px;
   }
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — independent of
+   the any-pointer:coarse-gated tablet block above and the real-hardware
+   exhibition-portrait block (that one only fires on a genuine >=1400px-tall
+   portrait viewport, which the rotated-but-still-1920x1080 exhibition
+   canvas never reports). Moderate bump over the base mobile circle (67px)
+   for comfortable viewing/touch on a 24" display, not as large as the
+   real-hardware breakpoint's numbers since this is a simulated rotation at
+   a real 1080px-wide viewport, not a genuinely larger panel. */
+:global(.exhibition) .nav {
+  bottom: calc(48px + env(safe-area-inset-bottom));
+  gap: 16px;
+  padding: 11px 26px;
+}
+
+:global(.exhibition) .circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 40px;
+}
+
+:global(.exhibition) .iconLayer svg {
+  width: 24px;
+  height: 24px;
+}
+
+:global(.exhibition) .centerSlot .iconLayer svg {
+  width: 28px;
+  height: 28px;
+}
+
+:global(.exhibition) .addMenuPillWrap {
+  margin-left: -64px;
+}
+
+:global(.exhibition) .addMenuPill {
+  width: 128px;
+  padding: 13px 18px;
+  font-size: 14px;
+}

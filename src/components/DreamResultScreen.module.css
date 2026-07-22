@@ -876,3 +876,21 @@
 :global(.exhibition) .screen {
   height: 100vw;
 }
+
+/* Portrait composition pass. The image/interpretation column already
+   grows and re-centers for free from --shell-max-width's exhibition
+   override (globals.css) — .image is width:100% of that column at a
+   fixed aspect-ratio, so it scales up automatically without any change
+   here. This only bumps the static heading/body type for legibility from
+   a few feet away; .captionText/.metaText are left untouched since
+   they're the user-configurable caption/date font-size controls (see
+   FontSizeStepper) — a base CSS bump here would only ever affect their
+   unset default, but skipping them entirely avoids any ambiguity with
+   that feature. */
+:global(.exhibition) .title {
+  font-size: 36px;
+}
+
+:global(.exhibition) .bodyText {
+  font-size: 16px;
+}

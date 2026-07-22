@@ -478,3 +478,32 @@
   min-height: 0;
   max-height: 100vw;
 }
+
+/* Portrait composition pass — the content column already narrows and
+   re-centers for free from --shell-max-width's exhibition override
+   (globals.css); this only bumps type/card sizing for legibility from a
+   few feet away. .statsCard's two columns already read as a readable
+   side-by-side layout at the new (narrower, portrait) column width, so no
+   structural change is needed there. */
+:global(.exhibition) .title {
+  font-size: 46px;
+  line-height: 50px;
+}
+
+:global(.exhibition) .subtitle {
+  font-size: 20px;
+  line-height: 30px;
+}
+
+:global(.exhibition) .statsCard {
+  min-height: 172px;
+}
+
+:global(.exhibition) .statsNum {
+  font-size: 46px;
+  line-height: 50px;
+}
+
+:global(.exhibition) .statsColLabel {
+  font-size: 16px;
+}

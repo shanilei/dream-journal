@@ -1554,6 +1554,7 @@
   height: 100vw;
   min-height: 0;
   max-height: 100vw;
+  padding-bottom: 200px;
 }
 
 :global(.exhibition) .calScroll {
@@ -1562,4 +1563,93 @@
 
 :global(.exhibition) .overlayPanel {
   height: 100vw;
+}
+
+/* ── Portrait composition pass ──
+   --shell-max-width/--shell-padding are already overridden globally (see
+   globals.css), so the header/grid/calendar column below is automatically
+   narrower and centered — this block only adds the size/spacing tweaks
+   that need their own values (fonts, touch targets, card proportions,
+   forcing the JS-driven grid column count). */
+
+:global(.exhibition) .galleryTitle {
+  font-size: 46px;
+  line-height: 50px;
+}
+
+:global(.exhibition) .headerBtn {
+  width: 56px;
+  height: 56px;
+}
+
+:global(.exhibition) .searchToggle {
+  height: 52px;
+  padding: 6px 20px;
+}
+
+:global(.exhibition) .searchLabel {
+  font-size: 15px;
+}
+
+:global(.exhibition) .searchInput {
+  font-size: 19px;
+}
+
+:global(.exhibition) .searchIconBtn,
+:global(.exhibition) .searchCloseBtn {
+  width: 22px;
+  height: 22px;
+}
+
+:global(.exhibition) .filterRow {
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+/* Dream History grid: the column count is set inline via React style
+   (gridTemplateColumns, driven by the phone-only 2/3 column toggle — see
+   HomeScreenClient.tsx), so only `!important` can override it here. This
+   is a visual-only override — the toggle's own state/behavior is
+   untouched — but it does mean the toggle no longer visibly changes the
+   column count while in exhibition mode, by design: a kiosk display shows
+   one deliberate portrait composition rather than a phone UI affordance. */
+:global(.exhibition) .collectionGrid {
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 20px;
+}
+
+:global(.exhibition) .gridImgWrap {
+  aspect-ratio: 3 / 4;
+  border-radius: 14px;
+}
+
+:global(.exhibition) .gridCardHeading {
+  font-size: 16px;
+}
+
+:global(.exhibition) .gridCardSubheading {
+  font-size: 13px;
+}
+
+:global(.exhibition) .typeGrid {
+  grid-template-columns: repeat(2, minmax(0, 280px));
+  gap: 20px;
+}
+
+:global(.exhibition) .typeGridCardWrap {
+  max-width: 280px;
+  min-height: 160px;
+}
+
+:global(.exhibition) .calMonth {
+  max-width: 480px;
+}
+
+:global(.exhibition) .calDayHeader {
+  font-size: 15px;
+}
+
+:global(.exhibition) .calDayHeaders,
+:global(.exhibition) .calWeek {
+  gap: 16px;
 }

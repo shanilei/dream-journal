@@ -272,3 +272,18 @@ body.exhibition.exhibition-cw {
 body.exhibition.exhibition-ccw {
   transform: translateY(100vh) rotate(-90deg);
 }
+
+/* Portrait-composition pass: this is layout, not the rotation itself (see
+   the rules above, untouched). Every screen already reads its content
+   column's width from these two tokens (--shell-max-width/--shell-padding,
+   defined on :root above), so overriding them once here — instead of in
+   every individual screen file — is what turns "the desktop-wide layout,
+   rotated" into a deliberately portrait one everywhere at once. 760px
+   leaves a clearly intentional margin on the ~1080px-wide rotated canvas
+   (real viewport width, i.e. 100vw) without going edge-to-edge or staying
+   at the desktop breakpoint's 900px. Higher specificity than :root's own
+   declarations (an added class), so it wins regardless of source order. */
+html.exhibition {
+  --shell-max-width: 760px;
+  --shell-padding: 40px;
+}
