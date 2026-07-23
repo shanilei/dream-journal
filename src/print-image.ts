@@ -16,13 +16,20 @@ import { formatDreamDate, formatDreamTime, langFromText } from "./i18n/translati
 // 2x the on-screen card's 338:475 box for print sharpness.
 const CANVAS_W = 676;
 const CANVAS_H = 950;
-const PADDING = 40;
+// Was 40 — widened per direct request ("slightly larger safety margins
+// than risk any caption being clipped") after the print layout's own
+// scale-down still wasn't enough on the Canon SELPHY CP910's real
+// printable area. Applies to both the caption/meta text's own edge
+// clearance (captionX/metaX below) and CAPTION_MAX_WIDTH's own margin.
+const PADDING = 48;
 const BG_COLOR = "#090a13";
 // Bounded caption column — leaves room for the date/time meta block in
 // the opposite corner (see captionX/metaX below) so a long/large caption
 // can never grow across the full canvas width and run into it, and stays
-// an equal PADDING away from the image's own edge on both sides.
-const CAPTION_MAX_WIDTH = CANVAS_W - PADDING * 2 - 160;
+// an equal PADDING away from the image's own edge on both sides. The
+// reserved-for-meta margin (was 160) is also widened, so the caption
+// column itself is narrower and wraps earlier/more conservatively.
+const CAPTION_MAX_WIDTH = CANVAS_W - PADDING * 2 - 200;
 
 // Deliberately NOT rounding corners or leaving any transparency in this
 // output — Safari's print/PDF rasterizer has proven unreliable compositing
