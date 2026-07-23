@@ -142,9 +142,23 @@
 /* Hidden print-only copy of the image card (see DreamResultScreen.tsx).
    Rendered off-screen at all times and revealed only via @media print, so
    window.print() can fire synchronously in the click handler — no popup
-   window, no waiting on async image/font loads. */
+   window, no waiting on async image/font loads.
+   Deliberately NOT display:none: this print-only <img> (printFlatImage,
+   below) is never shown anywhere else on the page, so display:none can
+   leave it un-fetched — some engines skip/deprioritize loading resources
+   inside a display:none subtree entirely until it becomes visible, which
+   for this element only happens the instant @media print activates, i.e.
+   the same moment window.print()'s snapshot is captured — too late for
+   the image to have loaded. Off-screen positioning (still fully "visible"
+   to the browser's resource loader, just outside the viewport) instead
+   lets the image start loading as soon as printImageUrl is known, so it's
+   already cached by the time Print is actually tapped. */
 .printCard {
-  display: none;
+  position: absolute;
+  top: 0;
+  left: -9999px;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 /* margin: 0 — a nonzero @page margin was the printable area eating into
@@ -180,6 +194,15 @@
      height at all. */
   .printCard {
     display: block !important;
+    /* Explicit !important resets for every property the off-screen base
+       rule above sets — not relying on globals.css's `.print-root` allow-
+       list rule (added to this same element) to win the cascade against
+       this file's own base rule, since that depends on cross-file/cross-
+       stylesheet source order rather than something guaranteed here. */
+    position: fixed !important;
+    inset: 0 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
     width: 100%;
     background: #fff;
   }
