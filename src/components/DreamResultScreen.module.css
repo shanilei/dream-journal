@@ -140,43 +140,23 @@
 }
 
 /* Hidden print-only copy of the image card (see DreamResultScreen.tsx).
-   Rendered at all times, invisible via opacity, and revealed only via
-   @media print, so window.print() can fire synchronously in the click
-   handler — no popup window, no waiting on async image/font loads.
-   Deliberately NOT display:none: this print-only <img> (printFlatImage,
-   below) is never shown anywhere else on the page, so display:none can
-   leave it un-fetched — some engines skip/deprioritize loading resources
-   inside a display:none subtree until it becomes visible, which for this
-   element only happens the instant @media print activates, i.e. the same
-   moment window.print()'s snapshot is captured — too late to have loaded.
-   Also deliberately NOT positioned off-screen (a previous attempt used
-   left: -9999px) — content placed far outside the viewport bounds risks
-   the opposite problem on mobile Safari: it can decide the content is
-   "off-screen enough" to skip painting/compositing it at all, so even a
-   fully-loaded image never actually got rendered once revealed. opacity:0
-   keeps this within normal viewport bounds (no culling risk) while still
-   fully "visible" to the browser's resource loader and paint pipeline —
-   only its visual appearance is suppressed. A second, independent
-   safeguard (an explicit JS preload of printImageUrl — see
-   DreamResultScreen.tsx) also guarantees the bytes are fetched into cache
-   regardless of any CSS technique. */
+   Rendered off-screen at all times and revealed only via @media print, so
+   window.print() can fire synchronously in the click handler — no popup
+   window, no waiting on async image/font loads.
+   This is deliberately back to the plain display:none this shipped with
+   originally — two separate attempts to "fix" image loading via opacity/
+   off-screen-positioning tricks instead made the photo stop appearing at
+   all, a regression against a mechanism that was actually working. An
+   independent JS preload (see DreamResultScreen.tsx) still warms the
+   image into cache ahead of time as a harmless safeguard, but the
+   display toggle itself is back to exactly what it was. */
 .printCard {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  opacity: 0;
-  pointer-events: none;
+  display: none;
 }
 
-/* margin: 0 — a nonzero @page margin was the printable area eating into
-   the fixed-size .printCardInner below, which (combined with anything
-   else left unhidden — see the confirmation-modal and AppBackground
-   hides below) could push the total content past one page's height and
-   paginate. Any breathing room around the card now comes from
-   .printCardInner's own centering, not the page margin. */
 @page {
   size: auto;
-  margin: 0;
+  margin: 24px;
 }
 
 @media print {
@@ -201,26 +181,13 @@
      height at all. */
   .printCard {
     display: block !important;
-    /* Explicit !important resets for every property the invisible base
-       rule above sets — not relying on globals.css's `.print-root` allow-
-       list rule (added to this same element) to win the cascade against
-       this file's own base rule, since that depends on cross-file/cross-
-       stylesheet source order rather than something guaranteed here. */
-    position: fixed !important;
-    inset: 0 !important;
-    z-index: 2147483647 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    pointer-events: auto !important;
     width: 100%;
     background: #fff;
   }
 
   .printCardInner {
     width: 320px;
-    margin: 24px auto;
-    break-inside: avoid;
-    page-break-inside: avoid;
+    margin: 0 auto;
   }
 
   /* Force the reveal-in animation to its resting state — by print time

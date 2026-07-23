@@ -1095,10 +1095,7 @@ export default function DreamResultScreen({
         solid black), so nothing print-specific is composited live anymore.
         Dreams created before this existed fall back to the old layered
         markup, which at least renders (if imperfectly) on other browsers. */}
-    {/* "print-root" is a plain (non-CSS-Modules) class — see globals.css's
-        allow-list print block, which hides every other element under
-        <body> by default and explicitly re-shows only this subtree. */}
-    <div className={`${styles.printCard} print-root`}>
+    <div className={styles.printCard}>
       <div className={styles.printCardInner}>
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
           {printImageUrlState ? (
