@@ -147,13 +147,29 @@
   display: none;
 }
 
+/* margin: 0 — a nonzero @page margin was the printable area eating into
+   the fixed-size .printCardInner below, which (combined with anything
+   else left unhidden — see the confirmation-modal and AppBackground
+   hides below) could push the total content past one page's height and
+   paginate. Any breathing room around the card now comes from
+   .printCardInner's own centering, not the page margin. */
 @page {
   size: auto;
-  margin: 24px;
+  margin: 0;
 }
 
 @media print {
   .screen {
+    display: none !important;
+  }
+
+  /* The confirmation modal is closed (setShowPrintModal(false)) right
+     before window.print() fires, but that's a React state update and
+     window.print() blocks synchronously — there's no guarantee the DOM
+     has actually re-rendered without it before the print snapshot is
+     taken. Hidden here unconditionally so it can never show up in the
+     printed/previewed output regardless of that race. */
+  .printModalOverlay {
     display: none !important;
   }
 
@@ -170,7 +186,9 @@
 
   .printCardInner {
     width: 320px;
-    margin: 0 auto;
+    margin: 24px auto;
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   /* Force the reveal-in animation to its resting state — by print time
@@ -351,6 +369,19 @@
 .captionText {
   margin: 0;
   flex: 1;
+  /* A flex item's default min-width is `auto`, i.e. its content's own
+     intrinsic width — for a long/unbreakable Hebrew word (or a large
+     user-chosen caption font size) that can be wider than the item's
+     flex-basis share of the row, which then refuses to shrink and pushes
+     past .captionOverlay's right edge instead of wrapping. min-width: 0
+     is what actually lets it shrink to fit and wrap within its bounded
+     column (the same bounded-column fix as the canvas print image's own
+     CAPTION_MAX_WIDTH — see print-image.ts) instead of only ever growing;
+     overflow-wrap covers the rare case of one single word still being
+     wider than the whole column even after that. */
+  min-width: 0;
+  overflow-wrap: break-word;
+  word-break: break-word;
   font-family: var(--font-alumni-sans), sans-serif;
   font-size: 12px;
   font-weight: 400;
@@ -868,13 +899,12 @@
 /* ===================== EXHIBITION MODE ===================== */
 /* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
    the normal app. Same reasoning as home.module.css's exhibition block:
-   `height: 100vh/100dvh` measures the wrong axis after the 90deg
-   rotation (the real viewport's width is now the visual height), so it
-   flips to 100vw here too — otherwise this screen (and BottomNav's
-   clearance within it) is confined to a box shorter than the actual
-   rotated canvas. */
+   `.exhibitionCanvas` is a fixed 1080x1920 box, so this screen must size
+   itself to the canvas's own fixed height instead of the ambient
+   `100vh`/`100dvh` — otherwise this screen (and BottomNav's clearance
+   within it) is confined to a box shorter than the actual canvas. */
 :global(.exhibition) .screen {
-  height: 100vw;
+  height: var(--exhibition-height);
 }
 
 /* Portrait composition pass. The image/interpretation column already

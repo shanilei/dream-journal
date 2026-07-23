@@ -4,6 +4,7 @@ import {
   CAPTION_MAX_WORDS,
   getCaptionWords,
   wrapCaptionLines,
+  wrapLinesToWidth,
   pickCaptionLayout,
   isHebrewText,
   CAPTION_FONT_SIZE_DEFAULT,
@@ -17,6 +18,11 @@ const CANVAS_W = 676;
 const CANVAS_H = 950;
 const PADDING = 40;
 const BG_COLOR = "#090a13";
+// Bounded caption column — leaves room for the date/time meta block in
+// the opposite corner (see captionX/metaX below) so a long/large caption
+// can never grow across the full canvas width and run into it, and stays
+// an equal PADDING away from the image's own edge on both sides.
+const CAPTION_MAX_WIDTH = CANVAS_W - PADDING * 2 - 160;
 
 // Deliberately NOT rounding corners or leaving any transparency in this
 // output — Safari's print/PDF rasterizer has proven unreliable compositing
@@ -122,8 +128,17 @@ export async function generatePrintImage({
 }: PrintImageParams): Promise<Buffer> {
   ensureFontsRegistered();
 
-  const isHebrew = isHebrewText(captionOverride || dreamText || summaryText || "");
-  const lang = langFromText(captionOverride || dreamText || summaryText, "en");
+  // Detected from the same source that actually becomes captionText below
+  // (captionOverride, else summaryText — dreamText is never itself drawn
+  // as the caption) — previously this checked `captionOverride || dreamText
+  // || summaryText`, so a dream whose raw dreamText happened to differ in
+  // language from its AI-generated summaryText would pick the wrong
+  // direction/alignment for a caption that was actually drawn from
+  // summaryText. dreamText stays as a last-resort fallback only if
+  // summaryText itself is empty.
+  const captionSource = captionOverride || summaryText || dreamText || "";
+  const isHebrew = isHebrewText(captionSource);
+  const lang = langFromText(captionSource, "en");
   const captionText = captionOverride?.trim() ? wrapCaptionLines(captionOverride) : getCaptionWords(summaryText, CAPTION_MAX_WORDS);
   const captionLines = captionText ? captionText.split("\n").filter(Boolean) : [];
   const captionLayout = pickCaptionLayout(imageUrl);
@@ -172,7 +187,17 @@ export async function generatePrintImage({
   const bottomAligned = captionLayout === "bottom";
   const anchorY = bottomAligned ? CANVAS_H - PADDING : CANVAS_H / 2;
 
-  const captionTextLines: TextLine[] = captionLines.map((text) => ({
+  // Safety re-wrap against the actual rendered width (see wrapLinesToWidth's
+  // own comment) — needs ctx.font set to the real caption font/size first,
+  // since canvas measureText() reads that state.
+  ctx.font = `${printCaptionFontSize}px "${captionFamily}", sans-serif`;
+  const boundedCaptionLines = wrapLinesToWidth(
+    captionLines,
+    (text) => ctx.measureText(text).width,
+    CAPTION_MAX_WIDTH
+  );
+
+  const captionTextLines: TextLine[] = boundedCaptionLines.map((text) => ({
     text,
     fontSize: printCaptionFontSize,
     family: captionFamily,
@@ -192,6 +217,11 @@ export async function generatePrintImage({
   const captionAlign = isHebrew ? "right" : "left";
   const metaX = isHebrew ? PADDING : CANVAS_W - PADDING;
   const metaAlign = isHebrew ? "left" : "right";
+  // Canvas defaults to LTR text direction regardless of script — without
+  // this, embedded numbers/punctuation inside a Hebrew line (a date-like
+  // fragment, digits) can shape/order incorrectly (mirrored) since the
+  // bidi algorithm never gets told which way the paragraph itself runs.
+  ctx.direction = isHebrew ? "rtl" : "ltr";
 
   for (const line of laidOutCaption) {
     ctx.font = `${line.fontSize}px "${line.family}", sans-serif`;

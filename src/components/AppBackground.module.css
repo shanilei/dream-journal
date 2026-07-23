@@ -14,3 +14,16 @@
   background: var(--gallery-gradient);
   pointer-events: none;
 }
+
+/* Mounted once above every route (see the header comment), so nothing
+   route-local — e.g. DreamResultScreen's own `.screen { display: none }`
+   print rule — ever hides this. A fixed, full-viewport, always-painted
+   layer left unhidden during print can get flattened into its own extra
+   page or repeated behind the actual printed content, so every route
+   that prints (currently just the Dream Result screen) needs this gone
+   too, not just its own local chrome. */
+@media print {
+  .bg {
+    display: none !important;
+  }
+}

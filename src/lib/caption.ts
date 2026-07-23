@@ -114,6 +114,46 @@ export function wrapCaptionLines(text: string): string {
   return groupIntoLines(words, CAPTION_WORDS_PER_LINE).join('\n');
 }
 
+// Defensive re-wrap pass for the canvas-drawn print image only (the CSS
+// live preview wraps naturally via the browser's own layout once its
+// container has a real bounded width — see .captionText's min-width:0 in
+// DreamResultScreen.module.css). getCaptionWords/wrapCaptionLines above
+// group a fixed word-count per line, which assumes roughly-average word
+// widths; that assumption breaks for long words (common in Hebrew) or a
+// large user-chosen caption font size, letting a line run past the
+// canvas's bounded caption column and get clipped at the image edge.
+// This takes those already-grouped lines and, only for any line that
+// actually measures wider than `maxWidth`, greedily re-wraps just that
+// line's own words into as many sub-lines as needed — every other line
+// (the common case) is returned untouched, so normal-length captions
+// still break at exactly the same points as the live preview.
+export function wrapLinesToWidth(
+  lines: string[],
+  measure: (text: string) => number,
+  maxWidth: number
+): string[] {
+  const result: string[] = [];
+  for (const line of lines) {
+    if (measure(line) <= maxWidth) {
+      result.push(line);
+      continue;
+    }
+    const words = line.split(' ');
+    let current = '';
+    for (const word of words) {
+      const candidate = current ? `${current} ${word}` : word;
+      if (current && measure(candidate) > maxWidth) {
+        result.push(current);
+        current = word;
+      } else {
+        current = candidate;
+      }
+    }
+    if (current) result.push(current);
+  }
+  return result;
+}
+
 export type CaptionLayout = "center" | "bottom";
 
 export function pickCaptionLayout(seed: string): CaptionLayout {
