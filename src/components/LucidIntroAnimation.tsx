@@ -192,7 +192,7 @@ export default function LucidIntroAnimation({ onComplete }: { onComplete?: () =>
 
           {/* Orb image — crescent mask applied */}
           <image
-            href="/images/orb-anim.gif"
+            href="/images/orb.svg"
             x={PAD}
             y={PAD}
             width={ORB_SIZE}
