@@ -140,24 +140,31 @@
 }
 
 /* Hidden print-only copy of the image card (see DreamResultScreen.tsx).
-   Rendered off-screen at all times and revealed only via @media print, so
-   window.print() can fire synchronously in the click handler — no popup
-   window, no waiting on async image/font loads.
+   Rendered at all times, invisible via opacity, and revealed only via
+   @media print, so window.print() can fire synchronously in the click
+   handler — no popup window, no waiting on async image/font loads.
    Deliberately NOT display:none: this print-only <img> (printFlatImage,
    below) is never shown anywhere else on the page, so display:none can
    leave it un-fetched — some engines skip/deprioritize loading resources
-   inside a display:none subtree entirely until it becomes visible, which
-   for this element only happens the instant @media print activates, i.e.
-   the same moment window.print()'s snapshot is captured — too late for
-   the image to have loaded. Off-screen positioning (still fully "visible"
-   to the browser's resource loader, just outside the viewport) instead
-   lets the image start loading as soon as printImageUrl is known, so it's
-   already cached by the time Print is actually tapped. */
+   inside a display:none subtree until it becomes visible, which for this
+   element only happens the instant @media print activates, i.e. the same
+   moment window.print()'s snapshot is captured — too late to have loaded.
+   Also deliberately NOT positioned off-screen (a previous attempt used
+   left: -9999px) — content placed far outside the viewport bounds risks
+   the opposite problem on mobile Safari: it can decide the content is
+   "off-screen enough" to skip painting/compositing it at all, so even a
+   fully-loaded image never actually got rendered once revealed. opacity:0
+   keeps this within normal viewport bounds (no culling risk) while still
+   fully "visible" to the browser's resource loader and paint pipeline —
+   only its visual appearance is suppressed. A second, independent
+   safeguard (an explicit JS preload of printImageUrl — see
+   DreamResultScreen.tsx) also guarantees the bytes are fetched into cache
+   regardless of any CSS technique. */
 .printCard {
-  position: absolute;
-  top: 0;
-  left: -9999px;
-  visibility: hidden;
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -194,13 +201,15 @@
      height at all. */
   .printCard {
     display: block !important;
-    /* Explicit !important resets for every property the off-screen base
+    /* Explicit !important resets for every property the invisible base
        rule above sets — not relying on globals.css's `.print-root` allow-
        list rule (added to this same element) to win the cascade against
        this file's own base rule, since that depends on cross-file/cross-
        stylesheet source order rather than something guaranteed here. */
     position: fixed !important;
     inset: 0 !important;
+    z-index: 2147483647 !important;
+    opacity: 1 !important;
     visibility: visible !important;
     pointer-events: auto !important;
     width: 100%;

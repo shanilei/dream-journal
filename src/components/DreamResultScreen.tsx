@@ -441,6 +441,20 @@ export default function DreamResultScreen({
   const [captionFontSize, setCaptionFontSize] = useState(lastSaved.captionFontSize);
   const [metaFontSize, setMetaFontSize] = useState(lastSaved.metaFontSize);
   const [printImageUrlState, setPrintImageUrlState] = useState(printImageUrl);
+  // Independent safeguard alongside .printCard's own CSS (see its comment
+  // in DreamResultScreen.module.css): explicitly fetch the print image
+  // into the browser's cache as soon as its URL is known, via a bare
+  // Image object never attached to the DOM at all — this doesn't depend
+  // on any visibility/opacity/positioning technique for the *real*
+  // <img printFlatImage> to actually start loading. By the time the user
+  // taps Print (a separate confirmation step later), this has had the
+  // entire intervening time to finish, not just the instant before
+  // window.print()'s synchronous snapshot.
+  useEffect(() => {
+    if (!printImageUrlState) return;
+    const preload = new Image();
+    preload.src = printImageUrlState;
+  }, [printImageUrlState]);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
