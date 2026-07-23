@@ -3,6 +3,14 @@
   gap: 8px;
   overflow-x: auto;
   padding-bottom: 4px;
+  /* Same trailing-clip fix as .filterRow in home.module.css — zero
+     trailing space meant the scroll container's true max scroll position
+     landed exactly at the last chip's far edge, with momentum scrolling
+     often settling short of it and no room for the chip's own shadow to
+     render. padding-inline-end (not padding-right, so RTL's trailing
+     edge — the left side — is handled too) matches --shell-padding, the
+     same gutter every other edge of this content column uses. */
+  padding-inline-end: var(--shell-padding);
   /* Opts back into horizontal touch dragging — see .filterRow in
      home.module.css for why this is needed against the global
      touch-action:pan-y lockdown. */
