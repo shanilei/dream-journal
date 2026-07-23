@@ -256,13 +256,17 @@ export default function RecordPage() {
           <div className={styles.orbLayers}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/orb.svg"
+              src="/images/orb.png"
+              srcSet="/images/orb.png 320w, /images/orb@3x.png 960w"
+              sizes="(min-width: 768px) 400px, 260px"
               alt=""
               className={styles.orbRings}
             />
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/images/orb.svg"
+              src="/images/orb.png"
+              srcSet="/images/orb.png 320w, /images/orb@3x.png 960w"
+              sizes="(min-width: 768px) 400px, 260px"
               alt=""
               className={styles.orbCore}
             />
