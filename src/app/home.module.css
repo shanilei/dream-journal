@@ -276,20 +276,6 @@
   display: flex;
   gap: 10px;
   padding: 0;
-  /* Root cause of the last chip (e.g. Favorite) reading as clipped: with
-     zero trailing space, the scroll container's true max scroll position
-     (scrollWidth - clientWidth) lands EXACTLY at the last pill's far
-     edge, no buffer past it. iOS's momentum/rubber-band scrolling can
-     settle a pixel or two short of that exact mathematical max, and the
-     pill's own box-shadow/glow (which extends past its own box) has no
-     room to render either — both read as "cut off" even though the pill
-     is technically still reachable. padding-inline-end (not padding-
-     right, so this is correct for RTL too, where the scrollable end is
-     the *left* side) gives real breathing room past the last pill, so it
-     settles fully visible with its shadow intact well before hitting the
-     scroll boundary. Matches --shell-padding, the same gutter every
-     other edge of this content column already uses. */
-  padding-inline-end: var(--shell-padding);
   margin-bottom: 22px;
   overflow-x: auto;
   scrollbar-width: none;
@@ -300,6 +286,18 @@
      stuck cut off at the screen edge. */
   touch-action: pan-x;
   overscroll-behavior-x: contain;
+}
+
+/* Real DOM spacer (see HomeScreenClient.tsx) instead of padding-inline-
+   end on .filterRow itself — Safari has a long-standing WebKit bug where
+   trailing (end-side) padding on a horizontally-scrolling flex container
+   is dropped once scrolled to the end, so the last chip (e.g. Favorite)
+   still read as clipped even with that padding set. An actual flex child
+   reserves the space reliably instead. Matches --shell-padding, the same
+   gutter every other edge of this content column already uses. */
+.filterRowSpacer {
+  flex-shrink: 0;
+  width: var(--shell-padding);
 }
 
 .filterRow::-webkit-scrollbar {

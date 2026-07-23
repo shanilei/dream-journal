@@ -963,6 +963,13 @@ export default function HomeScreenClient({
                 </span>
               </motion.button>
             ))}
+          {/* Real DOM spacer, not container padding — Safari has a
+              long-standing bug where trailing (end-side) padding on a
+              horizontally-scrolling flex container is dropped once
+              scrolled to the end, so the last chip still read as clipped
+              even with padding-inline-end set on .filterRow itself. An
+              actual flex child reserves that space reliably everywhere. */}
+          <div className={styles.filterRowSpacer} aria-hidden="true" />
         </div>
         </motion.div>
 
