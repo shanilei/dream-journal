@@ -154,13 +154,13 @@
   display: none;
 }
 
-/* margin bumped from 24px — larger safety margin so the card (now scaled
-   down ~10%, see .printCardInner below) sits comfortably inside the
-   Canon SELPHY CP910's actual printable area via AirPrint, not just a
-   generic page's. */
+/* margin bumped 24px -> 34px -> 46px across two passes — larger safety
+   margin so the card (now scaled down ~19% total, see .printCardInner
+   below) sits comfortably inside the Canon SELPHY CP910's actual
+   printable area via AirPrint, not just a generic page's. */
 @page {
   size: auto;
-  margin: 34px;
+  margin: 46px;
 }
 
 @media print {
@@ -189,15 +189,15 @@
     background: #fff;
   }
 
-  /* Was 320px — scaled down ~10% (per direct request) so the whole card
-     (image + caption + date, uniformly, since width is the only
-     dimension set and height/font-sizes/etc. all derive from it or the
-     source PNG's own aspect ratio) sits comfortably inside a small
-     fixed-media photo printer's real printable area instead of right up
-     against it, which was pushing the print job onto a second page.
+  /* Was 320px, then 288px (~10%), now ~260px (another ~10%, ~19% total
+     from the original) — the whole card (image + caption + date,
+     uniformly, since width is the only dimension set and height/font-
+     sizes/etc. all derive from it or the source PNG's own aspect ratio)
+     scaled down further per direct request, so it sits comfortably
+     inside a small fixed-media photo printer's real printable area.
      margin: 0 auto keeps it horizontally centered, same as before. */
   .printCardInner {
-    width: 288px;
+    width: 260px;
     margin: 0 auto;
   }
 
