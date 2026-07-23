@@ -219,6 +219,7 @@
 .printFlatImage {
   display: block;
   width: 100%;
+  margin: 0;
 }
 
 /* prefers-reduced-motion is handled in DreamResultScreen.tsx via Framer

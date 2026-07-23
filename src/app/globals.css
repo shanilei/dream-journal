@@ -220,6 +220,44 @@ h1, h2, h3, h4, h5, h6, p, li, span, label {
   html,
   body {
     background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* ===================== PRINT: ALLOW-LIST EVERYTHING ===================== */
+/* Belt-and-suspenders on top of DreamResultScreen.module.css's own
+   `.screen { display: none }` + individual fixed-element hides
+   (AppBackground, BottomNav, the print confirmation modal) — those hide
+   specific *known* elements, one at a time, which is exactly the kind of
+   list that's easy to leave a gap in (as AppBackground itself proved: a
+   position:fixed, full-viewport element with no print rule gets repeated
+   on every printed page per the CSS Paged Media spec, which is what
+   turned a one-page print into two). This instead hides *everything*
+   under <body> by default and explicitly re-shows only the print
+   target's own subtree — so any current or future fixed/absolute overlay
+   this app ever grows is safe by default, without needing its own
+   print rule.
+   `.print-root` (see DreamResultScreen.tsx) is a plain, non-CSS-Modules
+   class specifically so this global stylesheet can target it directly —
+   CSS Modules' own hashed class names aren't stable/referenceable here. */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .print-root,
+  .print-root * {
+    visibility: visible !important;
+  }
+
+  .print-root {
+    position: fixed !important;
+    inset: 0;
+    margin: 0 !important;
+    width: 100%;
   }
 }
 
