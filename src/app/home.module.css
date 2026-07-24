@@ -310,12 +310,7 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
-  /* Was 6px 16px — trimmed horizontally per direct request, for a
-     lighter/more compact feel closer to the Spotify reference. Also
-     narrows the row's total content width a bit, which incidentally
-     makes the last chip's natural at-rest clip subtler too (less of it
-     hangs past the viewport edge to begin with). */
-  padding: 6px 12px;
+  padding: 6px 16px;
   height: 41px;
   border-radius: 99px;
   background: rgba(255, 255, 255, 0.07);
