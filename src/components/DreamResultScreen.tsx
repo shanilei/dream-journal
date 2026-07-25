@@ -455,6 +455,30 @@ export default function DreamResultScreen({
     const preload = new Image();
     preload.src = printImageUrlState;
   }, [printImageUrlState]);
+  // iOS-only print path (see handlePrint below): pre-fetched into a Blob
+  // ahead of time, not at the moment Print is tapped — navigator.share()
+  // must be called synchronously within the click's own user-gesture
+  // window on iOS Safari, so an awaited fetch happening right before it
+  // risks losing that activation the same way window.print() itself once
+  // did (see the comment on window.print() below).
+  const printImageBlobRef = useRef<Blob | null>(null);
+  useEffect(() => {
+    printImageBlobRef.current = null;
+    if (!printImageUrlState) return;
+    let cancelled = false;
+    fetch(printImageUrlState)
+      .then((res) => res.blob())
+      .then((blob) => {
+        if (!cancelled) printImageBlobRef.current = blob;
+      })
+      .catch(() => {
+        // Non-fatal — handlePrint falls back to window.print() if this
+        // never populates in time.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [printImageUrlState]);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -717,6 +741,35 @@ export default function DreamResultScreen({
 
   function handlePrint() {
     setShowPrintModal(false);
+
+    // iOS only (trial — see the comment this replaced below): window.print()
+    // always prints an actual webpage, and Safari/iOS add their own
+    // URL/date/page-count chrome to that print job — no CSS/JS on the page
+    // can suppress it, since it's rendered by the OS/browser entirely
+    // outside the page's control. The only way around it is to not print a
+    // *webpage* at all: handing the flattened PNG to the native iOS share
+    // sheet instead lets the user print it the same way they'd print a
+    // photo from Photos — a different pipeline that never has browser
+    // chrome, because it was never a webpage to begin with.
+    // Falls through to the existing window.print() flow (untouched, still
+    // the only path on desktop) if this isn't iOS, or if the file isn't
+    // ready/shareable for any reason.
+    const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
+    const blob = printImageBlobRef.current;
+    if (isIOS && blob && typeof navigator.share === "function") {
+      const file = new File([blob], `dream-${id ?? "image"}.png`, { type: blob.type || "image/png" });
+      const shareData = { files: [file] };
+      if (navigator.canShare?.(shareData)) {
+        navigator.share(shareData).catch(() => {
+          // User dismissed the share sheet, or it failed — nothing else to
+          // do here (no fallback mid-flow: falling back to window.print()
+          // after the user already saw and closed a share sheet would be a
+          // confusing double prompt).
+        });
+        return;
+      }
+    }
+
     // A hidden .printCard copy of the image card lives in this same
     // document and is shown only via @media print (see module.css) — this
     // avoids popup windows entirely, since window.open()/document.write()
