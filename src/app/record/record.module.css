@@ -257,11 +257,31 @@
   animation-play-state: paused;
 }
 
+/* Two soft "heartbeat" pulses close together, then a long hold at rest,
+   repeating every 30s — a single CSS animation, so it costs nothing on
+   the JS thread and needs no timers/cleanup at all. `scale` (not
+   `transform`) so it can never conflict with .orbRings' own independent
+   rotation below, even though it's already a separate element/property.
+   Paused while actually recording (.recordButtonActive) — .recordButton
+   already has its own `breathe` animation as that state's "alive"
+   signal; layering this on top there would just compete with it. */
 .orbLayers {
   position: relative;
   width: 100%;
   height: 100%;
   pointer-events: none;
+  animation: orbPulse 30s ease-in-out infinite;
+}
+
+@keyframes orbPulse {
+  0%, 4%, 100% { scale: 1; }
+  1% { scale: 1.05; }
+  2% { scale: 1; }
+  3% { scale: 1.05; }
+}
+
+.recordButtonActive .orbLayers {
+  animation-play-state: paused;
 }
 
 .orbRings,
@@ -298,12 +318,13 @@
   animation-play-state: paused;
 }
 
-/* Idle-timeout pause (see the .animPaused block above) — same effect,
-   different trigger: nothing's actively recording, the screen's just
-   been sitting untouched for a few seconds. */
-.animPaused .orbRings {
-  animation-play-state: paused;
-}
+/* Deliberately NOT paused by .animPaused (idle-timeout) — the rotation is
+   a screensaver-style call to action and must keep going for as long as
+   this screen is open and nothing is actively paused-mid-recording, so
+   it never reads as "stuck"/static while idle. Every other idle
+   decoration (starfield, glow, ambientBreath, the button's own idle
+   breathe) still pauses on idle via .animPaused above — this is the one
+   deliberate exception. */
 
 /* Sits in the control row in place of the round mic button — the orb
    stays visible throughout recording (matches the Figma screen), this is

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import type { Variants } from "framer-motion";
 import styles from "@/app/home.module.css";
+import exhibitionStyles from "@/components/ExhibitionGallery.module.css";
+import ExhibitionGallery from "@/components/ExhibitionGallery";
 import BottomNav from "@/components/BottomNav";
 import FavoriteButton from "@/components/FavoriteButton";
 import DreamResultScreen from "@/components/DreamResultScreen";
@@ -256,9 +258,9 @@ function CalendarView({ gridCards }: { gridCards: Card[] }) {
                             transition={{ duration: CONTENT_ENTER_DURATION, ease: CONTENT_EASE, delay }}
                             style={{ gridColumnStart }}
                           >
-                            <Link href={`/dream/${dream.id}`} className={`${styles.calCell} ${isToday ? styles.calCellSelected : ""}`}>
+                            <Link href={`/dream/${dream.id}`} prefetch={false} className={`${styles.calCell} ${isToday ? styles.calCellSelected : ""}`}>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={dream.image} alt="" className={styles.calCellImg} loading="lazy" decoding="async" />
+                              <img src={toGalleryThumbnailUrl(dream.image)} alt="" className={styles.calCellImg} loading="lazy" decoding="async" />
                               <span className={`${styles.calCellNum} ${styles.calCellNumLight}`}>{day}</span>
                             </Link>
                           </motion.div>
@@ -380,11 +382,13 @@ function TypeGrid({
                     <motion.img
                       key={card.id}
                       layoutId={`type-thumb-${card.id}`}
-                      src={card.image}
+                      src={toGalleryThumbnailUrl(card.image)}
                       alt=""
                       className={`${styles.typeStackImg} ${posClass}`}
                       style={{ rotate: STACK_ROTATIONS[stackIndex], left: lefts[stackIndex] }}
                       transition={{ duration: 0.5, ease: EASE }}
+                      loading="lazy"
+                      decoding="async"
                     />
                   );
                 });
@@ -487,11 +491,13 @@ function CategoryOverlay({
               <div className={styles.sharedThumbSlot}>
                 <motion.img
                   layoutId={`type-thumb-${card.id}`}
-                  src={card.image}
+                  src={toGalleryThumbnailUrl(card.image)}
                   alt=""
                   className={styles.sharedThumbImg}
                   style={{ rotate: 0 }}
                   transition={{ duration: 0.5, ease: EASE }}
+                  loading="lazy"
+                  decoding="async"
                 />
                 <motion.div
                   initial={{ opacity: 0 }}
@@ -510,7 +516,7 @@ function CategoryOverlay({
                 <p className={styles.gridCardHeading}>{card.name || translateMood(card.mood, lang)}</p>
                 <p className={styles.gridCardSubheading}>{formatDreamDate(card.createdAt, langFromText(card.summary, lang))}</p>
               </motion.div>
-              <Link href={`/dream/${card.id}`} className={styles.sharedCardTapArea} aria-label={card.name || translateMood(card.mood, lang)} />
+              <Link href={`/dream/${card.id}`} prefetch={false} className={styles.sharedCardTapArea} aria-label={card.name || translateMood(card.mood, lang)} />
             </div>
           ))}
 
@@ -532,10 +538,10 @@ function CategoryOverlay({
                 variants={{ hidden: { opacity: 0, y: 12 }, show: { opacity: 1, y: 0 } }}
                 transition={{ duration: 0.3, ease: EASE }}
               >
-                <Link href={`/dream/${card.id}`} className={styles.gridCard}>
+                <Link href={`/dream/${card.id}`} prefetch={false} className={styles.gridCard}>
                   <div className={styles.gridImgWrap}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={card.image} alt="" className={styles.gridImg} />
+                    <img src={toGalleryThumbnailUrl(card.image)} alt="" className={styles.gridImg} loading="lazy" decoding="async" />
                     {renderChrome(card)}
                   </div>
                   <div className={styles.gridBody}>
@@ -676,6 +682,14 @@ export default function HomeScreenClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [gridColumns, setGridColumns] = useState<2 | 3>(3);
+  // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
+  // read directly (matches DreamLoadingScreen's own detection) rather
+  // than useSearchParams, so this component doesn't need a Suspense
+  // boundary just to pick the Exhibition-only layout below.
+  const [isExhibition, setIsExhibition] = useState(false);
+  useEffect(() => {
+    setIsExhibition(document.documentElement.classList.contains("exhibition"));
+  }, []);
   // The CSS module's own iPad 4-column override for .collectionGrid can
   // never win against the inline gridTemplateColumns below (inline style
   // always beats a class, media query or not) — so tablet has to be
@@ -759,11 +773,26 @@ export default function HomeScreenClient({
     });
   }
 
+  // Purpose-built Exhibition composition (see ExhibitionGallery.tsx) —
+  // its own markup/CSS matching the Figma export directly, not the
+  // responsive Gallery below adapted via .exhibition overrides (that was
+  // the first pass; per direct feedback it read as "the normal Gallery",
+  // not the Exhibition design). Early-returned above all the responsive-
+  // only render helpers/JSX below, none of which apply here.
+  if (isExhibition) {
+    return (
+      <div className={exhibitionStyles.screenShell}>
+        <ExhibitionGallery gridCards={gridCards} favorites={favorites} onToggleFavorite={toggleFavorite} />
+        <BottomNav active="dreams" />
+      </div>
+    );
+  }
+
   function renderDreamRow(card: Card) {
     return (
-      <Link key={card.id} href={`/dream/${card.id}`} className={styles.dreamRow}>
+      <Link key={card.id} href={`/dream/${card.id}`} prefetch={false} className={styles.dreamRow}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={card.image} alt="" className={styles.dreamRowThumb} />
+        <img src={toGalleryThumbnailUrl(card.image)} alt="" className={styles.dreamRowThumb} loading="lazy" decoding="async" />
         <div className={styles.dreamRowBody}>
           <div className={styles.dreamRowTop}>
             <p className={styles.dreamRowTitle} dir="auto">{card.name || translateMood(card.mood, lang)}</p>
@@ -1039,6 +1068,7 @@ export default function HomeScreenClient({
                   <Link
                     key={cat.label}
                     href={`/type/${encodeURIComponent(cat.label)}`}
+                    prefetch={false}
                     className={styles.listRow}
                   >
                     <p className={styles.listRowCategory}>{translateMood(cat.label, lang)}</p>
