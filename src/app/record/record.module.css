@@ -257,14 +257,19 @@
   animation-play-state: paused;
 }
 
-/* Two soft "heartbeat" pulses close together, then a long hold at rest,
-   repeating every 30s — a single CSS animation, so it costs nothing on
-   the JS thread and needs no timers/cleanup at all. `scale` (not
-   `transform`) so it can never conflict with .orbRings' own independent
-   rotation below, even though it's already a separate element/property.
-   Paused while actually recording (.recordButtonActive) — .recordButton
-   already has its own `breathe` animation as that state's "alive"
-   signal; layering this on top there would just compete with it. */
+/* Two soft "heartbeat" pulses with a real short pause between them, then
+   a long hold at rest, repeating every 30s — a single CSS animation, so
+   it costs nothing on the JS thread and needs no timers/cleanup at all
+   (no drift, no stacking — the browser owns the one repeating clock).
+   `scale` (not `transform`) so it can never conflict with .orbRings' own
+   independent rotation below, which keeps running through the pulse
+   untouched — the pulse never restarts or interrupts it. Paused while
+   actually recording (.recordButtonActive) — .recordButton already has
+   its own `breathe` animation as that state's "alive" signal; layering
+   this on top there would just compete with it. Starts at 0% — i.e. the
+   moment this element mounts/the record screen loads — so the first
+   pulse sequence is visible within ~1.2s of page load, not just after
+   waiting out a full cycle. */
 .orbLayers {
   position: relative;
   width: 100%;
@@ -273,11 +278,15 @@
   animation: orbPulse 30s ease-in-out infinite;
 }
 
+/* Percentages are fractions of the 30s cycle: pulse 1 rises/falls over
+   0–0.5s (0–1.667%), a flat 0.2s pause at rest (1.667–2.333%), pulse 2
+   rises/falls over 0.7–1.2s (2.333–4%), then a flat hold at rest for the
+   remaining ~28.8s (4–100%) until the next cycle. 1.09 scale (up from the
+   previous 1.05) so the pulse actually reads at a glance instead of
+   being lost in the orb's own continuous rotation. */
 @keyframes orbPulse {
-  0%, 4%, 100% { scale: 1; }
-  1% { scale: 1.05; }
-  2% { scale: 1; }
-  3% { scale: 1.05; }
+  0%, 1.667%, 2.333%, 4%, 100% { scale: 1; }
+  0.833%, 3.167% { scale: 1.09; }
 }
 
 .recordButtonActive .orbLayers {
