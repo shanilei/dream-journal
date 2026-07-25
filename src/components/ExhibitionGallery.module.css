@@ -1,0 +1,394 @@
+/* ===================== EXHIBITION GALLERY ===================== */
+/* A dedicated composition for the Gallery on the 1080x1920 Exhibition
+   canvas — built directly from the Figma export's exact measurements,
+   not adapted from the responsive Gallery's own classes (home.module.css)
+   like the first pass was. Only ever rendered when ExhibitionGallery.tsx
+   detects the `.exhibition` class (see HomeScreenClient.tsx), so none of
+   this needs its own `.exhibition`-gated selectors or media queries —
+   it simply doesn't exist in the DOM for mobile/iPad/desktop.
+
+   Colors/shadows/backgrounds intentionally reuse this app's existing
+   flat-glass dark card system (CLAUDE.md) rather than Figma's light-
+   lavender mockup fill — same scope decision as the first pass: Figma is
+   the source for measurements/spacing/typography/positioning only. */
+
+/* Deliberately not home.module.css's `.screen` — that class carries its
+   own `.exhibition`-gated height/scroll/padding overrides from the first
+   (adapted) pass, which would double up with .root's own here. This is a
+   clean, minimal shell instead. */
+.screenShell {
+  position: relative;
+  height: var(--exhibition-height);
+  background: #050a1a;
+  overflow: hidden;
+}
+
+.root {
+  position: relative;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
+  padding: 95px 117px 240px 118px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* ── Header: title + view toggle ── */
+.header {
+  width: 845px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.titleRow {
+  width: 845px;
+  height: 101px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.title {
+  flex: 1;
+  margin: 0;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 90px;
+  line-height: 50px;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+
+:global([lang="he"]) .title {
+  font-family: var(--font-ploni), serif;
+}
+
+.viewToggle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.viewBtn {
+  all: unset;
+  box-sizing: border-box;
+  width: 101px;
+  height: 101px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #ffffff;
+}
+
+.viewBtn svg {
+  width: 35px;
+  height: 35px;
+}
+
+.viewBtnActive {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* ── Filters: search pill + filter pills ── */
+.filterRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filterRow::-webkit-scrollbar {
+  display: none;
+}
+
+.searchPill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  height: 50px;
+  width: max-content;
+  padding: 6px 16px;
+  box-sizing: border-box;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10.28px);
+  -webkit-backdrop-filter: blur(10.28px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  overflow: hidden;
+  transition: max-width 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+              flex-grow 0.55s cubic-bezier(0.22, 0.61, 0.36, 1),
+              padding 0.55s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.searchPillOpen {
+  flex: 1 1 auto;
+  max-width: 2000px;
+}
+
+.searchIconBtn {
+  all: unset;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.searchLabel,
+.searchInput {
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 30px;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+:global([lang="he"]) .searchLabel,
+:global([lang="he"]) .searchInput {
+  font-family: var(--font-ploni), serif;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  outline: none;
+  white-space: normal;
+}
+
+.searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.filterPill {
+  all: unset;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  height: 50px;
+  padding: 6px 16px;
+  border-radius: 99px;
+  background: rgba(255, 255, 255, 0.07);
+  backdrop-filter: blur(10.28px);
+  -webkit-backdrop-filter: blur(10.28px);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 30px;
+  color: #ffffff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+:global([lang="he"]) .filterPill {
+  font-family: var(--font-ploni), serif;
+}
+
+.filterPillActive {
+  background: #ffffff;
+  color: #000000;
+  border-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* ── Content: section label + featured row + collection grid ── */
+.content {
+  width: 835px;
+  display: flex;
+  flex-direction: column;
+  gap: 27px;
+}
+
+.sectionLabel {
+  margin: 0 0 10px;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 22px;
+  line-height: 30px;
+  color: #ffffff;
+}
+
+:global([lang="he"]) .sectionLabel {
+  font-family: var(--font-ploni), serif;
+}
+
+.sectionHeaderRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.sectionHeaderRow .sectionLabel {
+  margin: 0;
+}
+
+/* ── Cards — shared shell for both the featured row and the grid ── */
+.card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px;
+  box-sizing: border-box;
+  border-radius: 5.46px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  text-decoration: none;
+  transition: transform 0.18s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.card:active {
+  transform: scale(0.98);
+}
+
+.featuredRow {
+  display: flex;
+  flex-direction: row;
+  gap: 14px;
+}
+
+/* Sized per real card count (1 or 2) inline via style — see
+   ExhibitionGallery.tsx; no fixed width here so a lone recent dream
+   fills the row instead of leaving Figma's second-card gap empty. */
+.featuredCard {
+  height: 151.15px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 198.25px);
+  column-gap: 14px;
+  row-gap: 10px;
+}
+
+.gridCard {
+  width: 198.25px;
+  height: 151.15px;
+}
+
+.cardImgWrap {
+  position: relative;
+  width: 100%;
+  height: 109.23px;
+  border-radius: 3.27692px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.cardImg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.cardTag {
+  position: absolute;
+  top: 5.46px;
+  left: 5.46px;
+  padding: 2.18462px 8.73846px;
+  border-radius: 10.9231px;
+  background: #ffffff;
+  color: rgba(0, 0, 0, 0.9);
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 6.55385px;
+  line-height: 11px;
+  white-space: nowrap;
+}
+
+:global([lang="he"]) .cardTag {
+  font-family: var(--font-ploni), serif;
+}
+
+:global([dir="rtl"]) .cardTag {
+  left: auto;
+  right: 5.46px;
+}
+
+/* Not part of the Figma export — kept at a small, fixed absolute size
+   (not scaled with the rest of the card) since there's no spec for it. */
+.cardHeart {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+:global([dir="rtl"]) .cardHeart {
+  right: auto;
+  left: 6px;
+}
+
+.cardBody {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4.37px;
+  padding: 5.46px;
+}
+
+.cardHeading {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin: 0;
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 8.73846px;
+  line-height: 13px;
+  color: #ffffff;
+}
+
+:global([lang="he"]) .cardHeading {
+  font-family: var(--font-ploni), serif;
+}
+
+.cardSubheading {
+  flex-shrink: 0;
+  margin: 0;
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 6.55385px;
+  line-height: 11px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+:global([lang="he"]) .cardSubheading {
+  font-family: var(--font-ploni), serif;
+}
+
+.comingSoon {
+  font-family: var(--font-family);
+  font-size: 22px;
+  line-height: 30px;
+  color: rgba(255, 255, 255, 0.6);
+}
