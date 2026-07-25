@@ -268,7 +268,7 @@
    its own `breathe` animation as that state's "alive" signal; layering
    this on top there would just compete with it. Starts at 0% — i.e. the
    moment this element mounts/the record screen loads — so the first
-   pulse sequence is visible within ~1.2s of page load, not just after
+   pulse sequence is visible within ~1.7s of page load, not just after
    waiting out a full cycle. */
 .orbLayers {
   position: relative;
@@ -279,14 +279,15 @@
 }
 
 /* Percentages are fractions of the 30s cycle: pulse 1 rises/falls over
-   0–0.5s (0–1.667%), a flat 0.2s pause at rest (1.667–2.333%), pulse 2
-   rises/falls over 0.7–1.2s (2.333–4%), then a flat hold at rest for the
-   remaining ~28.8s (4–100%) until the next cycle. 1.09 scale (up from the
-   previous 1.05) so the pulse actually reads at a glance instead of
-   being lost in the orb's own continuous rotation. */
+   0–0.7s (0–2.333%), a flat 0.25s pause at rest (2.333–3.167%), pulse 2
+   rises/falls over 0.95–1.65s (3.167–5.5%), then a flat hold at rest for
+   the remaining ~28.35s (5.5–100%) until the next cycle. 1.14 scale over
+   a slower 0.35s rise/fall (up from 1.09 over 0.25s) so each beat is
+   clearly visible against the orb's own continuous rotation, while
+   ease-in-out keeps the motion soft rather than snappy. */
 @keyframes orbPulse {
-  0%, 1.667%, 2.333%, 4%, 100% { scale: 1; }
-  0.833%, 3.167% { scale: 1.09; }
+  0%, 2.333%, 3.167%, 5.5%, 100% { scale: 1; }
+  1.167%, 4.333% { scale: 1.14; }
 }
 
 .recordButtonActive .orbLayers {
