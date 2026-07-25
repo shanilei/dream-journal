@@ -441,6 +441,41 @@ export default function DreamResultScreen({
   const [captionFontSize, setCaptionFontSize] = useState(lastSaved.captionFontSize);
   const [metaFontSize, setMetaFontSize] = useState(lastSaved.metaFontSize);
   const [printImageUrlState, setPrintImageUrlState] = useState(printImageUrl);
+  // The flattened print PNG is generated via after() in the dream-creation
+  // route — i.e. in the background, *after* that request's response is
+  // already sent — so the very first render of a freshly-created dream
+  // (right here on /record, right after recording) never has printImageUrl
+  // yet. Without this, printing immediately falls back to the old layered
+  // DOM markup below, which is the one path never fixed for Safari's print
+  // rasterizer rendering it solid black (the flattened-PNG approach exists
+  // specifically because of that bug). Poll briefly for it to show up —
+  // background generation logs ~1.7s in practice, so this typically only
+  // runs once or twice before clearing itself.
+  useEffect(() => {
+    if (!id || printImageUrlState) return;
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 10;
+    const intervalId = window.setInterval(async () => {
+      attempts++;
+      try {
+        const res = await fetch(`/api/dream/${id}`);
+        if (res.ok) {
+          const updated = await res.json();
+          if (!cancelled && updated?.printImageUrl) {
+            setPrintImageUrlState(updated.printImageUrl);
+          }
+        }
+      } catch {
+        // Transient network error — just try again next tick.
+      }
+      if (attempts >= maxAttempts) window.clearInterval(intervalId);
+    }, 1500);
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, [id, printImageUrlState]);
   // Independent safeguard alongside .printCard's own CSS (see its comment
   // in DreamResultScreen.module.css): explicitly fetch the print image
   // into the browser's cache as soon as its URL is known, via a bare
