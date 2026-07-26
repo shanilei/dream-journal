@@ -7,7 +7,6 @@ import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import styles from "./record.module.css";
 import { useSetBottomNavHidden } from "@/components/BottomNavVisibility";
-import { useIsExhibition } from "@/components/ExhibitionMode";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CloseIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
@@ -55,9 +54,10 @@ function shortSymbol(symbol: string): string {
 
 const AUDIO_BAR_COUNT = 5;
 const EASE = [0.22, 1, 0.36, 1] as const;
-// Exhibition mode only — how long into a recording before the helper
-// text swaps to a "tap again to send" hint (see the .prompt render below).
-const EXHIBITION_SEND_HINT_DELAY_SEC = 3;
+// Both exhibition and normal mobile — how long into a recording before
+// the helper text swaps to a "tap again" hint (see the .prompt render
+// below).
+const RECORD_SEND_HINT_DELAY_SEC = 3;
 
 function formatElapsed(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
@@ -91,8 +91,7 @@ export default function RecordPage() {
   // instead of this screen rendering its own instance.
   useSetBottomNavHidden(isRecording);
 
-  const isExhibition = useIsExhibition();
-  const showExhibitionSendHint = isExhibition && isRecording && elapsedSec >= EXHIBITION_SEND_HINT_DELAY_SEC;
+  const showSendHint = isRecording && elapsedSec >= RECORD_SEND_HINT_DELAY_SEC;
 
   // The idle screen's background (gradient pulse, starfield twinkle, glow
   // blobs, the orb's rotating rings) is decorative — pause it once the
@@ -230,32 +229,26 @@ export default function RecordPage() {
         {status === "error" ? (
           t.recordError
         ) : isRecording ? (
-          isExhibition ? (
-            // Exhibition only: crossfades from the normal "I'm listening"
-            // copy to a "tap again to send" hint a few seconds in, since a
-            // kiosk visitor has no other cue that tapping again submits
-            // (rather than cancels) the recording.
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={showExhibitionSendHint ? "hint" : "listening"}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4, ease: EASE }}
-                style={{ display: "block" }}
-              >
-                {(showExhibitionSendHint ? t.recordingPromptExhibitionHint : t.recordingPrompt)
-                  .split("\n")
-                  .map((line, i) => (
-                    <span key={i} className={styles.promptLine}>{line}</span>
-                  ))}
-              </motion.span>
-            </AnimatePresence>
-          ) : (
-            t.recordingPrompt.split("\n").map((line, i) => (
-              <span key={i} className={styles.promptLine}>{line}</span>
-            ))
-          )
+          // Crossfades from the normal "I'm listening" copy to a "tap
+          // again" hint a few seconds in, since there's no other cue that
+          // tapping again submits (rather than cancels) the recording —
+          // both exhibition and normal mobile.
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.span
+              key={showSendHint ? "hint" : "listening"}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: EASE }}
+              style={{ display: "block" }}
+            >
+              {(showSendHint ? t.recordingPromptSendHint : t.recordingPrompt)
+                .split("\n")
+                .map((line, i) => (
+                  <span key={i} className={styles.promptLine}>{line}</span>
+                ))}
+            </motion.span>
+          </AnimatePresence>
         ) : lang === "he" ? (
           t.recordPrompt.split("\n").map((line, i) => (
             <span key={i} className={styles.promptLine}>{line}</span>

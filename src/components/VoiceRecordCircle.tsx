@@ -147,6 +147,16 @@ export default function VoiceRecordCircle({ isRecording, isPaused = false, resta
             analyser.smoothingTimeConstant = 0.6;
             source.connect(analyser);
             audioCtxRef.current = audioCtx;
+            // Created inside an async getUserMedia().then() callback, not
+            // synchronously inside the click handler — by the time this
+            // runs (after the permission prompt round-trip), some browsers
+            // no longer consider it "within" that user gesture and start
+            // the context suspended. While suspended, getByteFrequencyData
+            // below just reads zeros forever — the rAF loop keeps running,
+            // but every bar renders at its floor height, indistinguishable
+            // from the waveform simply not moving. Nothing else in this
+            // file ever resumed it.
+            if (audioCtx.state === "suspended") audioCtx.resume().catch(() => {});
 
             const freqData = new Uint8Array(analyser.frequencyBinCount);
             const barCount = audioBarCount;
