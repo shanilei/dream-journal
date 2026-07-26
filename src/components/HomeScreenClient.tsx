@@ -7,7 +7,7 @@ import type { Variants } from "framer-motion";
 import styles from "@/app/home.module.css";
 import exhibitionStyles from "@/components/ExhibitionGallery.module.css";
 import ExhibitionGallery from "@/components/ExhibitionGallery";
-import BottomNav from "@/components/BottomNav";
+import { useSetBottomNavDimmed } from "@/components/BottomNavVisibility";
 import FavoriteButton from "@/components/FavoriteButton";
 import DreamResultScreen from "@/components/DreamResultScreen";
 import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon } from "@/components/Icons";
@@ -711,6 +711,9 @@ export default function HomeScreenClient({
   // time to fully settle (see NAVIGATE_AFTER), where it re-mounts with
   // skipEntrance so it doesn't replay any of it.
   const [openingCard, setOpeningCard] = useState<Card | null>(null);
+  // The global, persistent BottomNav (see GlobalBottomNav.tsx) reads this
+  // instead of this screen rendering its own instance.
+  useSetBottomNavDimmed(Boolean(openingCard));
   // Explicit `number` (not ReturnType<typeof window.setTimeout>) — with
   // @types/node in scope, that ReturnType resolves to Node's Timeout
   // instead of the DOM's number, even though this is client-only code
@@ -783,7 +786,6 @@ export default function HomeScreenClient({
     return (
       <div className={exhibitionStyles.screenShell}>
         <ExhibitionGallery gridCards={gridCards} favorites={favorites} onToggleFavorite={toggleFavorite} />
-        <BottomNav active="dreams" />
       </div>
     );
   }
@@ -1257,21 +1259,6 @@ export default function HomeScreenClient({
         {openingCard && <DreamAnalysisOverlay card={openingCard} lang={lang} onClose={closeDream} />}
       </AnimatePresence>
     </div>
-
-    {/* Rendered as a sibling of .screen, not a descendant — .screen plays
-        a transform-based entrance animation (screenIn) on every mount, and
-        while that's running it becomes a containing block for any
-        position:fixed descendant (see the note on `screenIn` in
-        globals.css), which was dragging this fixed BottomNav along with
-        the entrance animation instead of leaving it static. Stays outside
-        the blurred/frozen wrapper above so it can fade to 40% in place
-        (per the transition spec) without also blurring. */}
-    <motion.div
-      animate={{ opacity: openingCard ? 0.4 : 1 }}
-      transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
-    >
-      <BottomNav active="dreams" />
-    </motion.div>
     </LayoutGroup>
   );
 }

@@ -8,6 +8,8 @@ import { PhotoBorderProvider } from "@/components/PhotoBorderProvider";
 import AppBackground from "@/components/AppBackground";
 import ExhibitionMode from "@/components/ExhibitionMode";
 import IdleHomeRedirect from "@/components/IdleHomeRedirect";
+import GlobalBottomNav from "@/components/GlobalBottomNav";
+import { BottomNavVisibilityProvider } from "@/components/BottomNavVisibility";
 import "./globals.css";
 
 const THEME_INIT_SCRIPT = `
@@ -105,7 +107,15 @@ export default function RootLayout({
                   here — that used to leave a window between paint and the
                   redirect firing where an unonboarded user could see/touch
                   the real app underneath. */}
-              <PhotoBorderProvider>{children}</PhotoBorderProvider>
+              <BottomNavVisibilityProvider>
+                <PhotoBorderProvider>{children}</PhotoBorderProvider>
+                {/* Sibling of {children}, mounted once here instead of by each
+                    screen — see GlobalBottomNav.tsx for why: a fresh BottomNav
+                    per screen meant a full unmount/remount on every single
+                    navigation, which was the actual source of it visibly
+                    jumping/flashing on every tap. */}
+                <GlobalBottomNav />
+              </BottomNavVisibilityProvider>
             </LanguageProvider>
           </ThemeProvider>
         </ExhibitionMode>

@@ -8,7 +8,7 @@ import styles from "./BottomNav.module.css";
 import { AddAIIcon, GalleryIcon, UserIcon, CloseIcon, MicIcon, PencilIcon } from "./Icons";
 import { useLanguage } from "./LanguageProvider";
 
-type NavKey = "record" | "user" | "dreams";
+export type NavKey = "record" | "user" | "dreams";
 
 const LONG_PRESS_MS = 3000;
 const EASE = [0.22, 1, 0.36, 1] as const;
@@ -34,9 +34,14 @@ function scrollActiveScreenToTop() {
 export default function BottomNav({
   active,
   hidden = false,
+  dimmed = false,
 }: {
   active: NavKey;
   hidden?: boolean;
+  // Visual-only fade to 0.4 opacity (e.g. while the Gallery's own card/
+  // category overlay is opening) — unlike `hidden`, never slides the bar
+  // out of view or marks it inert; it stays exactly where it is.
+  dimmed?: boolean;
 }) {
   const { t } = useLanguage();
   const pathname = usePathname();
@@ -137,7 +142,7 @@ export default function BottomNav({
       </AnimatePresence>
 
       <nav
-        className={`${styles.nav} ${hidden ? styles.navHidden : ""}`}
+        className={`${styles.nav} ${hidden ? styles.navHidden : ""} ${dimmed ? styles.navDimmed : ""}`}
         aria-hidden={hidden}
         inert={hidden || undefined}
       >
