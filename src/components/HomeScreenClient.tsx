@@ -8,6 +8,7 @@ import styles from "@/app/home.module.css";
 import exhibitionStyles from "@/components/ExhibitionGallery.module.css";
 import ExhibitionGallery from "@/components/ExhibitionGallery";
 import { useSetBottomNavDimmed } from "@/components/BottomNavVisibility";
+import { useIsExhibition } from "@/components/ExhibitionMode";
 import FavoriteButton from "@/components/FavoriteButton";
 import DreamResultScreen from "@/components/DreamResultScreen";
 import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon } from "@/components/Icons";
@@ -682,14 +683,7 @@ export default function HomeScreenClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [gridColumns, setGridColumns] = useState<2 | 3>(3);
-  // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
-  // read directly (matches DreamLoadingScreen's own detection) rather
-  // than useSearchParams, so this component doesn't need a Suspense
-  // boundary just to pick the Exhibition-only layout below.
-  const [isExhibition, setIsExhibition] = useState(false);
-  useEffect(() => {
-    setIsExhibition(document.documentElement.classList.contains("exhibition"));
-  }, []);
+  const isExhibition = useIsExhibition();
   // The CSS module's own iPad 4-column override for .collectionGrid can
   // never win against the inline gridTemplateColumns below (inline style
   // always beats a class, media query or not) — so tablet has to be

@@ -7,6 +7,7 @@ import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import styles from "./record.module.css";
 import { useSetBottomNavHidden } from "@/components/BottomNavVisibility";
+import { useIsExhibition } from "@/components/ExhibitionMode";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CloseIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
@@ -90,14 +91,7 @@ export default function RecordPage() {
   // instead of this screen rendering its own instance.
   useSetBottomNavHidden(isRecording);
 
-  // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
-  // read directly (matches DreamLoadingScreen/HomeScreenClient's own
-  // detection) so this route doesn't need a Suspense boundary just for
-  // one recording-only text swap below.
-  const [isExhibition, setIsExhibition] = useState(false);
-  useEffect(() => {
-    setIsExhibition(document.documentElement.classList.contains("exhibition"));
-  }, []);
+  const isExhibition = useIsExhibition();
   const showExhibitionSendHint = isExhibition && isRecording && elapsedSec >= EXHIBITION_SEND_HINT_DELAY_SEC;
 
   // The idle screen's background (gradient pulse, starfield twinkle, glow

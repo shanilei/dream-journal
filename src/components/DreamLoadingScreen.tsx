@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import styles from "./DreamLoadingScreen.module.css";
 import { SparkleIcon, MoonPhaseIcon } from "./Icons";
 import { useLanguage } from "./LanguageProvider";
+import { useIsExhibition } from "./ExhibitionMode";
 
 const MOON_RING_COUNT = 28;
 // Bumped per request — was 74. .orbWrap's box (module.css) is sized to match.
@@ -53,13 +54,7 @@ export default function DreamLoadingScreen() {
   const isHe = lang === "he";
   const [messages] = useState<string[]>(() => pickMessages(isHe));
   const [visibleCount, setVisibleCount] = useState(1);
-  // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
-  // read directly instead of useSearchParams so this component doesn't
-  // need its own Suspense boundary just for the ring's radius.
-  const [isExhibition, setIsExhibition] = useState(false);
-  useEffect(() => {
-    setIsExhibition(document.documentElement.classList.contains("exhibition"));
-  }, []);
+  const isExhibition = useIsExhibition();
   const activeMoonRingIcons = isExhibition ? moonRingIconsExhibition : moonRingIcons;
 
   useEffect(() => {

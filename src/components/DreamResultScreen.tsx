@@ -6,6 +6,7 @@ import styles from "./DreamResultScreen.module.css";
 import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import { useSetBottomNavHidden } from "./BottomNavVisibility";
+import { useIsExhibition } from "./ExhibitionMode";
 import EditImageDetailsSheet from "./EditImageDetailsSheet";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
@@ -182,15 +183,10 @@ export default function DreamResultScreen({
   // top. The gap between the two thresholds avoids flicker if the
   // scroll position happens to sit right at either edge.
   const [navHidden, setNavHidden] = useState(true);
-  // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
-  // read directly (matches DreamLoadingScreen/record page's own
-  // detection). A kiosk visitor never scrolls this screen the way a phone
-  // user would, so the scroll-driven show/hide below would otherwise leave
-  // BottomNav hidden here indefinitely; exhibition mode keeps it shown.
-  const [isExhibition, setIsExhibition] = useState(false);
-  useEffect(() => {
-    setIsExhibition(document.documentElement.classList.contains("exhibition"));
-  }, []);
+  // A kiosk visitor never scrolls this screen the way a phone user would,
+  // so the scroll-driven show/hide below would otherwise leave BottomNav
+  // hidden here indefinitely; exhibition mode keeps it shown.
+  const isExhibition = useIsExhibition();
   // The global, persistent BottomNav (see GlobalBottomNav.tsx) reads this
   // instead of this screen rendering its own instance.
   useSetBottomNavHidden(isExhibition ? false : navHidden);
