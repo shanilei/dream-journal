@@ -526,12 +526,6 @@ export default function DreamResultScreen({
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
   const [detailsUpdated, setDetailsUpdated] = useState(false);
-  // TEMPORARY DEBUG — investigating a report that tapping Save in the
-  // "Edit image details" sheet never reaches the server at all (no PATCH
-  // shows up in server logs, before or after). Shows each step on-screen
-  // so this is visible even without Mac + cable remote debugging. Remove
-  // once the missing-PATCH issue is diagnosed and fixed.
-  const [debugMsg, setDebugMsg] = useState("");
   const displayAt = combineDateAndTime(dateInput, timeInput);
 
   function openEditSheet() {
@@ -551,11 +545,7 @@ export default function DreamResultScreen({
   }
 
   async function saveEditSheet() {
-    console.log("[print-debug] saveEditSheet() called, id=", id);
-    setDebugMsg("1. Save tapped, handler ran");
     if (!id) {
-      console.log("[print-debug] no id — bailing out before any fetch");
-      setDebugMsg("1b. No id on this dream — cannot save");
       setShowEditSheet(false);
       return;
     }
@@ -570,22 +560,13 @@ export default function DreamResultScreen({
         captionFontSize,
         metaFontSize,
       };
-      console.log("[print-debug] about to fetch PATCH /api/dream/" + id, body);
-      setDebugMsg("2. Sending PATCH...");
       const res = await fetch(`/api/dream/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      console.log("[print-debug] fetch resolved, status=", res.status, res.ok);
-      setDebugMsg(`3. Response: ${res.status}`);
       if (!res.ok) throw new Error("save failed with status " + res.status);
-      const updated = await res.json().catch((e) => {
-        console.log("[print-debug] res.json() failed:", e);
-        return null;
-      });
-      console.log("[print-debug] response body:", updated);
-      setDebugMsg(`4. printImageUrl in response: ${updated?.printImageUrl ? "yes" : "no"}`);
+      const updated = await res.json().catch(() => null);
       if (updated?.printImageUrl) setPrintImageUrlState(updated.printImageUrl);
       setLastSaved({
         captionOverride,
@@ -599,12 +580,10 @@ export default function DreamResultScreen({
       setShowEditSheet(false);
       setDetailsUpdated(true);
       setTimeout(() => setDetailsUpdated(false), 2500);
-      setTimeout(() => setDebugMsg(""), 6000);
     } catch (err) {
       // Keep the sheet open with the user's edits intact so they can retry
       // instead of silently discarding what they typed.
-      console.error("[print-debug] saveEditSheet failed:", err);
-      setDebugMsg(`ERROR: ${err instanceof Error ? err.message : String(err)}`);
+      console.error("saveEditSheet failed:", err);
     } finally {
       setSavingEdit(false);
     }
@@ -1122,13 +1101,6 @@ export default function DreamResultScreen({
 
       {detailsUpdated && (
         <div className={styles.toast}>{t.detailsUpdated}</div>
-      )}
-
-      {/* TEMPORARY DEBUG — see saveEditSheet()'s own comment above. */}
-      {debugMsg && (
-        <div className={styles.toast} style={{ bottom: 90, background: "#c0392b", zIndex: 200 }}>
-          DEBUG: {debugMsg}
-        </div>
       )}
 
       {showEditSheet && (

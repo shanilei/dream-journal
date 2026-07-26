@@ -27,3 +27,44 @@
     display: none !important;
   }
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* The single shared pulse every exhibition screen used to render its own
+   (freshly-restarting) copy of — record.module.css, DreamLoadingScreen,
+   YourJourneyScreen, DreamTypeScreen, DreamsByTypeScreen, and
+   ExhibitionGallery each had their own `::before`/`::after` gradient with
+   its own animation duration (or, for DreamsByTypeScreen/ExhibitionGallery,
+   no animation/gradient at all). Since each of those screens is a
+   distinct component that fully unmounts/remounts on navigation, each
+   copy's animation timeline restarted at 0% on arrival — the actual cause
+   of the reported color/brightness jump, independent of whether the
+   colors themselves matched. Animating *this* element's opacity instead
+   achieves the same "pulse toward the flat base and back" look (fading
+   toward the plain #050A1A <body> background at the low point, see
+   globals.css), but as the one element in the whole app that's mounted
+   once and never remounted, so its pulse timeline never resets. Every
+   individual screen's own gradient/pulse/glow-blob layers are hidden in
+   exhibition mode (see each component's own module.css) so this is the
+   only background layer ever visible.
+
+   background overridden here, not just var(--gallery-gradient) reused —
+   confirmed by rendering both at the real 1080x1920 canvas size: that
+   gradient's stops (0%/52.67%/105.33%, a 348.69deg diagonal) were tuned
+   for a ~390x850px phone frame, so stretched over a canvas more than 2x
+   as tall, the bright end gets compressed into roughly the top 15% and
+   the remaining ~85% reads as flat near-black — the actual cause of the
+   reported "bright band at the top, dark center" look (a separate,
+   confirmed-by-screenshot Figma radial gradient tried for this canvas
+   also produced a bright-top/bright-bottom/dark-center look instead of a
+   smooth surface). This linear, top-to-bottom version with stops
+   rebalanced for THIS canvas's own proportions (verified the same way)
+   reads as one continuous fade with no visible seam anywhere. */
+:global(.exhibition) .bg {
+  background: linear-gradient(180deg, #050A1A 0%, #080C36 55%, #6871FF 100%);
+  animation: exhibitionPulse 6s ease-in-out infinite;
+}
+
+@keyframes exhibitionPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}

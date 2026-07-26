@@ -913,9 +913,31 @@
    `.exhibitionCanvas` is a fixed 1080x1920 box, so this screen must size
    itself to the canvas's own fixed height instead of the ambient
    `100vh`/`100dvh` — otherwise this screen (and BottomNav's clearance
-   within it) is confined to a box shorter than the actual canvas. */
+   within it) is confined to a box shorter than the actual canvas.
+   max-width: 100% (was left at the inherited --shell-max-width, which
+   globals.css shrinks to --exhibition-content-width/880px in exhibition
+   mode) — every other exhibition screen fills the full 1080px canvas via
+   a position:fixed background pseudo-element that bypasses its own
+   content width entirely; this screen paints its background directly on
+   `.screen` itself, so without this override it stayed capped at 880px,
+   leaving a ~100px gutter on each side where the global ambient
+   gradient (AppBackground) showed through underneath instead. */
+/* Background made fully transparent (was this screen's own darker,
+   photo-viewing-optimized triple-glow background, then briefly a
+   separately-painted copy of the shared gradient) — AppBackground
+   (mounted once at the root, z-index:-1, confined to the same
+   1080x1920 canvas) already sits behind every screen at all times. Any
+   *second*, separately-rendered copy of that gradient here — even with
+   matching colors — is a distinct element that fades in on top of it
+   via `.screen`'s own screenIn opacity animation, so the transition
+   itself was visible as a seam/jump between the two layers. Making this
+   screen transparent means there's only ever one gradient element in
+   the whole exhibition experience to see, so navigating here can't
+   possibly show a mismatch. */
 :global(.exhibition) .screen {
   height: var(--exhibition-height);
+  max-width: 100%;
+  background: transparent;
 }
 
 /* Portrait composition pass. The image/interpretation column already

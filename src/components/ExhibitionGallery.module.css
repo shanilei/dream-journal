@@ -16,10 +16,15 @@
    own `.exhibition`-gated height/scroll/padding overrides from the first
    (adapted) pass, which would double up with .root's own here. This is a
    clean, minimal shell instead. */
+/* transparent (was a flat #050a1a with no gradient/pulse at all — the
+   most jarring of every screen's mismatched background treatments) so
+   the single shared pulse on AppBackground (see its own module.css) is
+   the only background ever visible; this component only ever renders in
+   exhibition mode already, so no :global(.exhibition) gate is needed. */
 .screenShell {
   position: relative;
   height: var(--exhibition-height);
-  background: #050a1a;
+  background: transparent;
   overflow: hidden;
 }
 

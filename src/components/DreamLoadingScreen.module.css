@@ -230,9 +230,23 @@
    MOON_RING_RADIUS_EXHIBITION_PX in DreamLoadingScreen.tsx (same ~20px
    margin around the ring as the base size below) — the component picks
    between the two radii itself based on the same `.exhibition` class. */
+/* transparent (was the opaque #050A1A base) + the ::before/nebula rules
+   below hidden — this screen's own gradient/blob layers are gone
+   entirely in exhibition mode so the single shared pulse on AppBackground
+   (see its own module.css) is the only background ever visible, instead
+   of a second copy with its own restarting animation timeline. */
 :global(.exhibition) .screen {
   max-width: 100%;
   height: var(--exhibition-height);
+  background: transparent;
+}
+
+:global(.exhibition) .screen::before {
+  display: none;
+}
+
+:global(.exhibition) .nebula {
+  display: none;
 }
 
 /* +30px per request (was 540px) — kept centered via the same flex
