@@ -45,8 +45,11 @@ export const translations = {
     // Exhibition mode only — shown in place of recordingPrompt once a
     // recording has run a few seconds (see record/page.tsx), so a kiosk
     // visitor knows tapping again ends and sends the dream instead of
-    // canceling it.
-    recordingPromptExhibitionHint: "Tap again\nto send the dream",
+    // canceling it. Wording ("start generate") is an explicit exhibition-
+    // only exception to the app's usual copy guide, which otherwise bans
+    // "Generate" — requested verbatim with a mockup, not a copy decision
+    // made unilaterally here.
+    recordingPromptExhibitionHint: "Tap again to\nstart generate",
     recordError: "Something went wrong — tap to try again",
     recordOr: "OR",
     recordTypeIt: "Type it",
@@ -211,7 +214,7 @@ export const translations = {
     dreamInputPlaceholder: "תאר את החלום",
     recordPrompt: "מה חלמת היום?\nלחץ כדי להקליט",
     recordingPrompt: "בוא נקשיב לחלום שלך",
-    recordingPromptExhibitionHint: "הקישו שוב\nכדי לשלוח את החלום",
+    recordingPromptExhibitionHint: "הקישו שוב\nכדי להתחיל ליצור",
     recordError: "משהו השתבש — לחץ לנסות שוב",
     recordOr: "או",
     recordTypeIt: "כתבו את החלום",

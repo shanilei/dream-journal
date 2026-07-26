@@ -56,7 +56,7 @@ const AUDIO_BAR_COUNT = 5;
 const EASE = [0.22, 1, 0.36, 1] as const;
 // Exhibition mode only — how long into a recording before the helper
 // text swaps to a "tap again to send" hint (see the .prompt render below).
-const EXHIBITION_SEND_HINT_DELAY_SEC = 5;
+const EXHIBITION_SEND_HINT_DELAY_SEC = 3;
 
 function formatElapsed(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
