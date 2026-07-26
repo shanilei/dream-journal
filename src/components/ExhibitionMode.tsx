@@ -1,7 +1,22 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, createContext, useContext, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+
+// `active` below is derived synchronously from useSearchParams() on every
+// render, so exposing it via context lets consumers read it during their
+// own first render — no DOM-class-sniffing, no effect-ordering race.
+// (Screens used to each independently check
+// document.documentElement.classList.contains("exhibition") inside their
+// own useEffect — React fires effects child-first on mount, so a deeply
+// nested screen's own check could run *before* ExhibitionModeInner's own
+// effect below had added the class, silently sticking at `false` forever
+// since each was a run-once effect.)
+const ExhibitionContext = createContext(false);
+
+export function useIsExhibition(): boolean {
+  return useContext(ExhibitionContext);
+}
 
 // Which way the exhibition monitor was physically turned relative to its
 // (fixed) Windows landscape orientation — flip to "ccw" if the physical
@@ -100,10 +115,14 @@ function ExhibitionModeInner({ children }: { children: React.ReactNode }) {
   }, [active]);
 
   if (!active) {
-    return <>{children}</>;
+    return <ExhibitionContext.Provider value={false}>{children}</ExhibitionContext.Provider>;
   }
 
-  return <ExhibitionCanvas preview={preview}>{children}</ExhibitionCanvas>;
+  return (
+    <ExhibitionContext.Provider value={true}>
+      <ExhibitionCanvas preview={preview}>{children}</ExhibitionCanvas>
+    </ExhibitionContext.Provider>
+  );
 }
 
 // useSearchParams() requires a Suspense boundary to avoid opting every
