@@ -106,6 +106,21 @@ html {
   overscroll-behavior-x: none;
   touch-action: pan-y;
   max-width: 100%;
+  /* Next.js scrolls at this html/body level (not per-.screen — see the
+     comment above), and pages differ in whether their content actually
+     overflows (Gallery/Dream Result/Your Journey scroll; Record/loading
+     are locked to exactly one viewport height). On a real desktop
+     browser (unlike touch/mobile, where scrollbars overlay content and
+     reserve no space) that meant the scrollbar itself appeared/
+     disappeared between screens, changing the viewport's actual content
+     width by its ~15-17px and shifting anything centered via `left: 50%`
+     (BottomNav) sideways on every navigation. Reserving the gutter
+     unconditionally keeps the content width constant regardless of
+     whether the current page happens to scroll. `auto` (not `stable
+     both-edges`) since this app is never horizontally scrollable to
+     begin with (overflow-x: hidden above) — only the vertical gutter
+     needs reserving. */
+  scrollbar-gutter: stable;
 }
 
 body {
