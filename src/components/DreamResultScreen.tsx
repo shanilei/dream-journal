@@ -5,7 +5,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
 import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
-import BottomNav from "./BottomNav";
+import { useSetBottomNavHidden } from "./BottomNavVisibility";
 import EditImageDetailsSheet from "./EditImageDetailsSheet";
 import { useLanguage } from "./LanguageProvider";
 import { usePhotoBorder } from "./PhotoBorderProvider";
@@ -191,6 +191,9 @@ export default function DreamResultScreen({
   useEffect(() => {
     setIsExhibition(document.documentElement.classList.contains("exhibition"));
   }, []);
+  // The global, persistent BottomNav (see GlobalBottomNav.tsx) reads this
+  // instead of this screen rendering its own instance.
+  useSetBottomNavHidden(isExhibition ? false : navHidden);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -1170,22 +1173,6 @@ export default function DreamResultScreen({
         </div>
       )}
     </div>
-
-    {/* Sibling of .screen, not a descendant — .screen plays a transform-
-        based entrance animation (screenIn) on every mount, which makes it
-        a containing block for any position:fixed descendant for the
-        animation's duration (see the note on `screenIn` in globals.css).
-        BottomNav being nested inside .screen was enough on its own to
-        drag it along with that entrance animation, regardless of this
-        wrapper's own opacity-only animation. Opacity only, no y, on this
-        wrapper itself for the same reason. */}
-    <motion.div
-      initial={reduceMotion ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.28, ease: EASE }}
-    >
-      <BottomNav active="dreams" hidden={isExhibition ? false : navHidden} />
-    </motion.div>
 
     {/* Print-only copy of the image card — shown via @media print in
         DreamResultScreen.module.css. When printImageUrl is available it's a

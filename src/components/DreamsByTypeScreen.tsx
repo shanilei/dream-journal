@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import styles from "./DreamsByTypeScreen.module.css";
-import BottomNav from "./BottomNav";
 import { ArrowLeftIcon } from "./Icons";
 import { useLanguage } from "./LanguageProvider";
 import { translateMood, formatDreamDate, langFromText } from "@/i18n/translations";
@@ -31,7 +30,6 @@ export default function DreamsByTypeScreen({ mood, dreams }: { mood: string; dre
   const { lang } = useLanguage();
 
   return (
-    <>
     <div className={styles.screen}>
       {/* Nebulas */}
       <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
@@ -89,14 +87,5 @@ export default function DreamsByTypeScreen({ mood, dreams }: { mood: string; dre
         </div>
       </div>
     </div>
-
-    {/* Sibling of .screen, not a descendant — .screen plays a transform-
-        based entrance animation (screenIn) on every mount, which briefly
-        makes it a containing block for any position:fixed descendant
-        (see the note on `screenIn` in globals.css), dragging this fixed
-        BottomNav along with the entrance animation instead of leaving it
-        static every time this route mounts. */}
-    <BottomNav active="dreams" />
-    </>
   );
 }

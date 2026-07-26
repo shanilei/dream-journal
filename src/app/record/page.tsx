@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import styles from "./record.module.css";
-import BottomNav from "@/components/BottomNav";
+import { useSetBottomNavHidden } from "@/components/BottomNavVisibility";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CloseIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
@@ -86,6 +86,9 @@ export default function RecordPage() {
   const pendingActionRef = useRef<"submit" | "discard">("submit");
 
   const isRecording = status === "recording";
+  // The global, persistent BottomNav (see GlobalBottomNav.tsx) reads this
+  // instead of this screen rendering its own instance.
+  useSetBottomNavHidden(isRecording);
 
   // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
   // read directly (matches DreamLoadingScreen/HomeScreenClient's own
@@ -204,7 +207,6 @@ export default function RecordPage() {
   }
 
   return (
-    <>
     <div
       ref={screenRef}
       className={`${styles.screen} ${bgAnimPaused ? styles.animPaused : ""} lockedScreen`}
@@ -364,14 +366,5 @@ export default function RecordPage() {
       )}
 
     </div>
-    {/* Sibling of .screen, not a descendant — .screen plays a transform-
-        based entrance animation (screenIn) on every mount, and while
-        that's running it becomes a containing block for any
-        position:fixed descendant (see the note on `screenIn` in
-        globals.css), which was dragging this fixed BottomNav along with
-        the entrance animation instead of leaving it static every time
-        this route mounts (e.g. navigating back here from Gallery). */}
-    <BottomNav active="record" hidden={isRecording} />
-    </>
   );
 }

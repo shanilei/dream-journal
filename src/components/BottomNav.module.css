@@ -30,6 +30,13 @@
   opacity: 0;
 }
 
+/* Fades in place (no slide, not inert) — used while the Gallery's own
+   card/category overlay is opening, distinct from .navHidden which takes
+   the bar fully out of view/interaction. */
+.navDimmed {
+  opacity: 0.4;
+}
+
 .circle {
   position: relative;
   width: 67px;
