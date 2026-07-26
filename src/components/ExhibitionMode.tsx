@@ -18,6 +18,18 @@ export function useIsExhibition(): boolean {
   return useContext(ExhibitionContext);
 }
 
+const EXHIBITION_STORAGE_KEY = "dj_exhibition";
+const EXHIBITION_PREVIEW_STORAGE_KEY = "dj_exhibition_preview";
+
+function readStoredFlag(key: string): boolean {
+  if (typeof window === "undefined") return false;
+  try {
+    return sessionStorage.getItem(key) === "1";
+  } catch {
+    return false;
+  }
+}
+
 // Which way the exhibition monitor was physically turned relative to its
 // (fixed) Windows landscape orientation — flip to "ccw" if the physical
 // display shows the app upside-down.
@@ -92,12 +104,43 @@ function ExhibitionCanvas({
 
 function ExhibitionModeInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
-  const active = searchParams.get("exhibition") === "1";
+  const urlActive = searchParams.get("exhibition") === "1";
   // ?exhibition=1&preview=1 — a local, upright stand-in for the physical
   // installation (same 1080x1920 canvas, scaled to fit, but never
   // rotated) so spacing/scale/typography can be checked on a normal
   // desktop browser without walking over to the rotated monitor.
-  const preview = active && searchParams.get("preview") === "1";
+  const urlPreview = searchParams.get("preview") === "1";
+
+  // Exhibition mode is meant to hold for an entire kiosk session, but
+  // ?exhibition=1 only lives on whatever URL was first opened — no
+  // internal <Link>/router.push in the app (BottomNav's tabs, the
+  // Gallery's card links, the idle-timeout redirect) appends it, so the
+  // very next client-side navigation's URL genuinely no longer carries
+  // it, and `active` would otherwise flip back to false mid-session.
+  // Lazily initialized from sessionStorage (not a useEffect) so it's
+  // already correct on the very first render of any later page — no
+  // effect-ordering race — and it's set the moment a real ?exhibition=1
+  // URL is seen. sessionStorage (not just in-memory state) also survives
+  // a hard reload of a page whose own URL lacks the param.
+  const [storedActive, setStoredActive] = useState(() => readStoredFlag(EXHIBITION_STORAGE_KEY));
+  const [storedPreview, setStoredPreview] = useState(() => readStoredFlag(EXHIBITION_PREVIEW_STORAGE_KEY));
+
+  useEffect(() => {
+    if (!urlActive) return;
+    try {
+      sessionStorage.setItem(EXHIBITION_STORAGE_KEY, "1");
+      if (urlPreview) sessionStorage.setItem(EXHIBITION_PREVIEW_STORAGE_KEY, "1");
+    } catch {
+      // private browsing or storage disabled — falls back to in-memory
+      // state below, which still covers same-tab navigation, just not a
+      // hard reload.
+    }
+    setStoredActive(true);
+    if (urlPreview) setStoredPreview(true);
+  }, [urlActive, urlPreview]);
+
+  const active = urlActive || storedActive;
+  const preview = active && (urlActive ? urlPreview : storedPreview);
 
   useEffect(() => {
     const html = document.documentElement;
