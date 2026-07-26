@@ -143,6 +143,7 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
   const sinceDate = isHe ? stats.sinceDateHe : stats.sinceDate;
 
   return (
+    <>
     <div ref={screenRef} className={`${styles.screen} ${bgAnimPaused ? styles.animPaused : ""}`}>
       {/* Background — same nebula system as Gallery/Record/Type */}
       <div className={`${styles.nebula} ${styles.nebulaBlue}`} />
@@ -289,11 +290,18 @@ export default function YourJourneyScreen({ stats }: { stats: JourneyStats }) {
         </motion.section>
       </motion.div>
 
-      <BottomNav active="user" />
-
       {showSettings && (
         <SettingsSheet onClose={() => setShowSettings(false)} />
       )}
     </div>
+
+    {/* Sibling of .screen, not a descendant — .screen plays a transform-
+        based entrance animation (screenIn) on every mount, which briefly
+        makes it a containing block for any position:fixed descendant
+        (see the note on `screenIn` in globals.css), dragging this fixed
+        BottomNav along with the entrance animation instead of leaving it
+        static every time this route mounts. */}
+    <BottomNav active="user" />
+    </>
   );
 }

@@ -771,9 +771,11 @@
   line-height: 115px;
 }
 
+/* top +20px per request (was 749px) — adds breathing room below the
+   headline without moving the headline itself. */
 :global(.exhibition) .recordButtonWrap {
   position: absolute;
-  top: 749px;
+  top: 769px;
   left: 50%;
   transform: translateX(-50%);
   width: 276.9px;
@@ -781,9 +783,12 @@
   margin-bottom: 0;
 }
 
+/* top +40px total (was 1115px): the orb's own +20px shift above carries
+   through, plus another +20px so the orb→subtitle gap grows by the same
+   amount as the headline→orb gap. */
 :global(.exhibition) .typeFallback {
   position: absolute;
-  top: 1115px;
+  top: 1155px;
   left: 50%;
   transform: translateX(-50%);
   gap: 10px;
@@ -814,8 +819,10 @@
   font-weight: 400;
 }
 
+/* Kept in step with the idle .recordButtonWrap's own +20px top shift
+   above (was 747px). */
 :global(.exhibition) .recordButtonWrapActive {
-  top: 747px;
+  top: 767px;
 }
 
 :global(.exhibition) .closeButton {
@@ -837,17 +844,23 @@
   height: 40px;
 }
 
+/* height +10px, kept in step with .controlBtn/.recordingPill's own bump
+   above (was 140px) — otherwise the taller buttons would center within a
+   shorter box than they actually are. */
 :global(.exhibition) .controlRow {
   bottom: auto;
   top: 1649px;
   width: 680px;
-  height: 140px;
+  height: 150px;
   gap: 100px;
 }
 
+/* +10px per request (was 140px) — easier to notice/tap from a few feet
+   away; border-radius left as-is since it already exceeds half the box
+   (fully rounds regardless of the extra 10px). */
 :global(.exhibition) .controlBtn {
-  width: 140px;
-  height: 140px;
+  width: 150px;
+  height: 150px;
   border-radius: 100px;
   background: rgba(255, 255, 255, 0.15);
 }
@@ -866,9 +879,11 @@
   height: 43px;
 }
 
+/* +10px per request (was 200x140px) — same reasoning as .controlBtn
+   above. */
 :global(.exhibition) .recordingPill {
-  width: 200px;
-  height: 140px;
+  width: 210px;
+  height: 150px;
   border-radius: 100px;
   background: rgba(255, 255, 255, 0.15);
   padding: 0;

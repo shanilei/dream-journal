@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
+import { AnimatePresence, motion } from "framer-motion";
 import styles from "./record.module.css";
 import BottomNav from "@/components/BottomNav";
 import VoiceRecordCircle from "@/components/VoiceRecordCircle";
@@ -52,6 +53,10 @@ function shortSymbol(symbol: string): string {
 }
 
 const AUDIO_BAR_COUNT = 5;
+const EASE = [0.22, 1, 0.36, 1] as const;
+// Exhibition mode only — how long into a recording before the helper
+// text swaps to a "tap again to send" hint (see the .prompt render below).
+const EXHIBITION_SEND_HINT_DELAY_SEC = 5;
 
 function formatElapsed(totalSeconds: number): string {
   const m = Math.floor(totalSeconds / 60);
@@ -81,6 +86,16 @@ export default function RecordPage() {
   const pendingActionRef = useRef<"submit" | "discard">("submit");
 
   const isRecording = status === "recording";
+
+  // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
+  // read directly (matches DreamLoadingScreen/HomeScreenClient's own
+  // detection) so this route doesn't need a Suspense boundary just for
+  // one recording-only text swap below.
+  const [isExhibition, setIsExhibition] = useState(false);
+  useEffect(() => {
+    setIsExhibition(document.documentElement.classList.contains("exhibition"));
+  }, []);
+  const showExhibitionSendHint = isExhibition && isRecording && elapsedSec >= EXHIBITION_SEND_HINT_DELAY_SEC;
 
   // The idle screen's background (gradient pulse, starfield twinkle, glow
   // blobs, the orb's rotating rings) is decorative — pause it once the
@@ -189,6 +204,7 @@ export default function RecordPage() {
   }
 
   return (
+    <>
     <div
       ref={screenRef}
       className={`${styles.screen} ${bgAnimPaused ? styles.animPaused : ""} lockedScreen`}
@@ -215,17 +231,42 @@ export default function RecordPage() {
       )}
 
       <p className={`${styles.prompt} ${lang === "he" ? styles.promptHe : ""} ${isRecording ? styles.promptRecording : ""}`}>
-        {status === "error"
-          ? t.recordError
-          : isRecording
-          ? t.recordingPrompt.split("\n").map((line, i) => (
+        {status === "error" ? (
+          t.recordError
+        ) : isRecording ? (
+          isExhibition ? (
+            // Exhibition only: crossfades from the normal "I'm listening"
+            // copy to a "tap again to send" hint a few seconds in, since a
+            // kiosk visitor has no other cue that tapping again submits
+            // (rather than cancels) the recording.
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={showExhibitionSendHint ? "hint" : "listening"}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.4, ease: EASE }}
+                style={{ display: "block" }}
+              >
+                {(showExhibitionSendHint ? t.recordingPromptExhibitionHint : t.recordingPrompt)
+                  .split("\n")
+                  .map((line, i) => (
+                    <span key={i} className={styles.promptLine}>{line}</span>
+                  ))}
+              </motion.span>
+            </AnimatePresence>
+          ) : (
+            t.recordingPrompt.split("\n").map((line, i) => (
               <span key={i} className={styles.promptLine}>{line}</span>
             ))
-          : lang === "he"
-          ? t.recordPrompt.split("\n").map((line, i) => (
-              <span key={i} className={styles.promptLine}>{line}</span>
-            ))
-          : t.recordPrompt}
+          )
+        ) : lang === "he" ? (
+          t.recordPrompt.split("\n").map((line, i) => (
+            <span key={i} className={styles.promptLine}>{line}</span>
+          ))
+        ) : (
+          t.recordPrompt
+        )}
       </p>
 
       <VoiceRecordCircle
@@ -322,7 +363,15 @@ export default function RecordPage() {
         </div>
       )}
 
-      <BottomNav active="record" hidden={isRecording} />
     </div>
+    {/* Sibling of .screen, not a descendant — .screen plays a transform-
+        based entrance animation (screenIn) on every mount, and while
+        that's running it becomes a containing block for any
+        position:fixed descendant (see the note on `screenIn` in
+        globals.css), which was dragging this fixed BottomNav along with
+        the entrance animation instead of leaving it static every time
+        this route mounts (e.g. navigating back here from Gallery). */}
+    <BottomNav active="record" hidden={isRecording} />
+    </>
   );
 }

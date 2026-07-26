@@ -1108,17 +1108,6 @@ export default function DreamResultScreen({
         )}
       </div>
 
-      {/* Opacity only, no y — BottomNav is position:fixed, and a
-          transform-animated ancestor (a translateY-based fade-up) would
-          make it fixed-relative-to-this-wrapper instead of the viewport. */}
-      <motion.div
-        initial={reduceMotion ? false : { opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.28, ease: EASE }}
-      >
-        <BottomNav active="dreams" hidden={navHidden} />
-      </motion.div>
-
       {copied && (
         <div className={styles.toast}>{t.linkCopied}</div>
       )}
@@ -1172,6 +1161,22 @@ export default function DreamResultScreen({
         </div>
       )}
     </div>
+
+    {/* Sibling of .screen, not a descendant — .screen plays a transform-
+        based entrance animation (screenIn) on every mount, which makes it
+        a containing block for any position:fixed descendant for the
+        animation's duration (see the note on `screenIn` in globals.css).
+        BottomNav being nested inside .screen was enough on its own to
+        drag it along with that entrance animation, regardless of this
+        wrapper's own opacity-only animation. Opacity only, no y, on this
+        wrapper itself for the same reason. */}
+    <motion.div
+      initial={reduceMotion ? false : { opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.28, ease: EASE }}
+    >
+      <BottomNav active="dreams" hidden={navHidden} />
+    </motion.div>
 
     {/* Print-only copy of the image card — shown via @media print in
         DreamResultScreen.module.css. When printImageUrl is available it's a

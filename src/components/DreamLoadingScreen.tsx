@@ -10,8 +10,9 @@ const MOON_RING_COUNT = 28;
 const MOON_RING_RADIUS_PX = 140;
 // Exhibition canvas is a fixed, much larger 1080x1920 box viewed from a
 // few feet away — .orbWrap's exhibition override (module.css) is sized to
-// match this.
-const MOON_RING_RADIUS_EXHIBITION_PX = 250;
+// match this. +15px per request (30px larger overall diameter — this
+// radius contributes to both sides of the ring).
+const MOON_RING_RADIUS_EXHIBITION_PX = 265;
 const CHASE_DURATION_MS = 2400;
 function buildMoonRingIcons(radius: number) {
   return Array.from({ length: MOON_RING_COUNT }, (_, i) => {
