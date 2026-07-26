@@ -928,10 +928,12 @@
    FontSizeStepper) — a base CSS bump here would only ever affect their
    unset default, but skipping them entirely avoids any ambiguity with
    that feature. */
+/* +6px per request (was 36px). */
 :global(.exhibition) .title {
-  font-size: 36px;
+  font-size: 42px;
 }
 
+/* +6px per request (was 16px). */
 :global(.exhibition) .bodyText {
-  font-size: 16px;
+  font-size: 22px;
 }
