@@ -748,8 +748,16 @@
    entirely in exhibition mode so the single shared pulse on AppBackground
    (see its own module.css) is the only background ever visible, instead
    of a second copy with its own restarting animation timeline. */
+/* max-width: 100% (was left at the inherited --shell-max-width, 880px in
+   exhibition mode) — this screen's own ::before/::after used to be
+   position:fixed and bled across the full 1080px canvas regardless of
+   .screen's own narrower width, masking this; now that they're removed
+   (below) in favor of the single shared AppBackground layer, .screen's
+   own box is the only thing left, and without this it left a ~100px
+   gutter on each side — the reported darker vertical side bands. */
 :global(.exhibition) .screen {
   height: var(--exhibition-height);
+  max-width: 100%;
   display: block;
   box-sizing: border-box;
   background: transparent;
@@ -762,6 +770,13 @@
 
 :global(.exhibition) .glowBlue,
 :global(.exhibition) .glowPurple {
+  display: none;
+}
+
+/* Independent full-bleed decorative layer (not tied to .screen's own
+   background) — also hidden in exhibition mode so AppBackground is
+   unambiguously the only background layer anywhere in the app. */
+:global(.exhibition) .starfield {
   display: none;
 }
 
