@@ -236,10 +236,14 @@ export default function RecordPage() {
           <AnimatePresence mode="wait" initial={false}>
             <motion.span
               key={showSendHint ? "hint" : "listening"}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.4, ease: EASE }}
+              // Softer, slower crossfade than a plain opacity swap — same
+              // "new text" convention used elsewhere in the app (fade +
+              // gentle rise) and the same dreamy easing curve, just applied
+              // here too instead of a flat linear-feeling fade.
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.7, ease: EASE }}
               style={{ display: "block" }}
             >
               {(showSendHint ? t.recordingPromptSendHint : t.recordingPrompt)
