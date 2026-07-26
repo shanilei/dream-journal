@@ -913,9 +913,18 @@
    `.exhibitionCanvas` is a fixed 1080x1920 box, so this screen must size
    itself to the canvas's own fixed height instead of the ambient
    `100vh`/`100dvh` — otherwise this screen (and BottomNav's clearance
-   within it) is confined to a box shorter than the actual canvas. */
+   within it) is confined to a box shorter than the actual canvas.
+   max-width: 100% (was left at the inherited --shell-max-width, which
+   globals.css shrinks to --exhibition-content-width/880px in exhibition
+   mode) — every other exhibition screen fills the full 1080px canvas via
+   a position:fixed background pseudo-element that bypasses its own
+   content width entirely; this screen paints its background directly on
+   `.screen` itself, so without this override it stayed capped at 880px,
+   leaving a ~100px gutter on each side where the global ambient
+   gradient (AppBackground) showed through underneath instead. */
 :global(.exhibition) .screen {
   height: var(--exhibition-height);
+  max-width: 100%;
 }
 
 /* Portrait composition pass. The image/interpretation column already
