@@ -922,9 +922,17 @@
    `.screen` itself, so without this override it stayed capped at 880px,
    leaving a ~100px gutter on each side where the global ambient
    gradient (AppBackground) showed through underneath instead. */
+/* Background overridden to match the Figma exhibition spec's shared
+   radial gradient (same #050A1A/#080C36/#6871FF family every other
+   exhibition screen uses) instead of this screen's own darker, photo-
+   viewing-optimized triple-glow background (the base `.screen` rule
+   above) — per direct request, so the whole exhibition experience reads
+   as one consistent background rather than this one screen standing
+   apart. */
 :global(.exhibition) .screen {
   height: var(--exhibition-height);
   max-width: 100%;
+  background: radial-gradient(250.48% 58.08% at 50% 46.8%, #050A1A 0%, #080C36 40.81%, #6871FF 100%);
 }
 
 /* Portrait composition pass. The image/interpretation column already
