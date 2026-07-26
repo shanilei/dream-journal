@@ -7,6 +7,7 @@ import { LanguageProvider } from "@/components/LanguageProvider";
 import { PhotoBorderProvider } from "@/components/PhotoBorderProvider";
 import AppBackground from "@/components/AppBackground";
 import ExhibitionMode from "@/components/ExhibitionMode";
+import IdleHomeRedirect from "@/components/IdleHomeRedirect";
 import "./globals.css";
 
 const THEME_INIT_SCRIPT = `
@@ -88,18 +89,26 @@ export default function RootLayout({
         </Script>
       </head>
       <body className={`${urbanist.variable} ${alumniSans.variable} ${ploni.variable}`}>
-        <ExhibitionMode />
-        <AppBackground />
-        <ThemeProvider>
-          <LanguageProvider>
-            {/* Onboarding gating now happens in middleware.ts (server-side,
-                before any page renders) instead of a client-side effect
-                here — that used to leave a window between paint and the
-                redirect firing where an unonboarded user could see/touch
-                the real app underneath. */}
-            <PhotoBorderProvider>{children}</PhotoBorderProvider>
-          </LanguageProvider>
-        </ThemeProvider>
+        {/* Wraps AppBackground + every provider + the page itself, so
+            that while Exhibition Mode is active the single rotated/scaled
+            canvas is the containing block for every position:fixed
+            descendant (AppBackground, BottomNav, sheets, modals) — see
+            ExhibitionMode.tsx. Renders its children completely unwrapped
+            (no extra DOM) when Exhibition Mode isn't active. */}
+        <ExhibitionMode>
+          <IdleHomeRedirect />
+          <AppBackground />
+          <ThemeProvider>
+            <LanguageProvider>
+              {/* Onboarding gating now happens in middleware.ts (server-side,
+                  before any page renders) instead of a client-side effect
+                  here — that used to leave a window between paint and the
+                  redirect firing where an unonboarded user could see/touch
+                  the real app underneath. */}
+              <PhotoBorderProvider>{children}</PhotoBorderProvider>
+            </LanguageProvider>
+          </ThemeProvider>
+        </ExhibitionMode>
       </body>
     </html>
   );

@@ -27,3 +27,15 @@
     max-width: 100%;
   }
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
+   the normal app. `.exhibitionCanvas` is a fixed 1080x1920 box, so this
+   sizes itself to the canvas's own fixed height instead of the ambient
+   `100vh`/`100dvh`, and to the full canvas width — OnboardingBackground
+   (mounted once for the whole onboarding flow) fills whatever `.shell` is
+   sized to, so widening it here is enough on its own. */
+:global(.exhibition) .shell {
+  max-width: 100%;
+  height: var(--exhibition-height);
+}

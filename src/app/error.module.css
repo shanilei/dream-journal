@@ -62,3 +62,34 @@
 :global([lang="he"]) .body {
   font-family: var(--font-ploni), serif;
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
+   the normal app. `.exhibitionCanvas` is a fixed 1080x1920 box, so this
+   sizes itself to the canvas's own fixed height instead of the ambient
+   `100vh`/`100dvh`. Content stays centered at its existing 320px column
+   (no bespoke exhibition sizing needed for a rare error state), just
+   legible enough from a distance via a modest type bump. */
+:global(.exhibition) .screen {
+  min-height: var(--exhibition-height);
+}
+
+:global(.exhibition) .content {
+  max-width: 420px;
+}
+
+:global(.exhibition) .title {
+  font-size: 30px;
+  line-height: 38px;
+}
+
+:global(.exhibition) .body {
+  font-size: 19px;
+  line-height: 28px;
+}
+
+:global(.exhibition) .retryBtn {
+  height: 60px;
+  padding: 0 32px;
+  font-size: 19px;
+}

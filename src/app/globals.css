@@ -227,80 +227,88 @@ h1, h2, h3, h4, h5, h6, p, li, span, label {
 /* Entirely gated behind the `.exhibition` class, added only by
    src/components/ExhibitionMode.tsx when the URL has `?exhibition=1` — no
    effect whatsoever on the normal app (mobile/iPad/desktop/PWA), which
-   never gets this class. Rotates `body` itself (not a new wrapper div) by
-   90deg so every `position: fixed` descendant (AppBackground, BottomNav,
-   sheets, modals) rotates as one rigid piece: a transformed ancestor
-   becomes the containing block for its fixed descendants, so once `body`
-   is transformed, its fixed children position themselves relative to
-   body's own 100vh x 100vw box instead of the real (landscape) viewport —
-   exactly the ~1080x1920 portrait canvas this needs, with zero DOM
-   changes to any existing component.
+   never gets this class.
 
-   The exhibition monitor stays logically 1920x1080 landscape (Windows
-   orientation can't change) but is physically mounted in portrait, so the
-   rendered page must be pre-rotated 90deg the opposite way the panel was
-   physically turned. Which way that is depends on how the specific unit
-   is mounted, so the direction is a single toggle (`.exhibition-cw` vs
-   `.exhibition-ccw`, driven by the EXHIBITION_ROTATION constant in
-   ExhibitionMode.tsx) rather than hardcoded — flip that one constant if
-   the image appears upside-down on the physical display. */
+   Architecture: ExhibitionMode.tsx wraps the whole app (AppBackground +
+   every provider + the page) in one `.exhibitionCanvas` div, sized to a
+   fixed, real 1080x1920 px box (--exhibition-width/height below) — not a
+   vw/vh-derived one. That single element is the only thing ever rotated
+   or scaled (via an inline `transform`, computed in JS from the actual
+   physical viewport size — see ExhibitionMode.tsx); every screen and
+   component inside it lays out as an ordinary, unrotated 1080x1920
+   portrait page, so no individual screen needs its own rotation logic.
+
+   This also means every existing `100vh`/`100dvh` full-screen rule keeps
+   working unmodified for its *value* (100dvh really is 1920px tall inside
+   the canvas's own box) — the only thing that stops working is relying on
+   the *window* to scroll past that height, since `.exhibitionCanvas`
+   itself clips overflow (below). Every screen's own `.screen`-level
+   exhibition override (see each component's own module.css) exists only
+   to swap `height: 100dvh` for `height: var(--exhibition-height)` so it
+   becomes its own internal scrollport instead — not to correct the axis
+   the way the old rotated-body approach had to.
+
+   A transformed element is the containing block for its position:fixed
+   descendants (CSS spec), so once `.exhibitionCanvas` has a transform,
+   every fixed-position descendant (AppBackground, BottomNav, sheets,
+   modals) automatically anchors to the canvas's own 1080x1920 box instead
+   of the real physical viewport — no per-component change needed for
+   fixed nav/sheets/modals to "stay attached" to the virtual screen. */
+:root {
+  --exhibition-width: 1080px;
+  --exhibition-height: 1920px;
+  --exhibition-content-width: 880px;
+  --exhibition-side-padding: 80px;
+  --exhibition-top-padding: 72px;
+  --exhibition-bottom-padding: 300px;
+  --exhibition-nav-height: 190px;
+}
+
 html.exhibition,
 body.exhibition {
   overflow: hidden;
 }
 
-body.exhibition {
+/* Physical stage: fills the real (possibly landscape) browser viewport,
+   letterboxing around the canvas in solid black — the canvas itself is
+   centered and, when the JS-measured physical viewport is landscape,
+   rotated 90deg (see ExhibitionMode.tsx / EXHIBITION_ROTATION) so the
+   virtual 1080x1920 portrait canvas always reads upright on the
+   physically-rotated monitor. */
+.exhibitionStage {
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vh;
-  height: 100vw;
-  transform-origin: top left;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+  z-index: 0;
 }
 
-/* Clockwise: rotate(90deg) sweeps the box to x:[-100vw, 0], y:[0, 100vh]
-   (relative to its own top-left origin) — translateX(100vw) then shifts
-   it back onto the real viewport, landing exactly at x:[0, 100vw],
-   y:[0, 100vh]. */
-body.exhibition.exhibition-cw {
-  transform: translateX(100vw) rotate(90deg);
-}
-
-/* Counter-clockwise: the mirror-image derivation — rotate(-90deg) sweeps
-   the box to x:[0, 100vw], y:[-100vh, 0], and translateY(100vh) shifts it
-   back onto the viewport the same way. */
-body.exhibition.exhibition-ccw {
-  transform: translateY(100vh) rotate(-90deg);
-}
-
-/* Local preview (?exhibition=1&preview=1): same box (width:100vh x
-   height:100vw, set by the shared body.exhibition rule above) as the real
-   installation — deliberately reusing that exact sizing formula rather
-   than a hardcoded 1080x1920 keeps every `.exhibition`-scoped screen rule
-   (all the height:100vw-based scroll fixes, etc.) behaving identically in
-   both modes. This just skips the rotate() the real installation needs to
-   compensate for the physical monitor mount, and re-centers the box
-   horizontally instead of pinning it to the corner (the box is normally
-   taller than a landscape desktop viewport, so vertical centering isn't
-   meaningful — use the browser's own zoom/devtools scale to see the full
-   canvas, not app code). Higher specificity than the shared rule's own
-   `left: 0`, so this wins regardless of source order. */
-body.exhibition.exhibition-preview {
+.exhibitionCanvas {
+  position: absolute;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  width: var(--exhibition-width);
+  height: var(--exhibition-height);
+  overflow: hidden;
+  transform-origin: center center;
+  background: #050A1A;
 }
 
-/* Portrait-composition pass: this is layout, not the rotation itself (see
-   the rules above, untouched). Every screen already reads its content
+/* Portrait-composition pass: every screen already reads its content
    column's width from these two tokens (--shell-max-width/--shell-padding,
    defined on :root above), so overriding them once here — instead of in
-   every individual screen file — is what turns "the desktop-wide layout,
-   rotated" into a deliberately portrait one everywhere at once. 760px
-   leaves a clearly intentional margin on the ~1080px-wide rotated canvas
-   (real viewport width, i.e. 100vw) without going edge-to-edge or staying
-   at the desktop breakpoint's 900px. Higher specificity than :root's own
+   every individual screen file — is what turns the normal responsive
+   layout into a deliberately portrait one, at a scale readable from a
+   few feet away, everywhere at once. Higher specificity than :root's own
    declarations (an added class), so it wins regardless of source order. */
 html.exhibition {
-  --shell-max-width: 760px;
-  --shell-padding: 40px;
+  --shell-max-width: var(--exhibition-content-width);
+  --shell-padding: var(--exhibition-side-padding);
+}
+
+/* Same fixed-height treatment as every other `.screen`-level exhibition
+   override (see each component's own module.css) — this is the shared,
+   non-module-scoped version for the `.lockedScreen` utility class. */
+.exhibition .lockedScreen {
+  height: var(--exhibition-height);
 }

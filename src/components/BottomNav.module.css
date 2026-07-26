@@ -274,34 +274,39 @@
    for comfortable viewing/touch on a 24" display, not as large as the
    real-hardware breakpoint's numbers since this is a simulated rotation at
    a real 1080px-wide viewport, not a genuinely larger panel. */
+/* Exact Figma measurements — confirmed independently twice now: the
+   Record screen's own export and the Gallery screen's export both give
+   identical numbers (488.98px total width = 3 * 141.96px circles + 2 *
+   31.55px gaps; top:1649px on the 1920px canvas = bottom: 1920 - 1649 -
+   141.96 = 129.04px). Reverts the earlier 170px/582px guess made in
+   response to "make it bigger" feedback on the Record screen before any
+   exact spec existed — two independent exact sources now agree on
+   141.96px, superseding that guess. */
 :global(.exhibition) .nav {
-  bottom: calc(48px + env(safe-area-inset-bottom));
-  gap: 16px;
-  padding: 11px 26px;
+  bottom: 129.04px;
+  width: 488.98px;
+  max-width: 488.98px;
+  gap: 31.55px;
+  padding: 0;
 }
 
 :global(.exhibition) .circle {
-  width: 80px;
-  height: 80px;
-  border-radius: 40px;
+  width: 141.96px;
+  height: 141.96px;
+  border-radius: 75.4877px;
 }
 
 :global(.exhibition) .iconLayer svg {
-  width: 24px;
-  height: 24px;
-}
-
-:global(.exhibition) .centerSlot .iconLayer svg {
-  width: 28px;
-  height: 28px;
+  width: 54.08px;
+  height: 54.08px;
 }
 
 :global(.exhibition) .addMenuPillWrap {
-  margin-left: -64px;
+  margin-left: -115px;
 }
 
 :global(.exhibition) .addMenuPill {
-  width: 128px;
-  padding: 13px 18px;
-  font-size: 14px;
+  width: 230px;
+  padding: 23px 32px;
+  font-size: 22px;
 }

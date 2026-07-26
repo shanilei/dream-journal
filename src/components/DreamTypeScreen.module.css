@@ -221,3 +221,34 @@
     max-width: 100%;
   }
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
+   the normal app. `.exhibitionCanvas` is a fixed 1080x1920 box, so this
+   sizes itself to the canvas's own fixed height instead of the ambient
+   `100vh`/`100dvh`, and widens to the full canvas like the tablet block
+   above (`.backButton`/`.inputPill` re-center automatically since they're
+   positioned off `--shell-padding`, which globals.css already widens in
+   Exhibition Mode). Type bumped for legibility from a few feet away. */
+:global(.exhibition) .screen {
+  max-width: 100%;
+  height: var(--exhibition-height);
+}
+
+:global(.exhibition) .inputPill {
+  bottom: var(--exhibition-bottom-padding);
+  padding: 14px 14px 14px 24px;
+  border-radius: 40px;
+}
+
+:global(.exhibition) .textarea {
+  font-size: 22px;
+  line-height: 28px;
+  max-height: 200px;
+}
+
+:global(.exhibition) .submitButton {
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
+}

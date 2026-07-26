@@ -722,76 +722,166 @@
   }
 }
 
-/* ===================== EXHIBITION MODE (rotation) ===================== */
+/* ===================== EXHIBITION MODE ===================== */
 /* Gated behind `.exhibition` on <body> (see globals.css) — unrelated to,
    and layered after, the exhibition-portrait breakpoint above (that one
-   is a *sizing* pass for a rotated-hardware viewport that genuinely
-   reports portrait dimensions; this one is the ?exhibition=1 rotation
-   mode, where the browser viewport itself stays landscape and the page is
-   rotated with CSS). `height: 100vh/100dvh` measures the wrong axis once
-   rotated — the real viewport's width is now the visual height — so this
-   flips to 100vw, same reasoning as every other screen's exhibition
-   block. */
+   is a *sizing* pass for hardware that genuinely reports portrait
+   dimensions; this one is the ?exhibition=1 canvas, which is always a
+   fixed 1080x1920 box — see globals.css — regardless of what the real
+   browser viewport reports). `.screen` sizes itself to the canvas's own
+   fixed height (var(--exhibition-height)) instead of the ambient
+   `100vh`/`100dvh`, the same way every other screen's exhibition block
+   does. */
 /* Portrait composition pass — mobile's idle-state layout is hand-placed
    absolute positioning tuned for a ~375-430px-wide phone (see .prompt/
-   .recordButtonWrap/.typeFallback above); at the rotated canvas's ~1080px
-   width that reads as tiny and off-center. Rather than retune those
-   absolute offsets, this switches the idle composition to the same
-   centered-flex-column structure the tablet block above already uses
-   (relative/static positioning + one `gap`-driven column), just at more
-   moderate sizes than that block's real-hardware-portrait numbers — this
-   is a simulated rotation at a real 1080px viewport width, not a genuinely
-   large physical panel. Deliberately independent of the tablet block's
-   `any-pointer: coarse` condition, since the exhibition kiosk may be
-   mouse-driven: this must apply whether or not that block also matches. */
+   .recordButtonWrap/.typeFallback above); at the canvas's 1080px width
+   that reads as tiny and off-center. Rather than retune those absolute
+   offsets, this switches the idle composition to the same centered-flex-
+   column structure the tablet block above already uses (relative/static
+   positioning + one `gap`-driven column), just at more moderate sizes
+   than that block's real-hardware-portrait numbers. Deliberately
+   independent of the tablet block's `any-pointer: coarse` condition,
+   since the exhibition kiosk may be mouse-driven: this must apply whether
+   or not that block also matches. */
 :global(.exhibition) .screen {
-  height: 100vw;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 150px;
-  padding-left: 56px;
-  padding-right: 56px;
+  height: var(--exhibition-height);
+  display: block;
   box-sizing: border-box;
 }
 
+/* Idle composition — exact Figma measurements for the Exhibition Record
+   screen (absolute px offsets from the 1080x1920 canvas's own top edge,
+   not the old estimated flex-column/gap layout). */
 :global(.exhibition) .prompt,
 :global(.exhibition) .promptHe {
-  position: static;
-  left: auto;
-  top: auto;
-  transform: none;
-  width: auto;
-  max-width: 480px;
-  font-size: 38px;
-  line-height: 48px;
-  margin-bottom: 44px;
+  position: absolute;
+  top: 440px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 540px;
+  max-width: 540px;
+  font-size: 90px;
+  line-height: 115px;
+  font-weight: 500;
+  margin-bottom: 0;
 }
 
 :global(.exhibition) .promptHe {
-  font-size: 40px;
-  line-height: 48px;
+  font-size: 90px;
+  line-height: 115px;
 }
 
 :global(.exhibition) .recordButtonWrap {
-  position: relative;
-  left: auto;
-  top: auto;
-  width: 340px;
-  height: 340px;
-  margin-bottom: 24px;
+  position: absolute;
+  top: 749px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 276.9px;
+  height: 275.49px;
+  margin-bottom: 0;
 }
 
 :global(.exhibition) .typeFallback {
-  position: static;
-  left: auto;
-  top: auto;
-  transform: none;
-  gap: 6px;
+  position: absolute;
+  top: 1115px;
+  left: 50%;
+  transform: translateX(-50%);
+  gap: 10px;
 }
 
 :global(.exhibition) .typeFallbackOr,
 :global(.exhibition) .typeFallbackLink {
-  font-size: 17px;
+  font-size: 30px;
+  line-height: 23px;
+  opacity: 0.6;
+  color: #8571FF;
+}
+
+/* ── Active-recording state — exact Figma measurements ──
+   .prompt/.recordButtonWrap are shared with the idle state above (same
+   element, only its text/children differ), so the active state needs its
+   own modifier class (set in page.tsx only when isRecording) rather than
+   overriding the idle rules directly — keeps the idle screen's own
+   top/line-height untouched. Everything below this (.closeButton,
+   .controlRow, .controlBtn, .recordingPill, etc.) only ever renders while
+   isRecording is true, so no modifier class is needed for those. */
+:global(.exhibition) .promptRecording {
+  top: 501px;
+  width: 644px;
+  max-width: 644px;
+  height: 180px;
+  line-height: 90px;
+  font-weight: 400;
+}
+
+:global(.exhibition) .recordButtonWrapActive {
+  top: 747px;
+}
+
+:global(.exhibition) .closeButton {
+  top: 89px;
+  left: 75px;
+  width: 101px;
+  height: 101px;
+  border-radius: 50px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+:global(.exhibition) .closeButtonHe {
+  left: auto;
+  right: 75px;
+}
+
+:global(.exhibition) .closeButton svg {
+  width: 40px;
+  height: 40px;
+}
+
+:global(.exhibition) .controlRow {
+  bottom: auto;
+  top: 1649px;
+  width: 680px;
+  height: 140px;
+  gap: 100px;
+}
+
+:global(.exhibition) .controlBtn {
+  width: 140px;
+  height: 140px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Pause/repeat share .controlBtn with no other distinguishing class —
+   :first-of-type/:last-of-type target them by DOM order (pause first,
+   repeat last, .recordingPill between) since their icon sizes differ
+   (41px vs 43px per Figma). */
+:global(.exhibition) .controlRow .controlBtn:first-of-type svg {
+  width: 41px;
+  height: 41px;
+}
+
+:global(.exhibition) .controlRow .controlBtn:last-of-type svg {
+  width: 43px;
+  height: 43px;
+}
+
+:global(.exhibition) .recordingPill {
+  width: 200px;
+  height: 140px;
+  border-radius: 100px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 0;
+}
+
+:global(.exhibition) .recordingWaveform {
+  width: 47.44px;
+  height: 61px;
+}
+
+:global(.exhibition) .recordingTime {
+  font-size: 27.1111px;
+  line-height: 41px;
+  font-weight: 500;
+  color: #ffffff;
 }

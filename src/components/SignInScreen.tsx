@@ -24,10 +24,10 @@ export default function SignInScreen() {
     // this is what makes the same code correctly return to localhost in
     // dev and the real Vercel domain in production without an env var or
     // config value to keep in sync. /auth/callback (see that route)
-    // exchanges the code and lands on /gallery by default.
+    // exchanges the code and lands on /record by default.
     const { error } = await supabase.auth.signInWithOAuth({
       provider,
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/gallery` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=/record` },
     });
     if (error) setLoadingProvider(null);
     // On success the browser is about to navigate away to the provider's

@@ -214,7 +214,7 @@ export default function RecordPage() {
         </button>
       )}
 
-      <p className={`${styles.prompt} ${lang === "he" ? styles.promptHe : ""}`}>
+      <p className={`${styles.prompt} ${lang === "he" ? styles.promptHe : ""} ${isRecording ? styles.promptRecording : ""}`}>
         {status === "error"
           ? t.recordError
           : isRecording
@@ -239,7 +239,7 @@ export default function RecordPage() {
         audioBarCount={AUDIO_BAR_COUNT}
       />
 
-      <div className={styles.recordButtonWrap}>
+      <div className={`${styles.recordButtonWrap} ${isRecording ? styles.recordButtonWrapActive : ""}`}>
         <button
           type="button"
           className={`${styles.recordButton} ${isRecording ? styles.recordButtonActive : ""} ${isPaused ? styles.recordButtonPaused : ""}`}
