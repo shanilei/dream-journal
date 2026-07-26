@@ -182,6 +182,15 @@ export default function DreamResultScreen({
   // top. The gap between the two thresholds avoids flicker if the
   // scroll position happens to sit right at either edge.
   const [navHidden, setNavHidden] = useState(true);
+  // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
+  // read directly (matches DreamLoadingScreen/record page's own
+  // detection). A kiosk visitor never scrolls this screen the way a phone
+  // user would, so the scroll-driven show/hide below would otherwise leave
+  // BottomNav hidden here indefinitely; exhibition mode keeps it shown.
+  const [isExhibition, setIsExhibition] = useState(false);
+  useEffect(() => {
+    setIsExhibition(document.documentElement.classList.contains("exhibition"));
+  }, []);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -1175,7 +1184,7 @@ export default function DreamResultScreen({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.28, ease: EASE }}
     >
-      <BottomNav active="dreams" hidden={navHidden} />
+      <BottomNav active="dreams" hidden={isExhibition ? false : navHidden} />
     </motion.div>
 
     {/* Print-only copy of the image card — shown via @media print in
