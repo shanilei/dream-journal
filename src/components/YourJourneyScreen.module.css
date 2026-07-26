@@ -472,10 +472,24 @@
    scrollport (it can no longer rely on the window growing/scrolling) —
    sized to the canvas's own fixed height, the same way home.module.css
    does for Gallery. */
+/* transparent (was the opaque #050A1A base) + the ::before/nebula rules
+   below hidden — this screen's own gradient/blob layers are gone
+   entirely in exhibition mode so the single shared pulse on AppBackground
+   (see its own module.css) is the only background ever visible, instead
+   of a second copy with its own restarting animation timeline. */
 :global(.exhibition) .screen {
   height: var(--exhibition-height);
   min-height: 0;
   max-height: var(--exhibition-height);
+  background: transparent;
+}
+
+:global(.exhibition) .screen::before {
+  display: none;
+}
+
+:global(.exhibition) .nebula {
+  display: none;
 }
 
 /* Portrait composition pass — the content column already narrows and

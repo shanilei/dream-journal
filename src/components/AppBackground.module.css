@@ -27,3 +27,30 @@
     display: none !important;
   }
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* The single shared pulse every exhibition screen used to render its own
+   (freshly-restarting) copy of — record.module.css, DreamLoadingScreen,
+   YourJourneyScreen, DreamTypeScreen, DreamsByTypeScreen, and
+   ExhibitionGallery each had their own `::before`/`::after` gradient with
+   its own animation duration (or, for DreamsByTypeScreen/ExhibitionGallery,
+   no animation/gradient at all). Since each of those screens is a
+   distinct component that fully unmounts/remounts on navigation, each
+   copy's animation timeline restarted at 0% on arrival — the actual cause
+   of the reported color/brightness jump, independent of whether the
+   colors themselves matched. Animating *this* element's opacity instead
+   achieves the same "pulse toward the flat base and back" look (fading
+   toward the plain #050A1A <body> background at the low point, see
+   globals.css), but as the one element in the whole app that's mounted
+   once and never remounted, so its pulse timeline never resets. Every
+   individual screen's own gradient/pulse/glow-blob layers are hidden in
+   exhibition mode (see each component's own module.css) so this is the
+   only background layer ever visible. */
+:global(.exhibition) .bg {
+  animation: exhibitionPulse 6s ease-in-out infinite;
+}
+
+@keyframes exhibitionPulse {
+  0%, 100% { opacity: 0.5; }
+  50%       { opacity: 1; }
+}

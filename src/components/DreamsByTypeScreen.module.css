@@ -189,6 +189,21 @@
    exhibition block. `.content`'s own `height: 100%` already cascades
    correctly from this once `.screen` is fixed, so it needs no separate
    override. */
+/* transparent (was the opaque #0B1020 base — a different flat color from
+   every other screen's #050A1A, one of the mismatches causing the
+   reported jump) + the ::before/nebula rules below hidden — this screen's
+   own gradient/blob layers are gone entirely in exhibition mode so the
+   single shared pulse on AppBackground (see its own module.css) is the
+   only background ever visible. */
 :global(.exhibition) .screen {
   height: var(--exhibition-height);
+  background: transparent;
+}
+
+:global(.exhibition) .screen::before {
+  display: none;
+}
+
+:global(.exhibition) .nebula {
+  display: none;
 }

@@ -743,10 +743,26 @@
    independent of the tablet block's `any-pointer: coarse` condition,
    since the exhibition kiosk may be mouse-driven: this must apply whether
    or not that block also matches. */
+/* transparent (was the opaque #050A1A base) + the ::before/::after/glow
+   rules below hidden — this screen's own gradient/glow layers are gone
+   entirely in exhibition mode so the single shared pulse on AppBackground
+   (see its own module.css) is the only background ever visible, instead
+   of a second copy with its own restarting animation timeline. */
 :global(.exhibition) .screen {
   height: var(--exhibition-height);
   display: block;
   box-sizing: border-box;
+  background: transparent;
+}
+
+:global(.exhibition) .screen::before,
+:global(.exhibition) .screen::after {
+  display: none;
+}
+
+:global(.exhibition) .glowBlue,
+:global(.exhibition) .glowPurple {
+  display: none;
 }
 
 /* Idle composition — exact Figma measurements for the Exhibition Record
