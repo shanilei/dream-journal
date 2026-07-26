@@ -32,11 +32,11 @@ export async function GET(request: NextRequest) {
 // pass a naive `startsWith("/")` check (browsers treat a leading "//" as
 // a protocol-relative URL to a different host) — rejecting anything
 // with "//" anywhere, not just requiring a single leading slash, closes
-// that gap. Falls back to /gallery, the requested default landing spot.
+// that gap. Falls back to /record, the requested default landing spot.
 function safeInternalPath(next: string | null): string {
-  if (!next) return "/gallery";
-  if (!next.startsWith("/")) return "/gallery";
-  if (next.startsWith("//")) return "/gallery";
-  if (next.includes("://")) return "/gallery";
+  if (!next) return "/record";
+  if (!next.startsWith("/")) return "/record";
+  if (next.startsWith("//")) return "/record";
+  if (next.includes("://")) return "/record";
   return next;
 }

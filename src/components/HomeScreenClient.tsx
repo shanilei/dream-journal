@@ -1238,16 +1238,6 @@ export default function HomeScreenClient({
 
       </motion.div>
 
-      {/* Stays outside the blurred/frozen wrapper so it can fade to 40%
-          in place (per the transition spec) without also blurring —
-          "remains visually stable throughout the transition." */}
-      <motion.div
-        animate={{ opacity: openingCard ? 0.4 : 1 }}
-        transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
-      >
-        <BottomNav active="dreams" />
-      </motion.div>
-
       <AnimatePresence>
         {openMood && (
           <CategoryOverlay
@@ -1267,6 +1257,21 @@ export default function HomeScreenClient({
         {openingCard && <DreamAnalysisOverlay card={openingCard} lang={lang} onClose={closeDream} />}
       </AnimatePresence>
     </div>
+
+    {/* Rendered as a sibling of .screen, not a descendant — .screen plays
+        a transform-based entrance animation (screenIn) on every mount, and
+        while that's running it becomes a containing block for any
+        position:fixed descendant (see the note on `screenIn` in
+        globals.css), which was dragging this fixed BottomNav along with
+        the entrance animation instead of leaving it static. Stays outside
+        the blurred/frozen wrapper above so it can fade to 40% in place
+        (per the transition spec) without also blurring. */}
+    <motion.div
+      animate={{ opacity: openingCard ? 0.4 : 1 }}
+      transition={{ duration: GALLERY_EXIT_DURATION, ease: EASE }}
+    >
+      <BottomNav active="dreams" />
+    </motion.div>
     </LayoutGroup>
   );
 }

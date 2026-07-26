@@ -370,3 +370,14 @@ button.row:active {
 .sectionLabelHe {
   font-family: var(--font-ploni), serif;
 }
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
+   the normal app. `.sheet`'s own `max-width: var(--shell-max-width)`
+   already scales up automatically (globals.css widens that token in
+   Exhibition Mode); only `92dvh` needs correcting here, since `dvh`
+   measures the real physical viewport, not `.exhibitionCanvas`'s own
+   fixed 1920px height. */
+:global(.exhibition) .sheet {
+  max-height: calc(var(--exhibition-height) * 0.92);
+}

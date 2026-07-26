@@ -1553,28 +1553,34 @@
 
 /* ===================== EXHIBITION MODE ===================== */
 /* Gated entirely behind the `.exhibition` class ExhibitionMode.tsx toggles
-   on <body> (see globals.css) — no effect on the normal app. body.exhibition
-   is position:fixed with a concrete pixel size (width:100vh, height:100vw)
-   and overflow:hidden, so the page can no longer grow and let the *window*
+   on <body> (see globals.css) — no effect on the normal app.
+   `.exhibitionCanvas` (globals.css) is a fixed 1080x1920 box with
+   overflow:hidden, so the page can no longer grow and let the *window*
    scroll the way it normally does; every `.screen` here must become its
-   own real scrollport instead. It also means every `100vh`/`100dvh` used
-   for full-height sizing below is measuring the wrong axis post-rotation —
-   the real viewport's height is now the canvas's visual *width*, and the
-   real viewport's *width* (100vw) is the visual height — so each one flips
-   to 100vw. Nothing here changes the normal (non-exhibition) values above. */
+   own real scrollport instead, sized to the canvas's own fixed height
+   (var(--exhibition-height)) rather than the ambient (and, on the real
+   kiosk hardware, still-landscape) `100vh`/`100dvh`. */
 :global(.exhibition) .screen {
-  height: 100vw;
+  height: var(--exhibition-height);
   min-height: 0;
-  max-height: 100vw;
-  padding-bottom: 200px;
+  max-height: var(--exhibition-height);
+  padding-bottom: var(--exhibition-bottom-padding);
+  /* Figma's Gallery content column is 835-845px wide (see .contentWrapper
+     below) — wider than the shared --exhibition-content-width (880px)
+     minus the shared --exhibition-side-padding (80px each side) used by
+     every other exhibition screen. Overridden here (this file's own
+     `.screen` class only — CSS Modules scope it, so this can't leak to
+     record/loading's own `.screen`) rather than touching the shared
+     globals.css vars, which stay untouched for every other screen. */
+  max-width: 1080px;
 }
 
 :global(.exhibition) .calScroll {
-  height: calc(100vw - 210px);
+  height: calc(var(--exhibition-height) - 210px);
 }
 
 :global(.exhibition) .overlayPanel {
-  height: 100vw;
+  height: var(--exhibition-height);
 }
 
 /* ── Portrait composition pass ──
@@ -1584,38 +1590,98 @@
    that need their own values (fonts, touch targets, card proportions,
    forcing the JS-driven grid column count). */
 
+/* Exact Figma measurements for the Exhibition Gallery screen. Per the
+   brief this came with: sourced for measurements/spacing/typography/
+   positioning only — card/tag background colors, box-shadows and the
+   nav's gradient fills are deliberately NOT imported from Figma here
+   (this app's flat-glass dark card system stays as-is; see CLAUDE.md).
+   Figma's own content column is 835px (confirmed 3x independently: the
+   featured row, the "more collection" header row, and the grid all
+   measure 835 — only the outer header frame measures 845, a 10px
+   discrepancy in the source file); 835 is used throughout below so the
+   grid math comes out pixel-exact, at the cost of the header being 10px
+   narrower than its own frame's nominal 845. */
+:global(.exhibition) .contentWrapper {
+  padding: 0 122.5px;
+}
+
+:global(.exhibition) .header {
+  padding-top: 95px;
+  padding-bottom: 0;
+  margin-bottom: 40px;
+  height: 101px;
+}
+
 :global(.exhibition) .galleryTitle {
-  font-size: 46px;
+  font-size: 90px;
+  font-weight: 500;
   line-height: 50px;
+  letter-spacing: -0.5px;
 }
 
 :global(.exhibition) .headerBtn {
-  width: 56px;
-  height: 56px;
+  width: 101px;
+  height: 101px;
+  border-radius: 50px;
+}
+
+:global(.exhibition) .headerBtn svg {
+  width: 35px;
+  height: 35px;
 }
 
 :global(.exhibition) .searchToggle {
-  height: 52px;
-  padding: 6px 20px;
+  height: 50px;
+  padding: 6px 16px;
 }
 
-:global(.exhibition) .searchLabel {
-  font-size: 15px;
+:global(.exhibition) .searchIconBtn svg {
+  width: 16px;
+  height: 16px;
 }
 
+:global(.exhibition) .searchLabel,
 :global(.exhibition) .searchInput {
-  font-size: 19px;
-}
-
-:global(.exhibition) .searchIconBtn,
-:global(.exhibition) .searchCloseBtn {
-  width: 22px;
-  height: 22px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 30px;
 }
 
 :global(.exhibition) .filterRow {
-  gap: 14px;
   margin-bottom: 30px;
+}
+
+:global(.exhibition) .filterPill {
+  height: 50px;
+  padding: 6px 16px;
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 30px;
+}
+
+:global(.exhibition) .sectionLabel,
+:global(.exhibition) .sectionLabelInRow,
+:global(.exhibition) .columnToggle,
+:global(.exhibition) .columnToggle button {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 30px;
+}
+
+:global(.exhibition) .sectionLabelTight {
+  margin: 0 0 10px;
+}
+
+/* Featured/"recent dream" row: Figma shows 2 cards at 410.5px each
+   (410.5*2 + 14 gap = 835), but this app's data model only ever surfaces
+   one recent-dream hero card — no second card is fabricated to fill the
+   row. Sized to the Figma card height (151.15px) and left at its natural
+   full-width (835px) instead. */
+:global(.exhibition) .heroCard {
+  height: 151.15px;
+  border-radius: 5.46px;
+  padding: 6px;
+  gap: 4px;
 }
 
 /* Dream History grid: the column count is set inline via React style
@@ -1624,23 +1690,56 @@
    is a visual-only override — the toggle's own state/behavior is
    untouched — but it does mean the toggle no longer visibly changes the
    column count while in exhibition mode, by design: a kiosk display shows
-   one deliberate portrait composition rather than a phone UI affordance. */
+   one deliberate portrait composition rather than a phone UI affordance.
+   198.25px fixed columns (not 1fr) + 14px gap = exactly 835px (Figma's
+   own math: 198.25*4 + 14*3 = 835), so this stays pixel-exact regardless
+   of the .contentWrapper padding computation above. */
 :global(.exhibition) .collectionGrid {
-  grid-template-columns: repeat(2, 1fr) !important;
-  gap: 20px;
+  grid-template-columns: repeat(4, 198.25px) !important;
+  column-gap: 14px;
+  row-gap: 10px;
 }
 
+:global(.exhibition) .heroImgWrap,
 :global(.exhibition) .gridImgWrap {
-  aspect-ratio: 3 / 4;
-  border-radius: 14px;
+  height: 109.23px;
+  aspect-ratio: auto;
+  border-radius: 3.27692px;
 }
 
+:global(.exhibition) .heroBody,
+:global(.exhibition) .gridBody {
+  padding: 5.46px;
+  gap: 4.37px;
+}
+
+:global(.exhibition) .cardHeading,
 :global(.exhibition) .gridCardHeading {
-  font-size: 16px;
+  font-size: 8.73846px;
+  font-weight: 500;
+  line-height: 13px;
 }
 
+:global(.exhibition) .cardSubheading,
 :global(.exhibition) .gridCardSubheading {
-  font-size: 13px;
+  font-size: 6.55385px;
+  font-weight: 400;
+  line-height: 11px;
+}
+
+:global(.exhibition) .gridMoodTag {
+  top: 5.46px;
+  left: 5.46px;
+  padding: 2.18462px 8.73846px;
+  border-radius: 10.9231px;
+  font-size: 6.55385px;
+  line-height: 11px;
+  font-weight: 400;
+}
+
+:global(.exhibition[dir="rtl"]) .gridMoodTag {
+  left: auto;
+  right: 5.46px;
 }
 
 :global(.exhibition) .typeGrid {

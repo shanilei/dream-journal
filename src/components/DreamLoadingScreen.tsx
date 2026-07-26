@@ -6,18 +6,27 @@ import { SparkleIcon, MoonPhaseIcon } from "./Icons";
 import { useLanguage } from "./LanguageProvider";
 
 const MOON_RING_COUNT = 28;
-// +10px per request — was 64. .orbWrap's box (module.css) is sized to match.
-const MOON_RING_RADIUS_PX = 74;
+// Bumped per request — was 74. .orbWrap's box (module.css) is sized to match.
+const MOON_RING_RADIUS_PX = 140;
+// Exhibition canvas is a fixed, much larger 1080x1920 box viewed from a
+// few feet away — .orbWrap's exhibition override (module.css) is sized to
+// match this. +15px per request (30px larger overall diameter — this
+// radius contributes to both sides of the ring).
+const MOON_RING_RADIUS_EXHIBITION_PX = 265;
 const CHASE_DURATION_MS = 2400;
-const moonRingIcons = Array.from({ length: MOON_RING_COUNT }, (_, i) => {
-  const angle = (i / MOON_RING_COUNT) * 2 * Math.PI - Math.PI / 2;
-  return {
-    phase: i / MOON_RING_COUNT,
-    x: MOON_RING_RADIUS_PX * Math.cos(angle),
-    y: MOON_RING_RADIUS_PX * Math.sin(angle),
-    delayMs: (i / MOON_RING_COUNT) * CHASE_DURATION_MS,
-  };
-});
+function buildMoonRingIcons(radius: number) {
+  return Array.from({ length: MOON_RING_COUNT }, (_, i) => {
+    const angle = (i / MOON_RING_COUNT) * 2 * Math.PI - Math.PI / 2;
+    return {
+      phase: i / MOON_RING_COUNT,
+      x: radius * Math.cos(angle),
+      y: radius * Math.sin(angle),
+      delayMs: (i / MOON_RING_COUNT) * CHASE_DURATION_MS,
+    };
+  });
+}
+const moonRingIcons = buildMoonRingIcons(MOON_RING_RADIUS_PX);
+const moonRingIconsExhibition = buildMoonRingIcons(MOON_RING_RADIUS_EXHIBITION_PX);
 
 // Three stages, random wording each time.
 const MESSAGE_STAGES: string[][] = [
@@ -44,6 +53,14 @@ export default function DreamLoadingScreen() {
   const isHe = lang === "he";
   const [messages] = useState<string[]>(() => pickMessages(isHe));
   const [visibleCount, setVisibleCount] = useState(1);
+  // Same `.exhibition` class ExhibitionMode.tsx toggles on <html>/<body> —
+  // read directly instead of useSearchParams so this component doesn't
+  // need its own Suspense boundary just for the ring's radius.
+  const [isExhibition, setIsExhibition] = useState(false);
+  useEffect(() => {
+    setIsExhibition(document.documentElement.classList.contains("exhibition"));
+  }, []);
+  const activeMoonRingIcons = isExhibition ? moonRingIconsExhibition : moonRingIcons;
 
   useEffect(() => {
     if (visibleCount >= messages.length) return;
@@ -68,14 +85,14 @@ export default function DreamLoadingScreen() {
 
       <div className={styles.orbWrap}>
         <div className={styles.moonRing}>
-          {moonRingIcons.map((icon, i) => (
+          {activeMoonRingIcons.map((icon, i) => (
             <span
               key={i}
               className={styles.moonRingIcon}
               style={{ transform: `translate(${icon.x}px, ${icon.y}px)` }}
             >
               <span className={styles.moonRingIconPulse} style={{ animationDelay: `${icon.delayMs}ms` }}>
-                <MoonPhaseIcon phase={icon.phase} size={16} color="currentColor" />
+                <MoonPhaseIcon phase={icon.phase} size={28} color="currentColor" />
               </span>
             </span>
           ))}

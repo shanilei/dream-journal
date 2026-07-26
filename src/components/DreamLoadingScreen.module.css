@@ -80,10 +80,10 @@
 .orbWrap {
   position: relative;
   z-index: 1;
-  /* Was 170px — kept in step with MOON_RING_RADIUS_PX's own +10px bump in
+  /* Was 190px — kept in step with MOON_RING_RADIUS_PX's own bump in
      DreamLoadingScreen.tsx (same ~20px margin around the ring as before). */
-  width: 190px;
-  height: 190px;
+  width: 320px;
+  height: 320px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,7 +103,8 @@
   left: 50%;
   top: 50%;
   display: flex;
-  margin: -8px 0 0 -8px;
+  /* Half of the 28px MoonPhaseIcon, to keep it centered on its ring point. */
+  margin: -14px 0 0 -14px;
 }
 
 .moonRingIconPulse {
@@ -217,4 +218,47 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+/* ===================== EXHIBITION MODE ===================== */
+/* Gated behind `.exhibition` on <body> (see globals.css) — no effect on
+   the normal app. `.exhibitionCanvas` is a fixed 1080x1920 box, so this
+   sizes itself to the canvas's own fixed height instead of the ambient
+   `100vh`/`100dvh`, and widens to the full canvas. Loader/message sizing
+   bumped for legibility from a few feet away. */
+/* .orbWrap's size here is kept in step with
+   MOON_RING_RADIUS_EXHIBITION_PX in DreamLoadingScreen.tsx (same ~20px
+   margin around the ring as the base size below) — the component picks
+   between the two radii itself based on the same `.exhibition` class. */
+:global(.exhibition) .screen {
+  max-width: 100%;
+  height: var(--exhibition-height);
+}
+
+/* +30px per request (was 540px) — kept centered via the same flex
+   align/justify-center on this box and its parent .screen, so growing it
+   never needs its own re-centering math. */
+:global(.exhibition) .orbWrap {
+  width: 570px;
+  height: 570px;
+}
+
+:global(.exhibition) .messages {
+  gap: 30px;
+}
+
+:global(.exhibition) .messageRow {
+  gap: 20px;
+}
+
+/* Scaled up alongside the bigger orb (was 34px) so the text still reads
+   as proportional to it, not left behind. */
+:global(.exhibition) .messageText {
+  font-size: 37px;
+}
+
+:global(.exhibition) .noteLabel,
+:global(.exhibition) .noteText {
+  font-size: 17px;
+  line-height: 25px;
 }
