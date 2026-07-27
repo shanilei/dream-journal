@@ -318,23 +318,22 @@
 }
 
 /* Exhibition-only "swipe to reveal" hint (see showWipeHint in
-   DreamResultScreen.tsx) — a soft glass pill so it reads as a UI
-   affordance, not part of the artwork, with the fingertip icon inside
-   doing the actual back-and-forth wipe motion. pointer-events: none so
-   it never itself blocks the real wipe gesture underneath it. */
+   DreamResultScreen.tsx) — a small glass badge in the image's top
+   corner (was centered/larger — per request, moved out of the way and
+   shrunk) so it reads as a UI affordance, not part of the artwork, with
+   the fingertip icon inside blinking to catch the eye. pointer-events:
+   none so it never itself blocks the real wipe gesture underneath it. */
 .wipeHint {
   position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  top: 16px;
+  right: 16px;
   pointer-events: none;
   z-index: 2;
 }
 
 .wipeHintDot {
-  width: 72px;
-  height: 72px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -984,15 +983,14 @@
   font-size: 42px;
 }
 
-/* +4px per request (was 22px) — a further bump for legibility from a
-   few feet away, on top of the earlier +6px. */
+/* +4px per request (was 26px) — a further bump for legibility from a
+   few feet away, on top of two earlier bumps (16 -> 22 -> 26 -> 30). */
 :global(.exhibition) .bodyText {
-  font-size: 26px;
+  font-size: 30px;
 }
 
-/* No exhibition override existed before — section headings ("What does
-   it say?" / "The dream itself" / "Symbols in your dream") were still
-   at their mobile size (24px / 22px in Hebrew) even on the big display. */
+/* +6px per request (was 28px) — same further-bump round as .bodyText
+   above. */
 :global(.exhibition) .blockHeading {
-  font-size: 28px;
+  font-size: 34px;
 }

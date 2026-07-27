@@ -995,10 +995,10 @@ export default function DreamResultScreen({
                 >
                   <motion.div
                     className={styles.wipeHintDot}
-                    animate={{ x: [0, -22, 0, 22, 0] }}
-                    transition={{ duration: 2.2, ease: EASE, repeat: Infinity, repeatDelay: 0.6 }}
+                    animate={{ opacity: [1, 0.25, 1], scale: [1, 1.08, 1] }}
+                    transition={{ duration: 1, ease: EASE, repeat: Infinity }}
                   >
-                    <TouchHintIcon size={40} color="#fff" />
+                    <TouchHintIcon size={22} color="#fff" />
                   </motion.div>
                 </motion.div>
               )}
