@@ -975,14 +975,29 @@
   font-size: 42px;
 }
 
-/* +4px per request (was 26px) — a further bump for legibility from a
-   few feet away, on top of two earlier bumps (16 -> 22 -> 26 -> 30). */
+/* +6px per request (was 30px) — interpretation + dream-text body copy. */
 :global(.exhibition) .bodyText {
-  font-size: 30px;
+  font-size: 36px;
 }
 
 /* +6px per request (was 28px) — same further-bump round as .bodyText
    above. */
 :global(.exhibition) .blockHeading {
   font-size: 34px;
+}
+
+/* No exhibition override existed before — symbol chips were still at
+   their mobile 12px even on the big display, illegible from a few feet
+   away. +6px per request, plus proportionally larger line-height/
+   padding so the chip itself doesn't look cramped around the bigger
+   text. */
+:global(.exhibition) .symbolChip {
+  font-size: 18px;
+  line-height: 26px;
+  padding: 6px 18px;
+}
+
+/* Slightly more breathing room between the now-bigger chips. */
+:global(.exhibition) .symbolsRow {
+  gap: 12px;
 }
