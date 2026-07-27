@@ -561,6 +561,16 @@ export default function DreamResultScreen({
       demoTimerRef.current = setTimeout(playDemoCycle, DEMO_GAP_MS);
       return;
     }
+    // The clear image is fetched over the network (see the effect that
+    // sets clearImgObjRef below) — on a slower connection it can easily
+    // still be loading when this first fires. Retrying quickly instead
+    // of proceeding is the difference between "the hint never actually
+    // shows anything" (canvas set to opacity 1 with nothing drawn on it
+    // yet, then dutifully faded back out) and it actually appearing.
+    if (!clearImgObjRef.current) {
+      demoTimerRef.current = setTimeout(playDemoCycle, 300);
+      return;
+    }
     const wrapW = wrap.clientWidth;
     const wrapH = wrap.clientHeight;
 
