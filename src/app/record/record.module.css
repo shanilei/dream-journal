@@ -487,7 +487,8 @@
    RTL-relative offset). */
 .promptHe {
   font-family: var(--font-ploni), serif;
-  font-size: 30px;
+  /* -2px per request (was 30px). */
+  font-size: 28px;
   font-weight: 500;
   line-height: 36px;
   left: 0;

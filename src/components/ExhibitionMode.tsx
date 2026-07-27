@@ -24,7 +24,7 @@ const EXHIBITION_PREVIEW_STORAGE_KEY = "dj_exhibition_preview";
 function readStoredFlag(key: string): boolean {
   if (typeof window === "undefined") return false;
   try {
-    return sessionStorage.getItem(key) === "1";
+    return localStorage.getItem(key) === "1";
   } catch {
     return false;
   }
@@ -117,19 +117,22 @@ function ExhibitionModeInner({ children }: { children: React.ReactNode }) {
   // Gallery's card links, the idle-timeout redirect) appends it, so the
   // very next client-side navigation's URL genuinely no longer carries
   // it, and `active` would otherwise flip back to false mid-session.
-  // Lazily initialized from sessionStorage (not a useEffect) so it's
+  // Lazily initialized from localStorage (not a useEffect) so it's
   // already correct on the very first render of any later page — no
   // effect-ordering race — and it's set the moment a real ?exhibition=1
-  // URL is seen. sessionStorage (not just in-memory state) also survives
-  // a hard reload of a page whose own URL lacks the param.
+  // URL is seen. localStorage (not sessionStorage) so a kiosk browser
+  // that crashes/restarts and reopens to whatever URL it last had —
+  // almost never the original ?exhibition=1 one — still comes back up
+  // in exhibition mode instead of silently falling back to the
+  // phone-shell layout in the middle of the physical display.
   const [storedActive, setStoredActive] = useState(() => readStoredFlag(EXHIBITION_STORAGE_KEY));
   const [storedPreview, setStoredPreview] = useState(() => readStoredFlag(EXHIBITION_PREVIEW_STORAGE_KEY));
 
   useEffect(() => {
     if (!urlActive) return;
     try {
-      sessionStorage.setItem(EXHIBITION_STORAGE_KEY, "1");
-      if (urlPreview) sessionStorage.setItem(EXHIBITION_PREVIEW_STORAGE_KEY, "1");
+      localStorage.setItem(EXHIBITION_STORAGE_KEY, "1");
+      if (urlPreview) localStorage.setItem(EXHIBITION_PREVIEW_STORAGE_KEY, "1");
     } catch {
       // private browsing or storage disabled — falls back to in-memory
       // state below, which still covers same-tab navigation, just not a
