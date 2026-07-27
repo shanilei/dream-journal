@@ -88,8 +88,16 @@ export default function RecordPage() {
 
   const isRecording = status === "recording";
   // The global, persistent BottomNav (see GlobalBottomNav.tsx) reads this
-  // instead of this screen rendering its own instance.
-  useSetBottomNavHidden(isRecording);
+  // instead of this screen rendering its own instance. Also forced hidden
+  // through "loading" and "result" — DreamLoadingScreen never manages
+  // this itself, and once DreamResultScreen mounts it takes over hidden
+  // management (scroll-driven on mobile, always-visible in exhibition).
+  // Keeping this true (unchanged) across the loading->result transition,
+  // rather than briefly computing false, avoids a race where this
+  // effect (parent) could re-fire and stomp on DreamResultScreen's own
+  // mount effect (child) — child effects run first, so if the parent's
+  // value actually changed it would run after and override it back.
+  useSetBottomNavHidden(isRecording || status === "loading" || status === "result");
 
   const showSendHint = isRecording && elapsedSec >= RECORD_SEND_HINT_DELAY_SEC;
 
