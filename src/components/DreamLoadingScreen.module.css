@@ -80,10 +80,11 @@
 .orbWrap {
   position: relative;
   z-index: 1;
-  /* Was 190px — kept in step with MOON_RING_RADIUS_PX's own bump in
-     DreamLoadingScreen.tsx (same ~20px margin around the ring as before). */
-  width: 320px;
-  height: 320px;
+  /* Kept in step with MOON_RING_RADIUS_PX in DreamLoadingScreen.tsx (same
+     ~20px margin around the ring). The exhibition-only enlargement lives
+     entirely in the `.exhibition .orbWrap` override below. */
+  width: 190px;
+  height: 190px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -103,8 +104,9 @@
   left: 50%;
   top: 50%;
   display: flex;
-  /* Half of the 28px MoonPhaseIcon, to keep it centered on its ring point. */
-  margin: -14px 0 0 -14px;
+  /* Half of the 16px MoonPhaseIcon, to keep it centered on its ring point.
+     The exhibition override below matches its own bigger 28px icon. */
+  margin: -8px 0 0 -8px;
 }
 
 .moonRingIconPulse {
@@ -255,6 +257,13 @@
 :global(.exhibition) .orbWrap {
   width: 570px;
   height: 570px;
+}
+
+/* Matches the exhibition-only 28px MoonPhaseIcon (see isExhibition branch
+   in DreamLoadingScreen.tsx) — mobile's default lives on .moonRingIcon
+   above, sized for its smaller 16px icon. */
+:global(.exhibition) .moonRingIcon {
+  margin: -14px 0 0 -14px;
 }
 
 :global(.exhibition) .messages {

@@ -7,8 +7,9 @@ import { useLanguage } from "./LanguageProvider";
 import { useIsExhibition } from "./ExhibitionMode";
 
 const MOON_RING_COUNT = 28;
-// Bumped per request — was 74. .orbWrap's box (module.css) is sized to match.
-const MOON_RING_RADIUS_PX = 140;
+// Mobile default — the exhibition-only enlargement lives entirely in
+// MOON_RING_RADIUS_EXHIBITION_PX below, never here.
+const MOON_RING_RADIUS_PX = 74;
 // Exhibition canvas is a fixed, much larger 1080x1920 box viewed from a
 // few feet away — .orbWrap's exhibition override (module.css) is sized to
 // match this. +15px per request (30px larger overall diameter — this
@@ -87,7 +88,7 @@ export default function DreamLoadingScreen() {
               style={{ transform: `translate(${icon.x}px, ${icon.y}px)` }}
             >
               <span className={styles.moonRingIconPulse} style={{ animationDelay: `${icon.delayMs}ms` }}>
-                <MoonPhaseIcon phase={icon.phase} size={28} color="currentColor" />
+                <MoonPhaseIcon phase={icon.phase} size={isExhibition ? 28 : 16} color="currentColor" />
               </span>
             </span>
           ))}

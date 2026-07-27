@@ -49,7 +49,7 @@ const STAGGER_STEP = 0.03; // 40–60ms between elements, tuned to fit the ~550�
 const CONTENT_BASE_DELAY = 0.2; // analysis content starts ~200ms in, per spec
 
 function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [expanded, setExpanded] = useState(false);
   const [overflowing, setOverflowing] = useState(false);
   const textRef = useRef<HTMLParagraphElement>(null);
@@ -63,7 +63,11 @@ function CollapsibleText({ text, dark }: { text: string; dark: boolean }) {
     <div className={styles.collapsibleBlock}>
       <p
         ref={textRef}
-        dir="auto"
+        // The app's own language state, not per-character detection —
+        // dir="auto" used to guess wrong on raw (typed/transcribed) dream
+        // text, whose first strong character isn't a reliable signal,
+        // unlike the always-matching-lang AI interpretation text.
+        dir={lang === "he" ? "rtl" : "ltr"}
         className={`${styles.bodyText} ${expanded ? "" : styles.bodyTextClamped} ${
           dark ? styles.bodyTextDark : ""
         }`}
