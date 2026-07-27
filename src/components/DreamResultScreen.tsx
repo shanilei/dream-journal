@@ -428,29 +428,24 @@ export default function DreamResultScreen({
     ensureWipeTicking();
   }
 
-  // ── Exhibition-only "demonstration" reveal patch ────────────────────────
+  // ── Exhibition-only "touch here" cursor hint ────────────────────────────
   // Kiosk visitors have no way to discover the wipe-to-reveal interaction
-  // above — nothing tells them the photo clears where they touch it. This
-  // periodically shows, near the photo's right edge, a small soft-masked
-  // crop of the same already-loaded clear image (reusing clearImgObjRef,
-  // no second image fetch), nudged a short distance to look like a finger
-  // gently rubbing condensation off glass — entirely on its own canvas,
-  // never touching the real wipeBuffer/wipeCanvas above, so it can never
-  // interfere with (or be mistaken for) an actual reveal.
-  const DEMO_DIAMETER_PX = 36; // small — pencil-tip sized, not a big patch
-  const DEMO_MOVE_PX = 45;
-  const DEMO_POS_X_FRACTION = 0.82; // near the right edge, inset enough not to clip
-  const DEMO_POS_Y_FRACTION = 0.42;
-  const DEMO_WAIT_BEFORE_MS = 1300; // 1–1.5s before the very first play
-  const DEMO_FADE_IN_MS = 2000; // the reveal gradually "clears" over ~2s
-  const DEMO_FADE_OUT_MS = 550;
-  const DEMO_MOVE_DURATION_MS = 1800; // slow, elegant — not bouncy
-  const DEMO_GAP_MS = 2800; // 2.5–3s between loops
-  const DEMO_PENCIL_SIZE = 22;
+  // above — nothing tells them the photo clears where they touch it. A
+  // small blinking cursor-like dot drifts across the image, visible for
+  // DEMO_VISIBLE_MS, then disappears for DEMO_GAP_MS, repeating for as
+  // long as nobody has actually touched/dragged the image for real.
+  const DEMO_VISIBLE_MS = 5000; // visible for ~5s per request
+  const DEMO_GAP_MS = 15000; // hidden for ~15s between appearances
+  const DEMO_BLINK_MS = 700; // one blink cycle
+  const DEMO_DOT_SIZE = 20;
+  // Drifts across a modest diagonal band near the image's right side —
+  // not the whole width, so it never wanders off into the caption area.
+  const DEMO_START_X_FRACTION = 0.72;
+  const DEMO_START_Y_FRACTION = 0.3;
+  const DEMO_END_X_FRACTION = 0.85;
+  const DEMO_END_Y_FRACTION = 0.55;
 
-  const demoCanvasRef = useRef<HTMLCanvasElement>(null);
-  const demoPencilRef = useRef<HTMLDivElement>(null);
-  const demoMaskCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const demoCursorRef = useRef<HTMLDivElement>(null);
   const demoRafRef = useRef<number | null>(null);
   const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Flipped permanently (never reset) the moment the visitor actually
@@ -459,193 +454,70 @@ export default function DreamResultScreen({
   // previous phase can never resurrect the loop afterward.
   const demoStoppedRef = useRef(false);
 
-  function getDemoMaskCanvas(sizePx: number): HTMLCanvasElement {
-    let mask = demoMaskCanvasRef.current;
-    if (!mask || mask.width !== sizePx) {
-      mask = document.createElement("canvas");
-      mask.width = sizePx;
-      mask.height = sizePx;
-      const mctx = mask.getContext("2d");
-      if (mctx) {
-        // Three jittered, overlapping soft-edged blobs instead of one
-        // centered circle — their union reads as an organic, irregular
-        // opening (a small brush stroke / rubbed-away patch) rather than
-        // a perfect dot.
-        const blobs = [
-          { dx: 0, dy: 0, r: sizePx * 0.46 },
-          { dx: sizePx * 0.16, dy: -sizePx * 0.12, r: sizePx * 0.32 },
-          { dx: -sizePx * 0.14, dy: sizePx * 0.13, r: sizePx * 0.3 },
-        ];
-        mctx.globalCompositeOperation = "lighter";
-        for (const b of blobs) {
-          const bx = sizePx / 2 + b.dx;
-          const by = sizePx / 2 + b.dy;
-          const g = mctx.createRadialGradient(bx, by, 0, bx, by, b.r);
-          g.addColorStop(0, "rgba(255,255,255,1)");
-          g.addColorStop(0.7, "rgba(255,255,255,0.85)");
-          g.addColorStop(1, "rgba(255,255,255,0)");
-          mctx.fillStyle = g;
-          mctx.beginPath();
-          mctx.arc(bx, by, b.r, 0, Math.PI * 2);
-          mctx.fill();
-        }
-      }
-      demoMaskCanvasRef.current = mask;
-    }
-    return mask;
-  }
-
-  // Draws the crop of the clear image at display-space point (cx, cy) —
-  // same object-fit: cover scale/offset math as drawWipeFrame, so the
-  // patch always shows the actual pixels that sit under that point, not
-  // an arbitrary slice of the source image.
-  function drawDemoPatch(cx: number, cy: number, scaleFactor: number) {
-    const canvas = demoCanvasRef.current;
-    const clearImg = clearImgObjRef.current;
-    const wrap = wrapRef.current;
-    // clientWidth/clientHeight (not getBoundingClientRect) — this needs
-    // the *local*, untransformed box size, the same coordinate space
-    // canvas.style.left/top below are interpreted in. Exhibition Mode
-    // renders everything inside a scaled .exhibitionCanvas ancestor
-    // (see ExhibitionMode.tsx); getBoundingClientRect() returns the
-    // post-scale visual size, which would double-apply that scale once
-    // assigned back into an inline style, landing the patch in the
-    // wrong spot. drawWipeFrame (the real reveal, above) already uses
-    // this same clientWidth/clientHeight pattern for exactly this
-    // reason — addWipePoint is the one exception, since it's converting
-    // genuine pointer clientX/Y, which *are* already post-scale.
-    if (!canvas || !clearImg || !wrap || !wrap.clientWidth || !wrap.clientHeight) return;
-    const wrapW = wrap.clientWidth;
-    const wrapH = wrap.clientHeight;
-
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const displaySize = DEMO_DIAMETER_PX * scaleFactor;
-    const pxSize = Math.max(1, Math.round(displaySize * dpr));
-    if (canvas.width !== pxSize || canvas.height !== pxSize) {
-      canvas.width = pxSize;
-      canvas.height = pxSize;
-    }
-    canvas.style.width = `${displaySize}px`;
-    canvas.style.height = `${displaySize}px`;
-    canvas.style.left = `${cx - displaySize / 2}px`;
-    canvas.style.top = `${cy - displaySize / 2}px`;
-
-    // The pencil icon's own tip sits at its bottom-left corner (see the
-    // PencilIcon path) — anchoring the wrapper's bottom-left there, not
-    // its center, so the tip itself (not the icon's middle) tracks the
-    // point actually being "revealed", same as a real pencil.
-    const pencil = demoPencilRef.current;
-    if (pencil) {
-      pencil.style.left = `${cx}px`;
-      pencil.style.top = `${cy - DEMO_PENCIL_SIZE}px`;
-    }
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
-    ctx.clearRect(0, 0, pxSize, pxSize);
-
-    const imgScale = Math.max(wrapW / clearImg.naturalWidth, wrapH / clearImg.naturalHeight);
-    const drawW = clearImg.naturalWidth * imgScale;
-    const drawH = clearImg.naturalHeight * imgScale;
-    const dx = (wrapW - drawW) / 2;
-    const dy = (wrapH - drawH) / 2;
-    const srcX = (cx - dx) / imgScale;
-    const srcY = (cy - dy) / imgScale;
-    const srcR = displaySize / 2 / imgScale;
-
-    ctx.save();
-    ctx.globalCompositeOperation = "source-over";
-    ctx.drawImage(clearImg, srcX - srcR, srcY - srcR, srcR * 2, srcR * 2, 0, 0, pxSize, pxSize);
-    ctx.globalCompositeOperation = "destination-in";
-    ctx.drawImage(getDemoMaskCanvas(pxSize), 0, 0);
-    ctx.restore();
-  }
-
-  // One full appear → drift → disappear cycle, then reschedules itself
-  // (DEMO_GAP_MS later) unless the visitor has since interacted for real.
+  // One full appear → drift/blink → disappear cycle, then reschedules
+  // itself (DEMO_GAP_MS later) unless the visitor has since interacted
+  // for real.
   function playDemoCycle() {
     if (demoStoppedRef.current) return;
-    const canvas = demoCanvasRef.current;
+    const cursor = demoCursorRef.current;
     const wrap = wrapRef.current;
-    // clientWidth/clientHeight, not getBoundingClientRect — see the
-    // comment in drawDemoPatch for why.
-    if (!canvas || !wrap || !wrap.clientWidth || !wrap.clientHeight) {
+    // clientWidth/clientHeight, not getBoundingClientRect — the latter
+    // returns Exhibition Mode's post-preview-scale size (see
+    // ExhibitionMode.tsx's scaled .exhibitionCanvas ancestor), which
+    // would double-apply that scale once fed back into an inline style,
+    // landing the cursor in the wrong spot.
+    if (!cursor || !wrap || !wrap.clientWidth || !wrap.clientHeight) {
       demoTimerRef.current = setTimeout(playDemoCycle, DEMO_GAP_MS);
       return;
     }
-    // The clear image is fetched over the network (see the effect that
-    // sets clearImgObjRef below) — on a slower connection it can easily
-    // still be loading when this first fires. Retrying quickly instead
-    // of proceeding is the difference between "the hint never actually
-    // shows anything" (canvas set to opacity 1 with nothing drawn on it
-    // yet, then dutifully faded back out) and it actually appearing.
-    if (!clearImgObjRef.current) {
-      demoTimerRef.current = setTimeout(playDemoCycle, 300);
-      return;
-    }
     const wrapW = wrap.clientWidth;
     const wrapH = wrap.clientHeight;
+    const startX = wrapW * DEMO_START_X_FRACTION;
+    const startY = wrapH * DEMO_START_Y_FRACTION;
+    const endX = wrapW * DEMO_END_X_FRACTION;
+    const endY = wrapH * DEMO_END_Y_FRACTION;
 
-    const startX = wrapW * DEMO_POS_X_FRACTION;
-    const startY = wrapH * DEMO_POS_Y_FRACTION;
-    const endX = startX - DEMO_MOVE_PX * 0.25;
-    const endY = startY + DEMO_MOVE_PX * 0.97;
+    function place(x: number, y: number) {
+      if (cursor) {
+        cursor.style.left = `${x - DEMO_DOT_SIZE / 2}px`;
+        cursor.style.top = `${y - DEMO_DOT_SIZE / 2}px`;
+      }
+    }
+
+    place(startX, startY);
+    cursor.style.opacity = "1";
 
     if (reduceMotion) {
-      // Static instead of looping, per prefers-reduced-motion — appears
-      // once, holds, never moves and never repeats/fades on its own
-      // (still removed instantly on real interaction, same as always).
-      drawDemoPatch(startX, startY, 1);
-      setDemoOpacity("1", DEMO_FADE_IN_MS);
+      // Static instead of drifting, per prefers-reduced-motion — still
+      // appears/disappears on the same DEMO_VISIBLE_MS/DEMO_GAP_MS
+      // rhythm, just without any movement.
+      demoTimerRef.current = setTimeout(() => {
+        if (demoStoppedRef.current) return;
+        cursor.style.opacity = "0";
+        demoTimerRef.current = setTimeout(playDemoCycle, DEMO_GAP_MS);
+      }, DEMO_VISIBLE_MS);
       return;
     }
 
-    drawDemoPatch(startX, startY, 1);
-    // The pencil "arrives" and the reveal gradually clears over ~2s —
-    // not an instant appearance — before it starts actually moving.
-    setDemoOpacity("1", DEMO_FADE_IN_MS);
-
-    demoTimerRef.current = setTimeout(() => {
+    const cycleStart = performance.now();
+    function tick(now: number) {
       if (demoStoppedRef.current) return;
-      const moveStart = performance.now();
-      function tick(now: number) {
-        if (demoStoppedRef.current) return;
-        const t = Math.min((now - moveStart) / DEMO_MOVE_DURATION_MS, 1);
-        // Slow ease in/out — "dreamlike", not linear.
-        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        const x = startX + (endX - startX) * eased;
-        const y = startY + (endY - startY) * eased;
-        // Very low-intensity "breathing" — 0.96 to 1.04, one full cycle
-        // across the whole drift, never a sharp pulse.
-        const breathe = 1 + 0.04 * Math.sin(t * Math.PI * 2);
-        drawDemoPatch(x, y, breathe);
-        if (t < 1) {
-          demoRafRef.current = requestAnimationFrame(tick);
-        } else {
-          setDemoOpacity("0", DEMO_FADE_OUT_MS);
-          demoTimerRef.current = setTimeout(() => {
-            if (!demoStoppedRef.current) demoTimerRef.current = setTimeout(playDemoCycle, DEMO_GAP_MS);
-          }, DEMO_FADE_OUT_MS);
-        }
+      const elapsed = now - cycleStart;
+      const t = Math.min(elapsed / DEMO_VISIBLE_MS, 1);
+      // Slow ease in/out — "dreamlike", not linear.
+      const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+      place(startX + (endX - startX) * eased, startY + (endY - startY) * eased);
+      // Blink: a smooth sine pulse rather than a hard flash.
+      const blink = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin((elapsed / DEMO_BLINK_MS) * Math.PI * 2));
+      if (demoCursorRef.current) demoCursorRef.current.style.opacity = String(blink);
+      if (t < 1) {
+        demoRafRef.current = requestAnimationFrame(tick);
+      } else {
+        if (demoCursorRef.current) demoCursorRef.current.style.opacity = "0";
+        demoTimerRef.current = setTimeout(playDemoCycle, DEMO_GAP_MS);
       }
-      demoRafRef.current = requestAnimationFrame(tick);
-    }, DEMO_FADE_IN_MS);
-  }
-
-  // Keeps the reveal patch and its pencil icon fading together, at
-  // whichever of the two speeds applies (slow reveal-in, quick fade-out).
-  function setDemoOpacity(opacity: "0" | "1", durationMs: number) {
-    const canvas = demoCanvasRef.current;
-    const pencil = demoPencilRef.current;
-    if (canvas) {
-      canvas.style.transitionDuration = `${durationMs}ms`;
-      canvas.style.opacity = opacity;
     }
-    if (pencil) {
-      pencil.style.transitionDuration = `${durationMs}ms`;
-      pencil.style.opacity = opacity;
-    }
+    demoRafRef.current = requestAnimationFrame(tick);
   }
 
   function stopDemoHint() {
@@ -653,13 +525,13 @@ export default function DreamResultScreen({
     demoStoppedRef.current = true;
     if (demoRafRef.current) cancelAnimationFrame(demoRafRef.current);
     if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
-    setDemoOpacity("0", DEMO_FADE_OUT_MS);
+    if (demoCursorRef.current) demoCursorRef.current.style.opacity = "0";
   }
 
   useEffect(() => {
     if (!isExhibition || !clearImageUrl) return;
     demoStoppedRef.current = false;
-    demoTimerRef.current = setTimeout(playDemoCycle, DEMO_WAIT_BEFORE_MS);
+    demoTimerRef.current = setTimeout(playDemoCycle, 1000);
     return () => {
       demoStoppedRef.current = true;
       if (demoRafRef.current) cancelAnimationFrame(demoRafRef.current);
@@ -1213,12 +1085,7 @@ export default function DreamResultScreen({
               <canvas ref={wipeCanvasRef} className={styles.imageWipeCanvas} aria-hidden="true" />
             )}
             {isExhibition && clearImageUrl && (
-              <>
-                <canvas ref={demoCanvasRef} className={styles.demoPatch} aria-hidden="true" />
-                <div ref={demoPencilRef} className={styles.demoPencil} aria-hidden="true">
-                  <PencilIcon size={22} color="#fff" />
-                </div>
-              </>
+              <div ref={demoCursorRef} className={styles.demoCursor} aria-hidden="true" />
             )}
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
             {(captionText || overlayDateLabel) && (
