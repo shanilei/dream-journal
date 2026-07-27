@@ -437,16 +437,19 @@ export default function DreamResultScreen({
   // gently rubbing condensation off glass — entirely on its own canvas,
   // never touching the real wipeBuffer/wipeCanvas above, so it can never
   // interfere with (or be mistaken for) an actual reveal.
-  const DEMO_DIAMETER_PX = 65; // 55–75px target diameter on the exhibition canvas
-  const DEMO_MOVE_PX = 65; // 50–80px drift
+  const DEMO_DIAMETER_PX = 36; // small — pencil-tip sized, not a big patch
+  const DEMO_MOVE_PX = 45;
   const DEMO_POS_X_FRACTION = 0.82; // near the right edge, inset enough not to clip
   const DEMO_POS_Y_FRACTION = 0.42;
   const DEMO_WAIT_BEFORE_MS = 1300; // 1–1.5s before the very first play
-  const DEMO_FADE_MS = 550;
+  const DEMO_FADE_IN_MS = 2000; // the reveal gradually "clears" over ~2s
+  const DEMO_FADE_OUT_MS = 550;
   const DEMO_MOVE_DURATION_MS = 1800; // slow, elegant — not bouncy
   const DEMO_GAP_MS = 2800; // 2.5–3s between loops
+  const DEMO_PENCIL_SIZE = 22;
 
   const demoCanvasRef = useRef<HTMLCanvasElement>(null);
+  const demoPencilRef = useRef<HTMLDivElement>(null);
   const demoMaskCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const demoRafRef = useRef<number | null>(null);
   const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -527,6 +530,16 @@ export default function DreamResultScreen({
     canvas.style.left = `${cx - displaySize / 2}px`;
     canvas.style.top = `${cy - displaySize / 2}px`;
 
+    // The pencil icon's own tip sits at its bottom-left corner (see the
+    // PencilIcon path) — anchoring the wrapper's bottom-left there, not
+    // its center, so the tip itself (not the icon's middle) tracks the
+    // point actually being "revealed", same as a real pencil.
+    const pencil = demoPencilRef.current;
+    if (pencil) {
+      pencil.style.left = `${cx}px`;
+      pencil.style.top = `${cy - DEMO_PENCIL_SIZE}px`;
+    }
+
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -584,12 +597,14 @@ export default function DreamResultScreen({
       // once, holds, never moves and never repeats/fades on its own
       // (still removed instantly on real interaction, same as always).
       drawDemoPatch(startX, startY, 1);
-      canvas.style.opacity = "1";
+      setDemoOpacity("1", DEMO_FADE_IN_MS);
       return;
     }
 
     drawDemoPatch(startX, startY, 1);
-    canvas.style.opacity = "1";
+    // The pencil "arrives" and the reveal gradually clears over ~2s —
+    // not an instant appearance — before it starts actually moving.
+    setDemoOpacity("1", DEMO_FADE_IN_MS);
 
     demoTimerRef.current = setTimeout(() => {
       if (demoStoppedRef.current) return;
@@ -608,14 +623,29 @@ export default function DreamResultScreen({
         if (t < 1) {
           demoRafRef.current = requestAnimationFrame(tick);
         } else {
-          if (demoCanvasRef.current) demoCanvasRef.current.style.opacity = "0";
+          setDemoOpacity("0", DEMO_FADE_OUT_MS);
           demoTimerRef.current = setTimeout(() => {
             if (!demoStoppedRef.current) demoTimerRef.current = setTimeout(playDemoCycle, DEMO_GAP_MS);
-          }, DEMO_FADE_MS);
+          }, DEMO_FADE_OUT_MS);
         }
       }
       demoRafRef.current = requestAnimationFrame(tick);
-    }, DEMO_FADE_MS);
+    }, DEMO_FADE_IN_MS);
+  }
+
+  // Keeps the reveal patch and its pencil icon fading together, at
+  // whichever of the two speeds applies (slow reveal-in, quick fade-out).
+  function setDemoOpacity(opacity: "0" | "1", durationMs: number) {
+    const canvas = demoCanvasRef.current;
+    const pencil = demoPencilRef.current;
+    if (canvas) {
+      canvas.style.transitionDuration = `${durationMs}ms`;
+      canvas.style.opacity = opacity;
+    }
+    if (pencil) {
+      pencil.style.transitionDuration = `${durationMs}ms`;
+      pencil.style.opacity = opacity;
+    }
   }
 
   function stopDemoHint() {
@@ -623,7 +653,7 @@ export default function DreamResultScreen({
     demoStoppedRef.current = true;
     if (demoRafRef.current) cancelAnimationFrame(demoRafRef.current);
     if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
-    if (demoCanvasRef.current) demoCanvasRef.current.style.opacity = "0";
+    setDemoOpacity("0", DEMO_FADE_OUT_MS);
   }
 
   useEffect(() => {
@@ -1183,7 +1213,12 @@ export default function DreamResultScreen({
               <canvas ref={wipeCanvasRef} className={styles.imageWipeCanvas} aria-hidden="true" />
             )}
             {isExhibition && clearImageUrl && (
-              <canvas ref={demoCanvasRef} className={styles.demoPatch} aria-hidden="true" />
+              <>
+                <canvas ref={demoCanvasRef} className={styles.demoPatch} aria-hidden="true" />
+                <div ref={demoPencilRef} className={styles.demoPencil} aria-hidden="true">
+                  <PencilIcon size={22} color="#fff" />
+                </div>
+              </>
             )}
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
             {(captionText || overlayDateLabel) && (

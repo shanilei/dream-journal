@@ -332,7 +332,24 @@
   opacity: 0;
   pointer-events: none;
   z-index: 2;
+  /* transitionDuration is overridden inline per phase (slow reveal-in,
+     quicker fade-out) — see setDemoOpacity in DreamResultScreen.tsx. */
   transition: opacity 0.55s ease;
+}
+
+/* The small pencil icon that visibly "draws" the demoPatch above —
+   fades and repositions in lockstep with it (see setDemoOpacity /
+   drawDemoPatch). Positioned so the icon's own tip (its bottom-left
+   corner, per PencilIcon's path) sits at the current reveal point. */
+.demoPencil {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity 0.55s ease;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
 }
 
 /* Scrim for caption legibility — unconditional now (the reveal is global,
