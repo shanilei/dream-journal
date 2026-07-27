@@ -545,3 +545,15 @@ export function GoogleIcon({ size = 18 }: { size?: number }) {
     </svg>
   );
 }
+
+// A filled dot with a soft outer ring, standing in for a fingertip —
+// used only as the exhibition "swipe to reveal the photo" hint (see
+// DreamResultScreen's wipeHint), never as an interactive control icon.
+export function TouchHintIcon({ size = 40, color = "#fff" }: { size?: number; color?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="20" cy="20" r="18" stroke={color} strokeWidth="2" opacity="0.35" />
+      <circle cx="20" cy="20" r="8" fill={color} />
+    </svg>
+  );
+}

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
+import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon, TouchHintIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import { useSetBottomNavHidden } from "./BottomNavVisibility";
 import { useIsExhibition } from "./ExhibitionMode";
@@ -194,6 +194,18 @@ export default function DreamResultScreen({
   // The global, persistent BottomNav (see GlobalBottomNav.tsx) reads this
   // instead of this screen rendering its own instance.
   useSetBottomNavHidden(isExhibition ? false : navHidden);
+
+  // Exhibition-only "swipe to reveal" hint — visitors at the physical
+  // display don't have any of the affordances a phone user picks up
+  // naturally (no one told them the photo wipes clear like condensation).
+  // Dismissed for good the moment someone actually starts wiping, or on
+  // its own after a few loops if nobody does.
+  const [showWipeHint, setShowWipeHint] = useState(isExhibition && Boolean(clearImageUrl));
+  useEffect(() => {
+    if (!showWipeHint) return;
+    const timer = setTimeout(() => setShowWipeHint(false), 9000);
+    return () => clearTimeout(timer);
+  }, [showWipeHint]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -889,6 +901,7 @@ export default function DreamResultScreen({
             onMouseDown={(e) => {
               if (!clearImageUrl) return;
               cancelPendingReset();
+              setShowWipeHint(false);
               isDraggingRef.current = true;
               lastDragPointRef.current = null;
               addWipePoint(e.clientX, e.clientY);
@@ -911,6 +924,7 @@ export default function DreamResultScreen({
             onTouchStart={(e) => {
               if (!clearImageUrl) return;
               cancelPendingReset();
+              setShowWipeHint(false);
               isDraggingRef.current = true;
               lastDragPointRef.current = null;
               const touch = e.touches[0];
@@ -969,6 +983,26 @@ export default function DreamResultScreen({
             {clearImageUrl && (
               <canvas ref={wipeCanvasRef} className={styles.imageWipeCanvas} aria-hidden="true" />
             )}
+            <AnimatePresence>
+              {showWipeHint && clearImageUrl && (
+                <motion.div
+                  className={styles.wipeHint}
+                  aria-hidden="true"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0, transition: { duration: 0.4 } }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <motion.div
+                    className={styles.wipeHintDot}
+                    animate={{ x: [0, -22, 0, 22, 0] }}
+                    transition={{ duration: 2.2, ease: EASE, repeat: Infinity, repeatDelay: 0.6 }}
+                  >
+                    <TouchHintIcon size={40} color="#fff" />
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
             {(captionText || overlayDateLabel) && (
               <div
