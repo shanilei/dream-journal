@@ -317,30 +317,22 @@
   contain: paint;
 }
 
-/* Exhibition-only "swipe to reveal" hint (see showWipeHint in
-   DreamResultScreen.tsx) — a small badge in the image's top corner.
-   Solid accent-colored fill (was a translucent glass pill) — per
-   feedback the glass version blended into busy photos and wasn't
-   noticeable enough; a solid accent dot plus its own glow reads clearly
-   against any artwork. pointer-events: none so it never itself blocks
-   the real wipe gesture underneath it. */
-.wipeHint {
+/* Exhibition-only "demonstration" reveal patch (see the demo* refs/
+   effect in DreamResultScreen.tsx) — a small canvas, separate from the
+   real wipeCanvas above, that draws a cropped+soft-masked piece of the
+   same already-loaded clear image near the photo's right edge and
+   nudges it slightly to mimic a finger gently rubbing the condensation
+   away. Position/size are set imperatively per frame (left/top/width/
+   height), not via CSS, so only opacity/transform need a rule here.
+   pointer-events: none so it never blocks the real wipe gesture. */
+.demoPatch {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 0;
+  left: 0;
+  opacity: 0;
   pointer-events: none;
   z-index: 2;
-}
-
-.wipeHintDot {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--accent-primary, #6871FF);
-  box-shadow: 0 0 16px 2px var(--accent-primary, #6871FF), 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.55s ease;
 }
 
 /* Scrim for caption legibility — unconditional now (the reveal is global,

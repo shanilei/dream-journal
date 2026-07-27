@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon, TouchHintIcon } from "./Icons";
+import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import { useSetBottomNavHidden } from "./BottomNavVisibility";
 import { useIsExhibition } from "./ExhibitionMode";
@@ -194,18 +194,6 @@ export default function DreamResultScreen({
   // The global, persistent BottomNav (see GlobalBottomNav.tsx) reads this
   // instead of this screen rendering its own instance.
   useSetBottomNavHidden(isExhibition ? false : navHidden);
-
-  // Exhibition-only "swipe to reveal" hint — visitors at the physical
-  // display don't have any of the affordances a phone user picks up
-  // naturally (no one told them the photo wipes clear like condensation).
-  // Dismissed for good the moment someone actually starts wiping, or on
-  // its own after a few loops if nobody does.
-  const [showWipeHint, setShowWipeHint] = useState(isExhibition && Boolean(clearImageUrl));
-  useEffect(() => {
-    if (!showWipeHint) return;
-    const timer = setTimeout(() => setShowWipeHint(false), 9000);
-    return () => clearTimeout(timer);
-  }, [showWipeHint]);
 
   useEffect(() => {
     const el = scrollRef.current;
@@ -439,6 +427,207 @@ export default function DreamResultScreen({
     lastDragPointRef.current = { x: clientX, y: clientY };
     ensureWipeTicking();
   }
+
+  // ── Exhibition-only "demonstration" reveal patch ────────────────────────
+  // Kiosk visitors have no way to discover the wipe-to-reveal interaction
+  // above — nothing tells them the photo clears where they touch it. This
+  // periodically shows, near the photo's right edge, a small soft-masked
+  // crop of the same already-loaded clear image (reusing clearImgObjRef,
+  // no second image fetch), nudged a short distance to look like a finger
+  // gently rubbing condensation off glass — entirely on its own canvas,
+  // never touching the real wipeBuffer/wipeCanvas above, so it can never
+  // interfere with (or be mistaken for) an actual reveal.
+  const DEMO_DIAMETER_PX = 65; // 55–75px target diameter on the exhibition canvas
+  const DEMO_MOVE_PX = 65; // 50–80px drift
+  const DEMO_POS_X_FRACTION = 0.82; // near the right edge, inset enough not to clip
+  const DEMO_POS_Y_FRACTION = 0.42;
+  const DEMO_WAIT_BEFORE_MS = 1300; // 1–1.5s before the very first play
+  const DEMO_FADE_MS = 550;
+  const DEMO_MOVE_DURATION_MS = 1800; // slow, elegant — not bouncy
+  const DEMO_GAP_MS = 2800; // 2.5–3s between loops
+
+  const demoCanvasRef = useRef<HTMLCanvasElement>(null);
+  const demoMaskCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const demoRafRef = useRef<number | null>(null);
+  const demoTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Flipped permanently (never reset) the moment the visitor actually
+  // touches/drags the image, or on unmount — every scheduled step below
+  // checks it before doing anything, so a stray pending timer/rAF from a
+  // previous phase can never resurrect the loop afterward.
+  const demoStoppedRef = useRef(false);
+
+  function getDemoMaskCanvas(sizePx: number): HTMLCanvasElement {
+    let mask = demoMaskCanvasRef.current;
+    if (!mask || mask.width !== sizePx) {
+      mask = document.createElement("canvas");
+      mask.width = sizePx;
+      mask.height = sizePx;
+      const mctx = mask.getContext("2d");
+      if (mctx) {
+        // Three jittered, overlapping soft-edged blobs instead of one
+        // centered circle — their union reads as an organic, irregular
+        // opening (a small brush stroke / rubbed-away patch) rather than
+        // a perfect dot.
+        const blobs = [
+          { dx: 0, dy: 0, r: sizePx * 0.46 },
+          { dx: sizePx * 0.16, dy: -sizePx * 0.12, r: sizePx * 0.32 },
+          { dx: -sizePx * 0.14, dy: sizePx * 0.13, r: sizePx * 0.3 },
+        ];
+        mctx.globalCompositeOperation = "lighter";
+        for (const b of blobs) {
+          const bx = sizePx / 2 + b.dx;
+          const by = sizePx / 2 + b.dy;
+          const g = mctx.createRadialGradient(bx, by, 0, bx, by, b.r);
+          g.addColorStop(0, "rgba(255,255,255,1)");
+          g.addColorStop(0.7, "rgba(255,255,255,0.85)");
+          g.addColorStop(1, "rgba(255,255,255,0)");
+          mctx.fillStyle = g;
+          mctx.beginPath();
+          mctx.arc(bx, by, b.r, 0, Math.PI * 2);
+          mctx.fill();
+        }
+      }
+      demoMaskCanvasRef.current = mask;
+    }
+    return mask;
+  }
+
+  // Draws the crop of the clear image at display-space point (cx, cy) —
+  // same object-fit: cover scale/offset math as drawWipeFrame, so the
+  // patch always shows the actual pixels that sit under that point, not
+  // an arbitrary slice of the source image.
+  function drawDemoPatch(cx: number, cy: number, scaleFactor: number) {
+    const canvas = demoCanvasRef.current;
+    const clearImg = clearImgObjRef.current;
+    const wrap = wrapRef.current;
+    // clientWidth/clientHeight (not getBoundingClientRect) — this needs
+    // the *local*, untransformed box size, the same coordinate space
+    // canvas.style.left/top below are interpreted in. Exhibition Mode
+    // renders everything inside a scaled .exhibitionCanvas ancestor
+    // (see ExhibitionMode.tsx); getBoundingClientRect() returns the
+    // post-scale visual size, which would double-apply that scale once
+    // assigned back into an inline style, landing the patch in the
+    // wrong spot. drawWipeFrame (the real reveal, above) already uses
+    // this same clientWidth/clientHeight pattern for exactly this
+    // reason — addWipePoint is the one exception, since it's converting
+    // genuine pointer clientX/Y, which *are* already post-scale.
+    if (!canvas || !clearImg || !wrap || !wrap.clientWidth || !wrap.clientHeight) return;
+    const wrapW = wrap.clientWidth;
+    const wrapH = wrap.clientHeight;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const displaySize = DEMO_DIAMETER_PX * scaleFactor;
+    const pxSize = Math.max(1, Math.round(displaySize * dpr));
+    if (canvas.width !== pxSize || canvas.height !== pxSize) {
+      canvas.width = pxSize;
+      canvas.height = pxSize;
+    }
+    canvas.style.width = `${displaySize}px`;
+    canvas.style.height = `${displaySize}px`;
+    canvas.style.left = `${cx - displaySize / 2}px`;
+    canvas.style.top = `${cy - displaySize / 2}px`;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, pxSize, pxSize);
+
+    const imgScale = Math.max(wrapW / clearImg.naturalWidth, wrapH / clearImg.naturalHeight);
+    const drawW = clearImg.naturalWidth * imgScale;
+    const drawH = clearImg.naturalHeight * imgScale;
+    const dx = (wrapW - drawW) / 2;
+    const dy = (wrapH - drawH) / 2;
+    const srcX = (cx - dx) / imgScale;
+    const srcY = (cy - dy) / imgScale;
+    const srcR = displaySize / 2 / imgScale;
+
+    ctx.save();
+    ctx.globalCompositeOperation = "source-over";
+    ctx.drawImage(clearImg, srcX - srcR, srcY - srcR, srcR * 2, srcR * 2, 0, 0, pxSize, pxSize);
+    ctx.globalCompositeOperation = "destination-in";
+    ctx.drawImage(getDemoMaskCanvas(pxSize), 0, 0);
+    ctx.restore();
+  }
+
+  // One full appear → drift → disappear cycle, then reschedules itself
+  // (DEMO_GAP_MS later) unless the visitor has since interacted for real.
+  function playDemoCycle() {
+    if (demoStoppedRef.current) return;
+    const canvas = demoCanvasRef.current;
+    const wrap = wrapRef.current;
+    // clientWidth/clientHeight, not getBoundingClientRect — see the
+    // comment in drawDemoPatch for why.
+    if (!canvas || !wrap || !wrap.clientWidth || !wrap.clientHeight) {
+      demoTimerRef.current = setTimeout(playDemoCycle, DEMO_GAP_MS);
+      return;
+    }
+    const wrapW = wrap.clientWidth;
+    const wrapH = wrap.clientHeight;
+
+    const startX = wrapW * DEMO_POS_X_FRACTION;
+    const startY = wrapH * DEMO_POS_Y_FRACTION;
+    const endX = startX - DEMO_MOVE_PX * 0.25;
+    const endY = startY + DEMO_MOVE_PX * 0.97;
+
+    if (reduceMotion) {
+      // Static instead of looping, per prefers-reduced-motion — appears
+      // once, holds, never moves and never repeats/fades on its own
+      // (still removed instantly on real interaction, same as always).
+      drawDemoPatch(startX, startY, 1);
+      canvas.style.opacity = "1";
+      return;
+    }
+
+    drawDemoPatch(startX, startY, 1);
+    canvas.style.opacity = "1";
+
+    demoTimerRef.current = setTimeout(() => {
+      if (demoStoppedRef.current) return;
+      const moveStart = performance.now();
+      function tick(now: number) {
+        if (demoStoppedRef.current) return;
+        const t = Math.min((now - moveStart) / DEMO_MOVE_DURATION_MS, 1);
+        // Slow ease in/out — "dreamlike", not linear.
+        const eased = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const x = startX + (endX - startX) * eased;
+        const y = startY + (endY - startY) * eased;
+        // Very low-intensity "breathing" — 0.96 to 1.04, one full cycle
+        // across the whole drift, never a sharp pulse.
+        const breathe = 1 + 0.04 * Math.sin(t * Math.PI * 2);
+        drawDemoPatch(x, y, breathe);
+        if (t < 1) {
+          demoRafRef.current = requestAnimationFrame(tick);
+        } else {
+          if (demoCanvasRef.current) demoCanvasRef.current.style.opacity = "0";
+          demoTimerRef.current = setTimeout(() => {
+            if (!demoStoppedRef.current) demoTimerRef.current = setTimeout(playDemoCycle, DEMO_GAP_MS);
+          }, DEMO_FADE_MS);
+        }
+      }
+      demoRafRef.current = requestAnimationFrame(tick);
+    }, DEMO_FADE_MS);
+  }
+
+  function stopDemoHint() {
+    if (demoStoppedRef.current) return;
+    demoStoppedRef.current = true;
+    if (demoRafRef.current) cancelAnimationFrame(demoRafRef.current);
+    if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    if (demoCanvasRef.current) demoCanvasRef.current.style.opacity = "0";
+  }
+
+  useEffect(() => {
+    if (!isExhibition || !clearImageUrl) return;
+    demoStoppedRef.current = false;
+    demoTimerRef.current = setTimeout(playDemoCycle, DEMO_WAIT_BEFORE_MS);
+    return () => {
+      demoStoppedRef.current = true;
+      if (demoRafRef.current) cancelAnimationFrame(demoRafRef.current);
+      if (demoTimerRef.current) clearTimeout(demoTimerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isExhibition, clearImageUrl]);
+
   const [copied, setCopied] = useState(false);
 
   // ── "Edit image details" (caption/date/time overlay editing) ───────────
@@ -901,7 +1090,7 @@ export default function DreamResultScreen({
             onMouseDown={(e) => {
               if (!clearImageUrl) return;
               cancelPendingReset();
-              setShowWipeHint(false);
+              stopDemoHint();
               isDraggingRef.current = true;
               lastDragPointRef.current = null;
               addWipePoint(e.clientX, e.clientY);
@@ -924,7 +1113,7 @@ export default function DreamResultScreen({
             onTouchStart={(e) => {
               if (!clearImageUrl) return;
               cancelPendingReset();
-              setShowWipeHint(false);
+              stopDemoHint();
               isDraggingRef.current = true;
               lastDragPointRef.current = null;
               const touch = e.touches[0];
@@ -983,26 +1172,9 @@ export default function DreamResultScreen({
             {clearImageUrl && (
               <canvas ref={wipeCanvasRef} className={styles.imageWipeCanvas} aria-hidden="true" />
             )}
-            <AnimatePresence>
-              {showWipeHint && clearImageUrl && (
-                <motion.div
-                  className={styles.wipeHint}
-                  aria-hidden="true"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0, transition: { duration: 0.4 } }}
-                  transition={{ duration: 0.4 }}
-                >
-                  <motion.div
-                    className={styles.wipeHintDot}
-                    animate={{ opacity: [1, 0.2, 1], scale: [1, 1.15, 1] }}
-                    transition={{ duration: 0.9, ease: EASE, repeat: Infinity }}
-                  >
-                    <TouchHintIcon size={16} color="#fff" />
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+            {isExhibition && clearImageUrl && (
+              <canvas ref={demoCanvasRef} className={styles.demoPatch} aria-hidden="true" />
+            )}
             <div className={textColor === "white" ? styles.imageScrimDark : styles.imageScrimLight} />
             {(captionText || overlayDateLabel) && (
               <div
