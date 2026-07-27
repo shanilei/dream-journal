@@ -440,7 +440,7 @@ export default function DreamResultScreen({
   const DEMO_MOVE_PX = 80; // 60–100px glide
   const DEMO_POS_X_FRACTION = 0.62; // inset well clear of any edge at this size
   const DEMO_POS_Y_FRACTION = 0.4;
-  const DEMO_WAIT_BEFORE_MS = 1200;
+  const DEMO_WAIT_BEFORE_MS = 5000; // per request — starts only after ~5s
   const DEMO_FADE_IN_MS = 550;
   const DEMO_FADE_OUT_MS = 500;
   const DEMO_MOVE_DURATION_MS = 1900; // slow, elegant
