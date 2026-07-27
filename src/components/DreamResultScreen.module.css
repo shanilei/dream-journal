@@ -317,22 +317,24 @@
   contain: paint;
 }
 
-/* Exhibition-only "demonstration" reveal patch (see the demo* refs/
-   effect in DreamResultScreen.tsx) — a small canvas, separate from the
-   real wipeCanvas above, that draws a cropped+soft-masked piece of the
-   same already-loaded clear image near the photo's right edge and
-   nudges it slightly to mimic a finger gently rubbing the condensation
-   away. Position/size are set imperatively per frame (left/top/width/
-   height), not via CSS, so only opacity/transform need a rule here.
-   pointer-events: none so it never blocks the real wipe gesture. */
-.demoPatch {
+/* Exhibition-only "touch here" cursor hint (see the demo* refs/effect
+   in DreamResultScreen.tsx) — a small blinking dot, styled like a
+   cursor/pointer, that drifts across the image to suggest it's
+   touchable. Position/opacity are set imperatively per frame, not via
+   CSS. pointer-events: none so it never blocks the real wipe gesture. */
+.demoCursor {
   position: absolute;
   top: 0;
   left: 0;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
   opacity: 0;
   pointer-events: none;
   z-index: 2;
-  transition: opacity 0.55s ease;
 }
 
 /* Scrim for caption legibility — unconditional now (the reveal is global,
