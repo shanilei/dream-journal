@@ -317,24 +317,26 @@
   contain: paint;
 }
 
-/* Exhibition-only "touch here" cursor hint (see the demo* refs/effect
-   in DreamResultScreen.tsx) — a small blinking dot, styled like a
-   cursor/pointer, that drifts across the image to suggest it's
-   touchable. Position/opacity are set imperatively per frame, not via
+/* Exhibition-only "scratch-card" reveal hint (see the demo* refs/effect
+   in DreamResultScreen.tsx) — a small canvas, separate from the real
+   wipeCanvas above, that draws a cropped + organic-soft-masked piece of
+   the same already-loaded clear image, gliding a short distance so it
+   reads as a real part of the photo being briefly uncovered. No glow,
+   no border, no color — the reveal itself (real image pixels) is the
+   whole effect. Position/size are set imperatively per frame, not via
    CSS. pointer-events: none so it never blocks the real wipe gesture. */
-.demoCursor {
+.demoPatch {
   position: absolute;
   top: 0;
   left: 0;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: #fff;
-  border: 2px solid rgba(0, 0, 0, 0.35);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  width: 90px;
+  height: 90px;
   opacity: 0;
   pointer-events: none;
   z-index: 2;
+  /* transitionDuration is overridden inline per phase (fade-in vs.
+     fade-out) — see playDemoCycle in DreamResultScreen.tsx. */
+  transition: opacity 0.55s ease;
 }
 
 /* Scrim for caption legibility — unconditional now (the reveal is global,
