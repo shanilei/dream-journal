@@ -317,6 +317,24 @@
   contain: paint;
 }
 
+/* Exhibition-only "demonstration" reveal patch (see the demo* refs/
+   effect in DreamResultScreen.tsx) — a small canvas, separate from the
+   real wipeCanvas above, that draws a cropped+soft-masked piece of the
+   same already-loaded clear image near the photo's right edge and
+   nudges it slightly to mimic a finger gently rubbing the condensation
+   away. Position/size are set imperatively per frame (left/top/width/
+   height), not via CSS, so only opacity/transform need a rule here.
+   pointer-events: none so it never blocks the real wipe gesture. */
+.demoPatch {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+  transition: opacity 0.55s ease;
+}
+
 /* Scrim for caption legibility — unconditional now (the reveal is global,
    not a hole to cut around), same as before the interactive reveal
    existed. */
@@ -955,15 +973,14 @@
   font-size: 42px;
 }
 
-/* +4px per request (was 22px) — a further bump for legibility from a
-   few feet away, on top of the earlier +6px. */
+/* +4px per request (was 26px) — a further bump for legibility from a
+   few feet away, on top of two earlier bumps (16 -> 22 -> 26 -> 30). */
 :global(.exhibition) .bodyText {
-  font-size: 26px;
+  font-size: 30px;
 }
 
-/* No exhibition override existed before — section headings ("What does
-   it say?" / "The dream itself" / "Symbols in your dream") were still
-   at their mobile size (24px / 22px in Hebrew) even on the big display. */
+/* +6px per request (was 28px) — same further-bump round as .bodyText
+   above. */
 :global(.exhibition) .blockHeading {
-  font-size: 28px;
+  font-size: 34px;
 }
