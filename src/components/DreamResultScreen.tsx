@@ -1042,7 +1042,12 @@ export default function DreamResultScreen({
         {(interpretationText || summaryText) && (
           <motion.div
             className={styles.block}
-            style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}
+            // flex-start (not flex-end) — the page inherits direction:
+            // rtl from <html>, which flips what "end" means for a flex
+            // container's cross axis, so flex-end would actually push
+            // this to the physical left (see .symbolsRow's own comment
+            // in the CSS module for the same gotcha).
+            style={lang === "he" ? { alignItems: "flex-start", width: "100%" } : undefined}
             {...fadeStep(6)}
           >
             <div className={styles.blockHeadingRow}>
@@ -1092,7 +1097,7 @@ export default function DreamResultScreen({
         )}
 
         {dreamText && (
-          <div className={styles.block} style={lang === "he" ? { alignItems: "flex-end", width: "100%" } : undefined}>
+          <div className={styles.block} style={lang === "he" ? { alignItems: "flex-start", width: "100%" } : undefined}>
             <p className={styles.blockHeading}>{t.theDreamItself}</p>
             <CollapsibleText text={dreamText} dark={false} />
           </div>

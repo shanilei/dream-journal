@@ -955,7 +955,15 @@
   font-size: 42px;
 }
 
-/* +6px per request (was 16px). */
+/* +4px per request (was 22px) — a further bump for legibility from a
+   few feet away, on top of the earlier +6px. */
 :global(.exhibition) .bodyText {
-  font-size: 22px;
+  font-size: 26px;
+}
+
+/* No exhibition override existed before — section headings ("What does
+   it say?" / "The dream itself" / "Symbols in your dream") were still
+   at their mobile size (24px / 22px in Hebrew) even on the big display. */
+:global(.exhibition) .blockHeading {
+  font-size: 28px;
 }
