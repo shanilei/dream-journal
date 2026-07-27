@@ -105,6 +105,13 @@ function ExhibitionCanvas({
 function ExhibitionModeInner({ children }: { children: React.ReactNode }) {
   const searchParams = useSearchParams();
   const urlActive = searchParams.get("exhibition") === "1";
+  // Explicit escape hatch — since the flag below now lives in
+  // localStorage (survives closing the browser entirely, not just the
+  // tab), any device that ever opened a real ?exhibition=1 link — a
+  // phone used to test it, not just the physical kiosk — would
+  // otherwise be stuck rendering the 1080-canvas exhibition layout on
+  // every future visit, with no way back. ?exhibition=0 clears it.
+  const urlExplicitlyOff = searchParams.get("exhibition") === "0";
   // ?exhibition=1&preview=1 — a local, upright stand-in for the physical
   // installation (same 1080x1920 canvas, scaled to fit, but never
   // rotated) so spacing/scale/typography can be checked on a normal
@@ -129,6 +136,17 @@ function ExhibitionModeInner({ children }: { children: React.ReactNode }) {
   const [storedPreview, setStoredPreview] = useState(() => readStoredFlag(EXHIBITION_PREVIEW_STORAGE_KEY));
 
   useEffect(() => {
+    if (urlExplicitlyOff) {
+      try {
+        localStorage.removeItem(EXHIBITION_STORAGE_KEY);
+        localStorage.removeItem(EXHIBITION_PREVIEW_STORAGE_KEY);
+      } catch {
+        // private browsing or storage disabled — nothing to clear.
+      }
+      setStoredActive(false);
+      setStoredPreview(false);
+      return;
+    }
     if (!urlActive) return;
     try {
       localStorage.setItem(EXHIBITION_STORAGE_KEY, "1");
@@ -140,9 +158,9 @@ function ExhibitionModeInner({ children }: { children: React.ReactNode }) {
     }
     setStoredActive(true);
     if (urlPreview) setStoredPreview(true);
-  }, [urlActive, urlPreview]);
+  }, [urlActive, urlPreview, urlExplicitlyOff]);
 
-  const active = urlActive || storedActive;
+  const active = !urlExplicitlyOff && (urlActive || storedActive);
   const preview = active && (urlActive ? urlPreview : storedPreview);
 
   useEffect(() => {
