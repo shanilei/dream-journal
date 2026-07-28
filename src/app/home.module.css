@@ -1579,8 +1579,15 @@
   height: calc(var(--exhibition-height) - 210px);
 }
 
+/* max-width: 100% — was left at the inherited --shell-max-width (880px
+   in exhibition), which is narrower than the full 1080px canvas. Since
+   this panel is `left: 50%; transform: translateX(-50%)` (not a flex
+   child), it was rendering as a centered 880px column with a visible
+   gutter on both sides instead of spanning the whole display — the
+   reported "category screen doesn't fill the screen" bug. */
 :global(.exhibition) .overlayPanel {
   height: var(--exhibition-height);
+  max-width: 100%;
 }
 
 /* ── Portrait composition pass ──
@@ -1698,6 +1705,11 @@
   grid-template-columns: repeat(4, 198.25px) !important;
   column-gap: 14px;
   row-gap: 10px;
+  /* Centers the (still fixed-width, Figma-exact) grid now that
+     .overlayPanel itself spans the full 1080px canvas instead of the
+     narrower 880px shell width. */
+  width: max-content;
+  margin: 0 auto;
 }
 
 :global(.exhibition) .heroImgWrap,
@@ -1713,18 +1725,21 @@
   gap: 4.37px;
 }
 
+/* +4px per request (was 8.73846px) — the dream title/mood label in each
+   card. */
 :global(.exhibition) .cardHeading,
 :global(.exhibition) .gridCardHeading {
-  font-size: 8.73846px;
+  font-size: 12.73846px;
   font-weight: 500;
-  line-height: 13px;
+  line-height: 17px;
 }
 
+/* +4px per request (was 6.55385px) — the date under it. */
 :global(.exhibition) .cardSubheading,
 :global(.exhibition) .gridCardSubheading {
-  font-size: 6.55385px;
+  font-size: 10.55385px;
   font-weight: 400;
-  line-height: 11px;
+  line-height: 15px;
 }
 
 :global(.exhibition) .gridMoodTag {
