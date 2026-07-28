@@ -761,11 +761,11 @@
 .printModalCheckboxRow {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   font-size: 14px;
   color: #000;
   cursor: pointer;
-  align-self: flex-start;
 }
 
 .printModalActions {
