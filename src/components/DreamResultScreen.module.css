@@ -758,9 +758,24 @@
   color: #000;
 }
 
+.printModalCheckboxRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #000;
+  cursor: pointer;
+  align-self: flex-start;
+}
+
 .printModalActions {
   display: flex;
   gap: 8px;
+}
+
+.printModalConfirm:disabled {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .printModalCancel {

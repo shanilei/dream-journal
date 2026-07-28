@@ -172,6 +172,15 @@ export default function DreamResultScreen({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
+  // "Print without the blur layer" — an on-demand alternate print image
+  // (see /api/dream/[id]/print-clear), never persisted as the dream's
+  // regular printImageUrl. printOverrideUrl only ever holds this one-off
+  // URL while it's actually in use for the print in progress; the default
+  // (unchecked) path never touches it, so nothing about the normal print
+  // flow changes.
+  const [printWithoutBlur, setPrintWithoutBlur] = useState(false);
+  const [generatingClearPrint, setGeneratingClearPrint] = useState(false);
+  const [printOverrideUrl, setPrintOverrideUrl] = useState<string | null>(null);
   // Not React state on purpose — it only gates pointer-move guards below
   // and never affects what's rendered directly (the wipe reveal is
   // painted straight onto a canvas, see drawWipeFrame below), so it was
@@ -878,7 +887,11 @@ export default function DreamResultScreen({
     };
   }, []);
 
-  function handlePrint() {
+  // `overrideBlob`, when given, is used instead of the prefetched
+  // printImageBlobRef — the "print without blur" path (see
+  // confirmPrint) fetches its own one-off blob and hands it straight in
+  // here rather than racing the ref's own effect-driven fetch.
+  function handlePrint(overrideBlob?: Blob | null) {
     setShowPrintModal(false);
 
     // iOS only (trial — see the comment this replaced below): window.print()
@@ -894,7 +907,7 @@ export default function DreamResultScreen({
     // the only path on desktop) if this isn't iOS, or if the file isn't
     // ready/shareable for any reason.
     const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent);
-    const blob = printImageBlobRef.current;
+    const blob = overrideBlob !== undefined ? overrideBlob : printImageBlobRef.current;
     if (isIOS && blob && typeof navigator.share === "function") {
       const file = new File([blob], `dream-${id ?? "image"}.png`, { type: blob.type || "image/png" });
       const shareData = { files: [file] };
@@ -916,6 +929,62 @@ export default function DreamResultScreen({
     // print rasterizer) and Chrome (print dialog never appeared, likely
     // because printing was deferred out of the click's user-gesture window).
     window.print();
+  }
+
+  // Entry point for the print modal's confirm button. The default
+  // (unchecked) path is untouched — goes straight to handlePrint() with
+  // no override, exactly as before. Checked: generates the clear-image
+  // print PNG on demand (see /api/dream/[id]/print-clear), preloads it
+  // into the browser cache so the hidden .printCard <img> (driven by
+  // printOverrideUrl below) paints instantly once it re-renders with
+  // that src, fetches its own blob for the iOS share path, then calls
+  // handlePrint with that blob — never touching printImageUrlState or
+  // printImageBlobRef, so the regular (blurred) print is completely
+  // unaffected for next time.
+  async function confirmPrint() {
+    if (!printWithoutBlur || !id) {
+      handlePrint();
+      return;
+    }
+    setGeneratingClearPrint(true);
+    try {
+      const res = await fetch(`/api/dream/${id}/print-clear`, { method: "POST" });
+      if (!res.ok) throw new Error(`print-clear failed: ${res.status}`);
+      const data = await res.json();
+      const clearUrl = data?.printImageUrl as string | undefined;
+      if (!clearUrl) throw new Error("print-clear returned no url");
+
+      await new Promise<void>((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve();
+        img.onerror = () => resolve();
+        img.src = clearUrl;
+      });
+      const blob = await fetch(clearUrl)
+        .then((r) => r.blob())
+        .catch(() => null);
+
+      setPrintOverrideUrl(clearUrl);
+      // Let the hidden <img>'s src actually update before window.print()
+      // snapshots the page — the fetch above already warmed the browser
+      // cache, so this paints from cache rather than a fresh load.
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+      handlePrint(blob);
+    } catch (err) {
+      // Fall back to the regular (blurred) print rather than leaving the
+      // user stuck with a non-responsive Print button.
+      console.error("print without blur failed:", err);
+      handlePrint();
+    } finally {
+      setGeneratingClearPrint(false);
+      // Delayed, not immediate — window.print() blocks synchronously in
+      // every mainstream engine, but resetting this the instant
+      // handlePrint() returns would be one JS-tick sooner than that
+      // guarantee actually needs to hold in every browser. A few seconds
+      // of headroom costs nothing (nothing else reads printOverrideUrl
+      // in between) and removes any doubt.
+      setTimeout(() => setPrintOverrideUrl(null), 3000);
+    }
   }
 
   return (
@@ -982,7 +1051,11 @@ export default function DreamResultScreen({
             type="button"
             className={styles.iconButton}
             aria-label={t.print}
-            onClick={() => setShowPrintModal(true)}
+            onClick={() => {
+              setPrintWithoutBlur(false);
+              setPrintOverrideUrl(null);
+              setShowPrintModal(true);
+            }}
           >
             <PrinterIcon size={16} color="currentColor" />
           </button>
@@ -1256,12 +1329,27 @@ export default function DreamResultScreen({
         <div className={styles.printModalOverlay} onClick={() => setShowPrintModal(false)}>
           <div className={styles.printModalCard} onClick={(e) => e.stopPropagation()}>
             <p className={styles.printModalTitle}>{t.printConfirmTitle}</p>
+            {clearImageUrl && (
+              <label className={styles.printModalCheckboxRow}>
+                <input
+                  type="checkbox"
+                  checked={printWithoutBlur}
+                  onChange={(e) => setPrintWithoutBlur(e.target.checked)}
+                />
+                {t.printWithoutBlur}
+              </label>
+            )}
             <div className={styles.printModalActions}>
               <button type="button" className={styles.printModalCancel} onClick={() => setShowPrintModal(false)}>
                 {t.cancel}
               </button>
-              <button type="button" className={styles.printModalConfirm} onClick={handlePrint}>
-                {t.print}
+              <button
+                type="button"
+                className={styles.printModalConfirm}
+                onClick={confirmPrint}
+                disabled={generatingClearPrint}
+              >
+                {generatingClearPrint ? t.preparingPrint : t.print}
               </button>
             </div>
           </div>
@@ -1282,9 +1370,9 @@ export default function DreamResultScreen({
     <div className={styles.printCard}>
       <div className={styles.printCardInner}>
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
-          {printImageUrlState ? (
+          {printOverrideUrl || printImageUrlState ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className={styles.printFlatImage} src={printImageUrlState} alt="Dream artwork" />
+            <img className={styles.printFlatImage} src={printOverrideUrl ?? printImageUrlState} alt="Dream artwork" />
           ) : (
             <div className={styles.imageWrap}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
