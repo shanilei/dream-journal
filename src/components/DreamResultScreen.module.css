@@ -157,9 +157,14 @@
 /* margin bumped 24px -> 34px -> 46px across two passes — larger safety
    margin so the card (now scaled down ~19% total, see .printCardInner
    below) sits comfortably inside the Canon SELPHY CP910's actual
-   printable area via AirPrint, not just a generic page's. */
+   printable area via AirPrint, not just a generic page's.
+   `portrait` explicitly forced (was just `auto`) — some printer drivers
+   (seen on a Canon SELPHY CP1500) default the print dialog to Landscape
+   with nothing here to override it, which put the whole (portrait-shaped)
+   flattened card tiny in one corner of a landscape sheet instead of
+   filling it. */
 @page {
-  size: auto;
+  size: auto portrait;
   margin: 46px;
 }
 
@@ -906,11 +911,6 @@
 :global([lang="he"]) .printModalCancel,
 :global([lang="he"]) .printModalConfirm {
   font-family: var(--font-ploni), serif;
-}
-
-@page {
-  margin: 0;
-  size: auto;
 }
 
 .toast {
