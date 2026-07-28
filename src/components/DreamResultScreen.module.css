@@ -158,13 +158,19 @@
    margin so the card (now scaled down ~19% total, see .printCardInner
    below) sits comfortably inside the Canon SELPHY CP910's actual
    printable area via AirPrint, not just a generic page's.
-   `portrait` explicitly forced (was just `auto`) — some printer drivers
-   (seen on a Canon SELPHY CP1500) default the print dialog to Landscape
-   with nothing here to override it, which put the whole (portrait-shaped)
-   flattened card tiny in one corner of a landscape sheet instead of
-   filling it. */
+   An explicit 4x6in physical size (was `auto portrait`) — on a Canon
+   SELPHY CP1500, `auto` left the browser defaulting to a generic A4
+   page with no 4x6 option ever offered in its own paper-size dropdown,
+   regardless of which physical media/cassette was actually loaded.
+   This is only ever a *hint*: the browser still decides what to do
+   with it based on the paper sizes its printer driver actually reports
+   — if 4x6 truly isn't in that list, this can prompt the browser to
+   pick the closest match, but it can't inject a size the OS/driver
+   itself never declared. If it still shows A4, check the printer's own
+   Windows driver/default-paper-size settings — that's outside what
+   this page's CSS can control. */
 @page {
-  size: auto portrait;
+  size: 4in 6in portrait;
   margin: 46px;
 }
 
