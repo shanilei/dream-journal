@@ -232,6 +232,37 @@
   }
 }
 
+/* Windows' Microsoft IPP Class Driver reports the Canon SELPHY CP1500 only
+   as Letter/A4 (confirmed directly in the printer's own Windows paper-size
+   dropdown) — there is no 4x6/Postcard option to select there at all, so
+   @page's own `size: 4in 6in` above is never honored on that setup and
+   Chrome rasterizes onto a full Letter/A4 canvas instead. The fixed 260px
+   card above was hand-tuned against a *real* small page (see its own
+   comment) and just sits tiny in a sea of margin on that much bigger
+   canvas — however the SELPHY's firmware then maps an oversized logical
+   page onto its small physical media, a small source region only ends up
+   smaller still.
+   `min-width`/`min-height` inside `@media print` resolve against the
+   actual resolved page box in Chrome, not the true 4x6 the CSS only
+   *hints* at — so this only fires when the page turned out bigger than a
+   real 4x6 (4in wide) ever would, i.e. exactly the Letter/A4 fallback
+   case, leaving the tuned 260px rule above completely untouched for any
+   setup that genuinely gets a small page (e.g. AirPrint elsewhere).
+   Height-driven (not width-driven) since the 4:6 image is proportionally
+   taller than both Letter and A4 — sizing by width first would overflow
+   the page's height and paginate the photo onto a second sheet. 9in
+   comfortably fits both page's usable height (~10in after margins) with
+   headroom, and only scoped to the modern flattened-image path via
+   :has() — the legacy pre-printImageUrl fallback markup keeps the
+   originally-tuned width-driven sizing untouched. */
+@media print and (min-width: 5in) {
+  .printCardInner:has(.printFlatImage) {
+    width: auto;
+    height: 9in;
+    margin: 0 auto;
+  }
+}
+
 /* Flattened print-ready image (image+scrim+caption pre-composited
    server-side, see src/print-image.ts) — deliberately a plain opaque
    rectangle with no border-radius/overflow-hidden clipping and no
@@ -241,6 +272,19 @@
   display: block;
   width: 100%;
   margin: 0;
+}
+
+@media print and (min-width: 5in) {
+  /* Companion to .printCardInner's height-driven override above — once
+     the container is sized by height instead of width, the image itself
+     must follow height too (with width auto) to actually fill it while
+     preserving its own aspect ratio, instead of collapsing to 0 width
+     under an auto-width ancestor. */
+  .printCardInner:has(.printFlatImage) .printFlatImage {
+    width: auto;
+    height: 100%;
+    margin: 0 auto;
+  }
 }
 
 /* prefers-reduced-motion is handled in DreamResultScreen.tsx via Framer
