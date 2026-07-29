@@ -638,6 +638,7 @@ export default function DreamResultScreen({
   }, [isExhibition, clearImageUrl]);
 
   const [copied, setCopied] = useState(false);
+  const [printUnavailable, setPrintUnavailable] = useState(false);
 
   // ── "Edit image details" (caption/date/time overlay editing) ───────────
   // These are the values actually drawn on the image — they double as the
@@ -1168,6 +1169,16 @@ export default function DreamResultScreen({
             className={styles.iconButton}
             aria-label={t.print}
             onClick={() => {
+              // Kiosk hardware/driver limitations (see the print pipeline's
+              // own history) mean printing can't be relied on to actually
+              // work on the exhibition PC — better to say so plainly than
+              // let a visitor tap Print and get a silently broken/mangled
+              // page. Desktop/mobile visitors are unaffected.
+              if (isExhibition) {
+                setPrintUnavailable(true);
+                setTimeout(() => setPrintUnavailable(false), 2500);
+                return;
+              }
               setPrintWithoutBlur(false);
               setPrintOverrideUrl(null);
               setShowPrintModal(true);
@@ -1417,6 +1428,10 @@ export default function DreamResultScreen({
 
       {detailsUpdated && (
         <div className={styles.toast}>{t.detailsUpdated}</div>
+      )}
+
+      {printUnavailable && (
+        <div className={styles.toast}>{t.printUnavailable}</div>
       )}
 
       {showEditSheet && (
