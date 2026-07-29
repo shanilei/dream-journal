@@ -52,5 +52,11 @@ export const config = {
   // fail. /signin itself is intentionally NOT in this list, so it still
   // goes through the onboarding gate like every other screen; it's
   // exempted from the *auth* gate specifically inside the function above.
-  matcher: ["/((?!onboarding|auth|api|_next|.*\\..*).*)"],
+  //
+  // "s" is the public, unauthenticated Exhibition Mode QR share page
+  // (/s/[token], see src/app/s/[token]/page.tsx) — a random visitor
+  // scanning the code has no session and no onboarding cookie at all;
+  // gating it the same as the personal-journal routes would just redirect
+  // every scan straight to /signin instead of showing the shared dream.
+  matcher: ["/((?!onboarding|auth|api|_next|s/|.*\\..*).*)"],
 };
