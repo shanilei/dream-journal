@@ -28,13 +28,20 @@
   overflow: hidden;
 }
 
+/* Desktop-exhibition redesign: was a fixed 117px/118px side padding
+   holding .header/.content at a hardcoded 845px/835px width regardless
+   of the actual available canvas width — a narrow, effectively fixed
+   column that left most of a wide display empty. 50px is a consistent
+   outer margin instead; .header/.content below now stretch to 100% of
+   whatever's left inside it, so both always line up with each other and
+   fill the real available width. */
 .root {
   position: relative;
   height: 100%;
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
-  padding: 95px 117px 240px 118px;
+  padding: 95px 50px 240px 50px;
   display: flex;
   flex-direction: column;
   gap: 30px;
@@ -42,14 +49,14 @@
 
 /* ── Header: title + view toggle ── */
 .header {
-  width: 845px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 40px;
 }
 
 .titleRow {
-  width: 845px;
+  width: 100%;
   height: 101px;
   display: flex;
   flex-direction: row;
@@ -216,7 +223,7 @@
 
 /* ── Content: section label + featured row + collection grid ── */
 .content {
-  width: 835px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 27px;
@@ -266,35 +273,45 @@
   transform: scale(0.98);
 }
 
-.featuredRow {
-  display: flex;
-  flex-direction: row;
-  gap: 14px;
-}
-
-/* Sized per real card count (1 or 2) inline via style — see
-   ExhibitionGallery.tsx; no fixed width here so a lone recent dream
-   fills the row instead of leaving Figma's second-card gap empty. */
-.featuredCard {
-  height: 151.15px;
-}
-
+/* .featuredRow and .grid share the exact same track definition (not just
+   the same values duplicated in two rules) so the browser's own grid
+   track-sizing algorithm computes pixel-identical column widths for
+   both — the "recent" row can never end up with taller/wider cards than
+   the collection below it again, regardless of how many columns end up
+   fitting. auto-fill/minmax rather than a hardcoded column count so this
+   naturally yields ~5-6 columns depending on the real available width
+   instead of a fixed 4-column layout sized for a narrower canvas. A
+   featured row with only 1-2 real cards leaves the remaining tracks in
+   that row empty rather than stretching those cards wider — consistent
+   card sizing across the whole gallery takes priority over filling the
+   row. */
+.featuredRow,
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 198.25px);
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   column-gap: 14px;
   row-gap: 10px;
 }
 
+/* Sizing now comes entirely from the shared grid track width above plus
+   .cardImgWrap's aspect-ratio below — min-width: 0 here is a genuine,
+   necessary declaration (not a placeholder): without it a grid item
+   containing .cardHeading's text-overflow:ellipsis content can refuse
+   to shrink below its text's intrinsic width, breaking the equal-width
+   guarantee this whole rework depends on. */
+.featuredCard,
 .gridCard {
-  width: 198.25px;
-  height: 151.15px;
+  min-width: 0;
 }
 
 .cardImgWrap {
   position: relative;
   width: 100%;
-  height: 109.23px;
+  /* Was a fixed 109.23px height at a fixed 198.25px width (~1.815:1) —
+     aspect-ratio preserves that same proportion at whatever width the
+     responsive grid track above actually computes, instead of a height
+     that no longer matched a now-variable card width. */
+  aspect-ratio: 198.25 / 109.23;
   border-radius: 3.27692px;
   overflow: hidden;
   flex-shrink: 0;
@@ -396,4 +413,69 @@
   font-size: 22px;
   line-height: 30px;
   color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Type filter: mood tiles (exhibition only) ──
+   Reuses the app's flat-glass card language (see .card above / CLAUDE.md)
+   rather than a bespoke Figma layout — none was ever specced for this
+   state. Same auto-fill/minmax track definition as .featuredRow/.grid
+   above (not a hardcoded repeat(5, 1fr) tied to the old fixed content
+   width) so mood tiles size consistently with the rest of the redesigned
+   gallery. Tapping one opens <CategoryOverlay> (see CategoryOverlay.tsx),
+   shared with the responsive Gallery's own TypeGrid destination. */
+.moodTileGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  column-gap: 14px;
+  row-gap: 10px;
+}
+
+.moodTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.moodTile:active {
+  transform: scale(0.98);
+}
+
+.moodTileImg {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.moodTileLabel {
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 24px;
+  color: #ffffff;
+}
+
+:global([lang="he"]) .moodTileLabel {
+  font-family: var(--font-ploni), serif;
+}
+
+.moodTileCount {
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([lang="he"]) .moodTileCount {
+  font-family: var(--font-ploni), serif;
 }

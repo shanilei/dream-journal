@@ -1769,6 +1769,7 @@
 
 :global(.exhibition) .calMonth {
   max-width: 480px;
+  margin: 0 auto;
 }
 
 :global(.exhibition) .calDayHeader {
