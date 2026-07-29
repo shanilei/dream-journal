@@ -718,6 +718,30 @@ export default function DreamResultScreen({
   // window on iOS Safari, so an awaited fetch happening right before it
   // risks losing that activation the same way window.print() itself once
   // did (see the comment on window.print() below).
+  // The *actual* rendered <img className={styles.printFlatImage}> below —
+  // distinct from the bare preload Image() above. That preload only warms
+  // the network/HTTP cache; it never touches this specific element, and
+  // browsers defer decoding/rasterizing an <img> that sits inside a
+  // display:none ancestor (as .printCard does until @media print flips it)
+  // until it's actually about to paint. Since that flip happens as part of
+  // window.print()'s own synchronous media-context switch, decoding could
+  // still be in flight the instant Chrome's print preview takes its first
+  // snapshot — producing a blank/white preview pane even though the image
+  // bytes were long since cached. Forcing decode() ahead of time (both
+  // eagerly below and again right before print) avoids doing that decode
+  // work under the print dialog's time pressure.
+  const printFlatImageRef = useRef<HTMLImageElement>(null);
+  async function ensurePrintImageDecoded() {
+    try {
+      await printFlatImageRef.current?.decode();
+    } catch {
+      // Image not ready/broken — proceed anyway rather than blocking print.
+    }
+  }
+  useEffect(() => {
+    if (!printOverrideUrl && !printImageUrlState) return;
+    ensurePrintImageDecoded();
+  }, [printOverrideUrl, printImageUrlState]);
   const printImageBlobRef = useRef<Blob | null>(null);
   useEffect(() => {
     printImageBlobRef.current = null;
@@ -979,7 +1003,7 @@ export default function DreamResultScreen({
   // printImageBlobRef — the "print without blur" path (see
   // confirmPrint) fetches its own one-off blob and hands it straight in
   // here rather than racing the ref's own effect-driven fetch.
-  function handlePrint(overrideBlob?: Blob | null) {
+  async function handlePrint(overrideBlob?: Blob | null) {
     setShowPrintModal(false);
 
     // iOS only (trial — see the comment this replaced below): window.print()
@@ -1016,6 +1040,10 @@ export default function DreamResultScreen({
     // proved unreliable across Safari (image rendered solid black in the
     // print rasterizer) and Chrome (print dialog never appeared, likely
     // because printing was deferred out of the click's user-gesture window).
+    // Decode is normally already resolved well before this point (see the
+    // eager effect above) — this await is a last-resort guarantee for the
+    // rare case a user taps Print before that's had time to finish.
+    await ensurePrintImageDecoded();
     window.print();
   }
 
@@ -1460,7 +1488,7 @@ export default function DreamResultScreen({
         <div className={`${styles.imageCard} ${showBorder ? "" : styles.imageCardNoBorder}`}>
           {printOverrideUrl || printImageUrlState ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img className={styles.printFlatImage} src={printOverrideUrl ?? printImageUrlState} alt="Dream artwork" />
+            <img ref={printFlatImageRef} className={styles.printFlatImage} src={printOverrideUrl ?? printImageUrlState} alt="Dream artwork" />
           ) : (
             <div className={styles.imageWrap}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
