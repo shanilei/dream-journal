@@ -2,12 +2,20 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { AnimatePresence } from "framer-motion";
 import styles from "./ExhibitionGallery.module.css";
 import FavoriteButton from "@/components/FavoriteButton";
 import { LayoutGalleryIcon, TableChartIcon } from "@/components/Icons";
 import { translateMood, formatDreamDate, langFromText, type Lang } from "@/i18n/translations";
 import { toGalleryThumbnailUrl } from "@/lib/thumbnail";
 import { useLanguage } from "@/components/LanguageProvider";
+import { CalendarView } from "@/components/CalendarView";
+import { CategoryOverlay } from "@/components/CategoryOverlay";
+
+// Same fixed mood list gallery/page.tsx itself uses for the Type filter's
+// category counts — kept local (not a shared constants file) to match
+// that existing convention rather than introducing a new one.
+const MOOD_TYPES = ["Fear", "Confused", "Sweet", "Sad", "Angry"] as const;
 
 type Card = {
   id: string;
@@ -54,6 +62,11 @@ export default function ExhibitionGallery({
   const [filter, setFilter] = useState<"all" | "type" | "date" | "favorite">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  // Which mood tile is expanded into <CategoryOverlay> — mirrors
+  // HomeScreenClient's own openMood pattern for the responsive Gallery's
+  // TypeGrid, but simpler: no shared-element layoutId handoff, since
+  // there's no "frozen folder" to animate out of here.
+  const [openMood, setOpenMood] = useState<string | null>(null);
 
   const isSearching = searchQuery.trim().length > 0;
   const q = searchQuery.trim().toLowerCase();
@@ -69,6 +82,10 @@ export default function ExhibitionGallery({
   ];
 
   const favoriteCards = gridCards.filter((c) => favorites.has(c.id));
+  const categories = MOOD_TYPES.map((mood) => ({
+    label: mood,
+    count: gridCards.filter((c) => c.mood === mood).length,
+  }));
 
   // Figma's featured row shows 2 cards side by side — filled with the 2
   // most recent real dreams (not a fabricated placeholder second card).
@@ -186,32 +203,79 @@ export default function ExhibitionGallery({
       </div>
 
       <div className={styles.content}>
-        {featuredCards.length > 0 && (
+        {filter === "type" && !isSearching ? (
           <div>
-            <p className={styles.sectionLabel}>{t.recentDream}</p>
-            <div className={styles.featuredRow}>
-              {featuredCards.map((card) =>
-                renderCard(card, card.id, styles.featuredCard)
+            <div className={styles.sectionHeaderRow}>
+              <p className={styles.sectionLabel}>{t.filterType}</p>
+            </div>
+            <div className={styles.moodTileGrid}>
+              {categories.map((cat) => {
+                const preview = gridCards.find((c) => c.mood === cat.label);
+                return (
+                  <button
+                    key={cat.label}
+                    type="button"
+                    className={styles.moodTile}
+                    onClick={() => setOpenMood(cat.label)}
+                  >
+                    {preview && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={toGalleryThumbnailUrl(preview.image)} alt="" className={styles.moodTileImg} />
+                    )}
+                    <span className={styles.moodTileLabel}>{translateMood(cat.label, lang)}</span>
+                    <span className={styles.moodTileCount}>{cat.count} {t.dreamsCount}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : filter === "date" && !isSearching ? (
+          <CalendarView gridCards={gridCards} />
+        ) : (
+          <>
+            {featuredCards.length > 0 && (
+              <div>
+                <p className={styles.sectionLabel}>{t.recentDream}</p>
+                <div className={styles.featuredRow}>
+                  {featuredCards.map((card) =>
+                    renderCard(card, card.id, styles.featuredCard)
+                  )}
+                </div>
+              </div>
+            )}
+
+            <div>
+              <div className={styles.sectionHeaderRow}>
+                <p className={styles.sectionLabel}>
+                  {filter === "all" && !isSearching ? t.moreCollection : filters.find((f) => f.key === filter)?.label}
+                </p>
+              </div>
+              {restCards.length === 0 ? (
+                <p className={styles.comingSoon}>{isSearching ? t.searchNoResults : t.noFavorites}</p>
+              ) : (
+                <div className={styles.grid}>
+                  {restCards.map((card) => renderCard(card, card.id, styles.gridCard))}
+                </div>
               )}
             </div>
-          </div>
+          </>
         )}
-
-        <div>
-          <div className={styles.sectionHeaderRow}>
-            <p className={styles.sectionLabel}>
-              {filter === "all" && !isSearching ? t.moreCollection : filters.find((f) => f.key === filter)?.label}
-            </p>
-          </div>
-          {restCards.length === 0 ? (
-            <p className={styles.comingSoon}>{isSearching ? t.searchNoResults : t.noFavorites}</p>
-          ) : (
-            <div className={styles.grid}>
-              {restCards.map((card) => renderCard(card, card.id, styles.gridCard))}
-            </div>
-          )}
-        </div>
       </div>
+
+      <AnimatePresence>
+        {openMood && (
+          <CategoryOverlay
+            mood={openMood}
+            dreams={gridCards.filter((c) => c.mood === openMood)}
+            stackCards={[]}
+            lang={lang}
+            t={t}
+            favorites={favorites}
+            onToggleFavorite={onToggleFavorite}
+            onClose={() => setOpenMood(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

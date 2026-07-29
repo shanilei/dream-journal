@@ -414,3 +414,68 @@
   line-height: 30px;
   color: rgba(255, 255, 255, 0.6);
 }
+
+/* ── Type filter: mood tiles (exhibition only) ──
+   Reuses the app's flat-glass card language (see .card above / CLAUDE.md)
+   rather than a bespoke Figma layout — none was ever specced for this
+   state. Same auto-fill/minmax track definition as .featuredRow/.grid
+   above (not a hardcoded repeat(5, 1fr) tied to the old fixed content
+   width) so mood tiles size consistently with the rest of the redesigned
+   gallery. Tapping one opens <CategoryOverlay> (see CategoryOverlay.tsx),
+   shared with the responsive Gallery's own TypeGrid destination. */
+.moodTileGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  column-gap: 14px;
+  row-gap: 10px;
+}
+
+.moodTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 8px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+}
+
+.moodTile:active {
+  transform: scale(0.98);
+}
+
+.moodTileImg {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.moodTileLabel {
+  font-family: var(--font-family);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 24px;
+  color: #ffffff;
+}
+
+:global([lang="he"]) .moodTileLabel {
+  font-family: var(--font-ploni), serif;
+}
+
+.moodTileCount {
+  font-family: var(--font-family);
+  font-weight: 400;
+  font-size: 14px;
+  line-height: 18px;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+:global([lang="he"]) .moodTileCount {
+  font-family: var(--font-ploni), serif;
+}
