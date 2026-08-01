@@ -23,23 +23,21 @@
    so it stays proportionally in the same spot across viewport heights,
    consistent with how other absolute-positioned elements in this app
    (e.g. record.module.css) anchor relative to the screen. */
+/* Was a crop into a tall sprite-sheet PNG with several logo lockups
+   stacked in it — same fix as SplashScreen.module.css's own .logo (see
+   its comment): the current logo is a standalone SVG, no crop needed. */
 .logoWindow {
   position: absolute;
   top: 30.3%;
   left: 50%;
   transform: translateX(-50%);
   width: 220px;
-  height: 72px;
-  overflow: hidden;
 }
 
 .logo {
-  position: absolute;
-  top: -341.43%;
-  left: -0.05%;
-  width: 106.21%;
-  height: 457.14%;
-  max-width: none;
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* Anchored to the bottom independently of the logo above — see
