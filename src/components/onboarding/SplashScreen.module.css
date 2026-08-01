@@ -7,16 +7,13 @@
   justify-content: center;
 }
 
-/* The source PNG is a tall sprite sheet with several logo lockups
-   stacked in it — Figma crops a single window into it via absolute
-   positioning + overflow:hidden rather than shipping a pre-cropped
-   asset. Reproduce that exact crop (from the Figma node: img sized
-   106.21% x 457.14% of its container, offset top -341.43% / left -0.05%). */
+/* Was a crop into a tall sprite-sheet PNG with several logo lockups
+   stacked in it (Figma exported it that way, no pre-cropped asset) —
+   the current logo is a clean standalone SVG with its own viewBox, so
+   this is just a normal sized container now, no crop math needed. */
 .logoWindow {
   position: relative;
   width: 220px;
-  height: 72px;
-  overflow: hidden;
   transform: translateY(0);
   transition: transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1),
               opacity 0.7s ease;
@@ -28,10 +25,7 @@
 }
 
 .logo {
-  position: absolute;
-  top: -341.43%;
-  left: -0.05%;
-  width: 106.21%;
-  height: 457.14%;
-  max-width: none;
+  display: block;
+  width: 100%;
+  height: auto;
 }
