@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
+import { ArrowLeftIcon, ArrowUpIcon, MoreIcon, PrinterIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import { useSetBottomNavHidden } from "./BottomNavVisibility";
 import { useIsExhibition } from "./ExhibitionMode";
@@ -28,7 +28,6 @@ import {
 } from "@/lib/caption";
 import { toDateInputValue, toTimeInputValue, combineDateAndTime } from "@/lib/dream-format";
 import { loadFavorites, saveFavorites } from "@/lib/favorites";
-import { loadSelectedVoiceId } from "@/lib/voicePreference";
 import { preventWidows } from "@/lib/text";
 
 // This screen is rendered in two places that must look identical and
@@ -912,93 +911,6 @@ export default function DreamResultScreen({
     }
   }
 
-  const [ttsStatus, setTtsStatus] = useState<"idle" | "loading" | "playing" | "unavailable" | "error">("idle");
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioUrlRef = useRef<string | null>(null);
-  const ttsAbortRef = useRef<AbortController | null>(null);
-
-  function revokeAudioUrl() {
-    if (audioUrlRef.current) {
-      URL.revokeObjectURL(audioUrlRef.current);
-      audioUrlRef.current = null;
-    }
-  }
-
-  async function handleListen() {
-    if (ttsStatus === "playing") {
-      audioRef.current?.pause();
-      setTtsStatus("idle");
-      return;
-    }
-    if (ttsStatus === "loading") return;
-
-    const text = interpretationText || summaryText;
-    if (!text) return;
-
-    // Cancel any in-flight request from a previous tap before starting a
-    // new one — repeated taps must never race two responses against
-    // each other.
-    ttsAbortRef.current?.abort();
-    const abortController = new AbortController();
-    ttsAbortRef.current = abortController;
-
-    if (!audioRef.current) audioRef.current = new Audio();
-    const audio = audioRef.current;
-
-    // iOS Safari only allows audio.play() without a fresh user gesture if
-    // an earlier play() call already happened synchronously within a
-    // gesture handler on this exact <audio> element — the fetch below
-    // breaks that direct gesture chain, so "unlock" the element right now
-    // (the call rejects immediately since there's no source yet, which is
-    // expected and safe to ignore) before doing any async work.
-    audio.play().catch(() => {});
-    audio.pause();
-
-    setTtsStatus("loading");
-    const voiceId = loadSelectedVoiceId();
-    console.log("[tts] request start", { voiceId, textLength: text.length });
-    try {
-      const res = await fetch("/api/tts", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, voiceId }),
-        signal: abortController.signal,
-      });
-      console.log("[tts] response", { status: res.status, contentType: res.headers.get("content-type") });
-      if (res.status === 501) {
-        setTtsStatus("unavailable");
-        setTimeout(() => setTtsStatus("idle"), 2500);
-        return;
-      }
-      if (!res.ok) throw new Error(`tts request failed: ${res.status}`);
-      const blob = await res.blob();
-      console.log("[tts] audio blob", { bytes: blob.size, type: blob.type });
-      if (blob.size === 0) throw new Error("tts returned empty audio");
-
-      revokeAudioUrl();
-      const url = URL.createObjectURL(blob);
-      audioUrlRef.current = url;
-      audio.src = url;
-      audio.onended = () => setTtsStatus("idle");
-      await audio.play();
-      console.log("[tts] playback started");
-      setTtsStatus("playing");
-    } catch (err) {
-      if ((err as Error)?.name === "AbortError") return;
-      console.error("[tts] playback error", (err as Error)?.message);
-      setTtsStatus("error");
-      setTimeout(() => setTtsStatus((s) => (s === "error" ? "idle" : s)), 2500);
-    }
-  }
-
-  useEffect(() => {
-    return () => {
-      ttsAbortRef.current?.abort();
-      audioRef.current?.pause();
-      revokeAudioUrl();
-    };
-  }, []);
-
   // `overrideBlob`, when given, is used instead of the prefetched
   // printImageBlobRef — the "print without blur" path (see
   // confirmPrint) fetches its own one-off blob and hands it straight in
@@ -1106,6 +1018,35 @@ export default function DreamResultScreen({
   return (
     <>
     <div className={styles.screen} ref={scrollRef}>
+      {/* Exhibition Mode only — the kiosk touchscreen doesn't reliably
+          register a scroll/swipe gesture on this screen, so the full
+          content (image, interpretation, symbols) can be unreachable
+          below the fold with no way to get to it. Two fixed buttons that
+          programmatically scroll the same container a touch gesture
+          would have, rather than any new navigation pattern. Phone/
+          desktop are untouched — scrolling works fine there. */}
+      {isExhibition && (
+        <div className={styles.exhibitionScrollNav}>
+          <button
+            type="button"
+            className={styles.exhibitionScrollNavBtn}
+            aria-label={t.scrollUp}
+            onClick={() => scrollRef.current?.scrollBy({ top: -700, behavior: "smooth" })}
+          >
+            <ArrowUpIcon size={28} color="currentColor" />
+          </button>
+          <button
+            type="button"
+            className={styles.exhibitionScrollNavBtn}
+            aria-label={t.scrollDown}
+            onClick={() => scrollRef.current?.scrollBy({ top: 700, behavior: "smooth" })}
+          >
+            <span className={styles.exhibitionScrollNavDownIcon}>
+              <ArrowUpIcon size={28} color="currentColor" />
+            </span>
+          </button>
+        </div>
+      )}
       <motion.div
         className={styles.topBar}
         initial={reduceMotion ? false : { opacity: 0, y: -7 }}
@@ -1359,32 +1300,6 @@ export default function DreamResultScreen({
           >
             <div className={styles.blockHeadingRow}>
               <p className={styles.blockHeading}>{t.whatDoesItSay}</p>
-              {/* TTS doesn't work correctly in Hebrew yet — hidden there
-                  (not just disabled) so nothing implies it's available;
-                  English narration itself is untouched. */}
-              {lang !== "he" && (
-                <button
-                  type="button"
-                  className={styles.listenBtn}
-                  onClick={handleListen}
-                  aria-label={ttsStatus === "playing" ? t.reading : t.listen}
-                >
-                  <span className={styles.listenBtnIcon}>
-                    {ttsStatus === "playing" ? (
-                      <VolumeIcon size={14} color="currentColor" />
-                    ) : (
-                      <PlayIcon size={14} color="currentColor" />
-                    )}
-                  </span>
-                  {ttsStatus === "playing"
-                    ? t.reading
-                    : ttsStatus === "loading"
-                    ? t.loadingAudio
-                    : ttsStatus === "error"
-                    ? t.audioError
-                    : t.listen}
-                </button>
-              )}
             </div>
             <CollapsibleText text={interpretationText || summaryText} dark={false} />
           </motion.div>
