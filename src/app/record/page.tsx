@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
@@ -11,6 +11,7 @@ import VoiceRecordCircle from "@/components/VoiceRecordCircle";
 import { useLanguage } from "@/components/LanguageProvider";
 import { CloseIcon, PauseIcon, PlayIcon, RepeatIcon } from "@/components/Icons";
 import { useIsTablet } from "@/lib/useIsTablet";
+import { useIsExhibition } from "@/components/ExhibitionMode";
 import { useIdleAnimationPause } from "@/lib/useIdleAnimationPause";
 
 // Not needed for the idle/recording UI (the vast majority of a visit to
@@ -73,6 +74,7 @@ export default function RecordPage() {
   // hook for any future logic that genuinely needs JS, not CSS, to branch
   // (kept for other screens to reuse as they get their own tablet pass).
   const isTablet = useIsTablet();
+  const isExhibition = useIsExhibition();
   const [status, setStatus] = useState<Status>("idle");
   const [result, setResult] = useState<DreamResult | null>(null);
   const [isPaused, setIsPaused] = useState(false);
@@ -117,6 +119,41 @@ export default function RecordPage() {
   // (animation-play-state, never restarts from 0%).
   const { paused: idleAnimPaused, rootRef: screenRef, resume: resumeIdleAnim } = useIdleAnimationPause({ idleMs: 65000 });
   const bgAnimPaused = idleAnimPaused && !isRecording;
+
+  // .prompt/.recordButtonWrap are both position:absolute with fixed
+  // percentage offsets tuned assuming the prompt text always renders as
+  // exactly 2 lines — but the Hebrew prompt has been observed (on a real
+  // device, not reproducible locally across several browser engines/
+  // configs) wrapping onto 4 lines instead, pushing its bottom edge down
+  // into the orb below it. Rather than keep guessing at bigger static
+  // offsets, this measures the prompt's actual rendered height and
+  // positions the orb directly beneath it (plus a fixed gap) — correct
+  // regardless of how many lines the text ends up wrapping to, in any
+  // browser/font-rendering environment. Tablet and Exhibition Mode keep
+  // their own already-tuned, separate CSS positioning untouched (this
+  // never overrides them).
+  const promptRef = useRef<HTMLParagraphElement>(null);
+  const [measuredOrbTop, setMeasuredOrbTop] = useState<number | null>(null);
+  const ORB_GAP_PX = 40;
+
+  useLayoutEffect(() => {
+    if (isTablet || isExhibition) return;
+    function measure() {
+      const promptEl = promptRef.current;
+      const screenEl = screenRef.current;
+      if (!promptEl || !screenEl) return;
+      const promptBottom = promptEl.offsetTop + promptEl.offsetHeight;
+      setMeasuredOrbTop(promptBottom + ORB_GAP_PX);
+    }
+    measure();
+    // Hebrew's Ploni font can finish loading (and reflow the text it's
+    // already painted in a fallback font) after this first measurement —
+    // re-measuring once it's ready catches that shift instead of leaving
+    // a stale, now-wrong position from the fallback font's layout.
+    document.fonts?.ready?.then(measure).catch(() => {});
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [isTablet, isExhibition, lang, status, isRecording, showSendHint, screenRef]);
 
   useEffect(() => {
     if (isRecording) resumeIdleAnim();
@@ -233,7 +270,10 @@ export default function RecordPage() {
         </button>
       )}
 
-      <p className={`${styles.prompt} ${lang === "he" ? styles.promptHe : ""} ${isRecording ? styles.promptRecording : ""}`}>
+      <p
+        ref={promptRef}
+        className={`${styles.prompt} ${lang === "he" ? styles.promptHe : ""} ${isRecording ? styles.promptRecording : ""}`}
+      >
         {status === "error" ? (
           t.recordError
         ) : isRecording ? (
@@ -281,7 +321,10 @@ export default function RecordPage() {
         audioBarCount={AUDIO_BAR_COUNT}
       />
 
-      <div className={`${styles.recordButtonWrap} ${isRecording ? styles.recordButtonWrapActive : ""}`}>
+      <div
+        className={`${styles.recordButtonWrap} ${isRecording ? styles.recordButtonWrapActive : ""}`}
+        style={measuredOrbTop !== null ? { top: `${measuredOrbTop}px` } : undefined}
+      >
         <button
           type="button"
           className={`${styles.recordButton} ${isRecording ? styles.recordButtonActive : ""} ${isPaused ? styles.recordButtonPaused : ""}`}
