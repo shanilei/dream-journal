@@ -798,7 +798,24 @@
   margin-bottom: 0;
 }
 
+/* Hebrew specifically needs much more than 540px at this font size —
+   "מה חלמת היום?" alone was wrapping onto 2 lines by itself, plus
+   "לחץ כדי להקליט" wrapping onto 2 more (4 total instead of the
+   intended 2), overflowing down into the orb below regardless of the
+   orb's own position — moving the orb down just traded that overlap
+   for crowding the elements below it instead of actually fixing
+   anything. A guessed fixed width (900px) still wasn't enough and
+   overflowed past its own box — left/right:60px + width:auto spans
+   almost the full 1080px canvas instead, guaranteed not to overflow
+   regardless of exactly how wide the real rendered text turns out to
+   be. English (.prompt alone, not reachable by this rule) is
+   untouched — no evidence it has the same problem. */
 :global(.exhibition) .promptHe {
+  left: 60px;
+  right: 60px;
+  width: auto;
+  max-width: none;
+  transform: none;
   font-size: 90px;
   line-height: 115px;
 }
