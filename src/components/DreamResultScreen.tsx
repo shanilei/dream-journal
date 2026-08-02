@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, MoreIcon, QrCodeIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
+import { ArrowLeftIcon, MoreIcon, PrinterIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import { useSetBottomNavHidden } from "./BottomNavVisibility";
 import { useIsExhibition } from "./ExhibitionMode";
@@ -172,13 +172,6 @@ export default function DreamResultScreen({
   const scrollRef = useRef<HTMLDivElement>(null);
   const [textColor, setTextColor] = useState<"white" | "black">("white");
   const [showPrintModal, setShowPrintModal] = useState(false);
-  // Exhibition Mode's "Scan to keep your dream" — replaces the print
-  // action entirely there (see the icon button below), never shown
-  // outside isExhibition. "idle" before the button's first tap; the
-  // fetch + QR-encode happens once per open, not eagerly on mount, since
-  // most visitors never tap it.
-  const [scanState, setScanState] = useState<"idle" | "loading" | "ready" | "error">("idle");
-  const [scanQrDataUrl, setScanQrDataUrl] = useState<string | null>(null);
   // "Print without the blur layer" — an on-demand alternate print image
   // (see /api/dream/[id]/print-clear), never persisted as the dream's
   // regular printImageUrl. printOverrideUrl only ever holds this one-off
@@ -1110,38 +1103,6 @@ export default function DreamResultScreen({
     }
   }
 
-  // Exhibition Mode only (see the icon button below) — creates/reuses a
-  // public share link for this dream (server-scoped to the signed-in
-  // owner, see /api/dream/[id]/share) and encodes it into a QR image
-  // client-side. Re-runs from scratch on every open rather than caching
-  // across taps — the share itself is cheap to reuse server-side (see
-  // createOrReuseShare), so there's nothing to gain from also caching the
-  // QR bitmap here, and it keeps this simple.
-  async function startScan() {
-    setScanState("loading");
-    setScanQrDataUrl(null);
-    try {
-      if (!id) throw new Error("missing dream id");
-      const res = await fetch(`/api/dream/${id}/share`, { method: "POST" });
-      if (!res.ok) throw new Error(`share creation failed: ${res.status}`);
-      const data = await res.json();
-      const shareUrl = data?.url as string | undefined;
-      if (!shareUrl) throw new Error("share response had no url");
-
-      const QRCode = (await import("qrcode")).default;
-      const dataUrl = await QRCode.toDataURL(shareUrl, {
-        width: 600,
-        margin: 2,
-        color: { dark: "#000000", light: "#ffffff" },
-      });
-      setScanQrDataUrl(dataUrl);
-      setScanState("ready");
-    } catch (err) {
-      console.error("scan-to-keep failed:", err);
-      setScanState("error");
-    }
-  }
-
   return (
     <>
     <div className={styles.screen} ref={scrollRef}>
@@ -1205,17 +1166,14 @@ export default function DreamResultScreen({
           <button
             type="button"
             className={styles.iconButton}
-            aria-label={t.scanToKeep}
-            onClick={startScan}
+            aria-label={t.print}
+            onClick={() => {
+              setPrintWithoutBlur(false);
+              setPrintOverrideUrl(null);
+              setShowPrintModal(true);
+            }}
           >
-            {/* TEMPORARY: was gated on isExhibition (QR only in exhibition
-                mode, print everywhere else) — isExhibition has been
-                intermittently misdetecting on the kiosk (unrelated to any
-                code change; under investigation), so this is forced to
-                always show/use the scan flow everywhere, phone and desktop
-                included, until that's root-caused. Print is fully
-                unreachable from this button while this is in place. */}
-            <QrCodeIcon size={16} color="currentColor" />
+            <PrinterIcon size={16} color="currentColor" />
           </button>
         </div>
       </motion.div>
@@ -1508,37 +1466,6 @@ export default function DreamResultScreen({
                 disabled={generatingClearPrint}
               >
                 {generatingClearPrint ? t.preparingPrint : t.print}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {isExhibition && scanState !== "idle" && (
-        <div className={styles.printModalOverlay} onClick={() => setScanState("idle")}>
-          <div className={styles.scanModalCard} onClick={(e) => e.stopPropagation()}>
-            <p className={styles.printModalTitle}>{t.scanToKeep}</p>
-            {scanState === "loading" && (
-              <p className={styles.scanStatusText}>{t.scanPreparing}</p>
-            )}
-            {scanState === "ready" && scanQrDataUrl && (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={scanQrDataUrl} alt="" className={styles.scanQrImage} />
-                <p className={styles.scanSubtitleText}>{t.scanSubtitle}</p>
-              </>
-            )}
-            {scanState === "error" && (
-              <>
-                <p className={styles.scanStatusText}>{t.scanError}</p>
-                <button type="button" className={styles.printModalConfirm} onClick={startScan}>
-                  {t.errorPageRetry}
-                </button>
-              </>
-            )}
-            <div className={styles.printModalActions}>
-              <button type="button" className={styles.printModalCancel} onClick={() => setScanState("idle")}>
-                {t.cancel}
               </button>
             </div>
           </div>
