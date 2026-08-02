@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, MoreIcon, PrinterIcon, QrCodeIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
+import { ArrowLeftIcon, MoreIcon, QrCodeIcon, PlayIcon, VolumeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import { useSetBottomNavHidden } from "./BottomNavVisibility";
 import { useIsExhibition } from "./ExhibitionMode";
@@ -1205,25 +1205,17 @@ export default function DreamResultScreen({
           <button
             type="button"
             className={styles.iconButton}
-            aria-label={isExhibition ? t.scanToKeep : t.print}
-            onClick={() => {
-              // Exhibition Mode: this button becomes "Scan to keep your
-              // dream" entirely — a physical print job is exactly what's
-              // unreliable on the kiosk's printer/driver combo (see the
-              // print pipeline's own history), so replacing rather than
-              // just relabeling the button avoids the confusion of a
-              // "Print" icon that doesn't print. Desktop/mobile below is
-              // completely untouched.
-              if (isExhibition) {
-                startScan();
-                return;
-              }
-              setPrintWithoutBlur(false);
-              setPrintOverrideUrl(null);
-              setShowPrintModal(true);
-            }}
+            aria-label={t.scanToKeep}
+            onClick={startScan}
           >
-            {isExhibition ? <QrCodeIcon size={16} color="currentColor" /> : <PrinterIcon size={16} color="currentColor" />}
+            {/* TEMPORARY: was gated on isExhibition (QR only in exhibition
+                mode, print everywhere else) — isExhibition has been
+                intermittently misdetecting on the kiosk (unrelated to any
+                code change; under investigation), so this is forced to
+                always show/use the scan flow everywhere, phone and desktop
+                included, until that's root-caused. Print is fully
+                unreachable from this button while this is in place. */}
+            <QrCodeIcon size={16} color="currentColor" />
           </button>
         </div>
       </motion.div>
