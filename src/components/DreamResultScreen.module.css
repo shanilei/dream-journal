@@ -50,50 +50,6 @@
   flex-shrink: 0;
 }
 
-/* Exhibition Mode only — see the comment above where this renders in
-   DreamResultScreen.tsx. Fixed to the right edge, vertically centered,
-   clear of both .topBar and BottomNav (always visible in exhibition
-   mode) so it never overlaps either. Sits inside .screen, which is
-   itself inside the scaled/rotated exhibition canvas — position:fixed
-   here resolves against that canvas's own transformed box, not the
-   true browser viewport, which is exactly the "pinned within the
-   1080x1920 display" behavior wanted. */
-.exhibitionScrollNav {
-  position: fixed;
-  right: 24px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 4;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.exhibitionScrollNavBtn {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.exhibitionScrollNavBtn:active {
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.exhibitionScrollNavDownIcon {
-  display: flex;
-  transform: rotate(180deg);
-}
-
 .moreMenuWrapper {
   position: relative;
 }

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import styles from "./DreamResultScreen.module.css";
-import { ArrowLeftIcon, ArrowUpIcon, MoreIcon, PrinterIcon, QrCodeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
+import { ArrowLeftIcon, MoreIcon, PrinterIcon, QrCodeIcon, PencilIcon, ShareIcon, SaveIcon } from "./Icons";
 import FavoriteButton from "./FavoriteButton";
 import { useSetBottomNavHidden } from "./BottomNavVisibility";
 import { useIsExhibition } from "./ExhibitionMode";
@@ -1057,35 +1057,6 @@ export default function DreamResultScreen({
   return (
     <>
     <div className={styles.screen} ref={scrollRef}>
-      {/* Exhibition Mode only — the kiosk touchscreen doesn't reliably
-          register a scroll/swipe gesture on this screen, so the full
-          content (image, interpretation, symbols) can be unreachable
-          below the fold with no way to get to it. Two fixed buttons that
-          programmatically scroll the same container a touch gesture
-          would have, rather than any new navigation pattern. Phone/
-          desktop are untouched — scrolling works fine there. */}
-      {isExhibition && (
-        <div className={styles.exhibitionScrollNav}>
-          <button
-            type="button"
-            className={styles.exhibitionScrollNavBtn}
-            aria-label={t.scrollUp}
-            onClick={() => scrollRef.current?.scrollBy({ top: -700, behavior: "smooth" })}
-          >
-            <ArrowUpIcon size={28} color="currentColor" />
-          </button>
-          <button
-            type="button"
-            className={styles.exhibitionScrollNavBtn}
-            aria-label={t.scrollDown}
-            onClick={() => scrollRef.current?.scrollBy({ top: 700, behavior: "smooth" })}
-          >
-            <span className={styles.exhibitionScrollNavDownIcon}>
-              <ArrowUpIcon size={28} color="currentColor" />
-            </span>
-          </button>
-        </div>
-      )}
       <motion.div
         className={styles.topBar}
         initial={reduceMotion ? false : { opacity: 0, y: -7 }}
