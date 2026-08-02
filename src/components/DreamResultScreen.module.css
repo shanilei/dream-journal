@@ -50,6 +50,50 @@
   flex-shrink: 0;
 }
 
+/* Exhibition Mode only — see the comment above where this renders in
+   DreamResultScreen.tsx. Fixed to the right edge, vertically centered,
+   clear of both .topBar and BottomNav (always visible in exhibition
+   mode) so it never overlaps either. Sits inside .screen, which is
+   itself inside the scaled/rotated exhibition canvas — position:fixed
+   here resolves against that canvas's own transformed box, not the
+   true browser viewport, which is exactly the "pinned within the
+   1080x1920 display" behavior wanted. */
+.exhibitionScrollNav {
+  position: fixed;
+  right: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.exhibitionScrollNavBtn {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.exhibitionScrollNavBtn:active {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.exhibitionScrollNavDownIcon {
+  display: flex;
+  transform: rotate(180deg);
+}
+
 .moreMenuWrapper {
   position: relative;
 }
@@ -654,38 +698,6 @@
   gap: 10px;
 }
 
-/* Listen/Reading pill — Figma node 1613:17527 ("Navigation button"),
-   scaled up from its tiny Figma export units to this file's existing
-   12px/18px chip convention (see .symbolChip/.moodPill above) rather
-   than using the literal (sub-pixel) exported values. Deliberately a
-   dark navy-tinted glass rather than this app's usual white-based flat
-   glass — an intentional one-off per the Figma spec, not the general
-   card pattern. */
-.listenBtn {
-  all: unset;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  border-radius: 20px;
-  background: rgba(5, 10, 95, 0.5);
-  color: var(--accent-primary);
-  font-size: 12px;
-  line-height: 18px;
-  font-weight: 400;
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.listenBtn:active {
-  opacity: 0.8;
-}
-
-.listenBtnIcon {
-  display: flex;
-  flex-shrink: 0;
-}
-
 .bodyText {
   margin: 0;
   font-size: 14px;
@@ -900,16 +912,6 @@
 
 :global([lang="he"]) .symbolChip {
   font-family: var(--font-ploni), serif;
-}
-
-:global([lang="he"]) .listenBtn {
-  font-family: var(--font-ploni), serif;
-}
-
-/* Same mirroring already used for .ctaIcon (LanguagePickerScreen) —
-   directional icon flips 180° in RTL so it still reads correctly. */
-:global([dir="rtl"]) .listenBtnIcon {
-  transform: scaleX(-1);
 }
 
 /* Print modal: Ploni */
