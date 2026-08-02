@@ -230,17 +230,6 @@ export function PrinterIcon({ size = 16, color = "#000624" }: { size?: number; c
   );
 }
 
-export function QrCodeIcon({ size = 16, color = "#000624" }: { size?: number; color?: string }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="3" y="3" width="7" height="7" rx="1" stroke={color} strokeWidth={1.6} />
-      <rect x="14" y="3" width="7" height="7" rx="1" stroke={color} strokeWidth={1.6} />
-      <rect x="3" y="14" width="7" height="7" rx="1" stroke={color} strokeWidth={1.6} />
-      <path d="M14 14h3v3h-3v-3zM20 14h1v3M14 20h3M20 18v3h-3" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
 export function BellIcon({ size = 24, color = "#fff" }: { size?: number; color?: string }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

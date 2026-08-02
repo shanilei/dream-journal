@@ -22,7 +22,7 @@ export default function SplashScreen({ onDone }: { onDone: () => void }) {
       <motion.div variants={visualVariants}>
         <div className={`${styles.logoWindow} ${leaving ? styles.logoLeaving : ""}`}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/onboarding/lucid-logo.svg" alt="Lucid" className={styles.logo} />
+          <img src="/images/onboarding/lucid-logo.png" alt="Lucid" className={styles.logo} />
         </div>
       </motion.div>
     </div>

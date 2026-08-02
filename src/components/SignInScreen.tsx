@@ -39,7 +39,7 @@ export default function SignInScreen() {
       <OnboardingBackground />
       <div className={styles.content}>
         <div className={styles.logoWindow}>
-          <img src="/images/onboarding/lucid-logo.svg" alt="Lucid" className={styles.logo} />
+          <img src="/images/onboarding/lucid-logo.png" alt="Lucid" className={styles.logo} />
         </div>
 
         {/* Text + buttons are one Figma group (node 1699:26067) — a 20px
