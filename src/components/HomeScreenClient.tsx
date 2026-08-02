@@ -5,10 +5,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import type { Variants } from "framer-motion";
 import styles from "@/app/home.module.css";
-import exhibitionStyles from "@/components/ExhibitionGallery.module.css";
-import ExhibitionGallery from "@/components/ExhibitionGallery";
 import { useSetBottomNavDimmed } from "@/components/BottomNavVisibility";
-import { useIsExhibition } from "@/components/ExhibitionMode";
 import FavoriteButton from "@/components/FavoriteButton";
 import DreamResultScreen from "@/components/DreamResultScreen";
 import { LayoutGalleryIcon, TableChartIcon, ArrowUpIcon, ArrowLeftIcon } from "@/components/Icons";
@@ -683,7 +680,6 @@ export default function HomeScreenClient({
   const [searchQuery, setSearchQuery] = useState("");
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [gridColumns, setGridColumns] = useState<2 | 3>(3);
-  const isExhibition = useIsExhibition();
   // The CSS module's own iPad 4-column override for .collectionGrid can
   // never win against the inline gridTemplateColumns below (inline style
   // always beats a class, media query or not) — so tablet has to be
@@ -768,20 +764,6 @@ export default function HomeScreenClient({
       saveFavorites(next);
       return next;
     });
-  }
-
-  // Purpose-built Exhibition composition (see ExhibitionGallery.tsx) —
-  // its own markup/CSS matching the Figma export directly, not the
-  // responsive Gallery below adapted via .exhibition overrides (that was
-  // the first pass; per direct feedback it read as "the normal Gallery",
-  // not the Exhibition design). Early-returned above all the responsive-
-  // only render helpers/JSX below, none of which apply here.
-  if (isExhibition) {
-    return (
-      <div className={exhibitionStyles.screenShell}>
-        <ExhibitionGallery gridCards={gridCards} favorites={favorites} onToggleFavorite={toggleFavorite} />
-      </div>
-    );
   }
 
   function renderDreamRow(card: Card) {
