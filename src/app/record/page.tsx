@@ -121,45 +121,29 @@ export default function RecordPage() {
   const bgAnimPaused = idleAnimPaused && !isRecording;
 
   // .prompt/.recordButtonWrap are both position:absolute with fixed
-  // offsets tuned assuming the prompt text always renders as exactly 2
-  // lines — but the Hebrew prompt has been observed (on a real device,
-  // not reproducible locally across several browser engines/configs)
-  // wrapping onto more lines instead, pushing its bottom edge down into
-  // the orb below it. Confirmed to affect both the phone layout (small
-  // px/percent offsets) and Exhibition Mode's own separate absolute-px
-  // offsets (540px-wide box at a much bigger 90px font — if anything
-  // more prone to overflow-wrapping, not less). Rather than keep
-  // guessing at bigger static offsets in either place, this measures
-  // the prompt's actual rendered height and positions the orb directly
-  // beneath it (plus a gap) — correct regardless of how many lines the
-  // text wraps to, in any environment. Tablet keeps its own already-
-  // tuned flex-based layout untouched (never absolute-positioned in the
-  // first place, so it isn't exposed to this bug the same way).
+  // percentage offsets tuned assuming the prompt text always renders as
+  // exactly 2 lines — but the Hebrew prompt has been observed (on a real
+  // device, not reproducible locally across several browser engines/
+  // configs) wrapping onto 4 lines instead, pushing its bottom edge down
+  // into the orb below it. Rather than keep guessing at bigger static
+  // offsets, this measures the prompt's actual rendered height and
+  // positions the orb directly beneath it (plus a fixed gap) — correct
+  // regardless of how many lines the text ends up wrapping to, in any
+  // browser/font-rendering environment. Tablet and Exhibition Mode keep
+  // their own already-tuned, separate CSS positioning untouched (this
+  // never overrides them).
   const promptRef = useRef<HTMLParagraphElement>(null);
-  const recordButtonWrapRef = useRef<HTMLDivElement>(null);
   const [measuredOrbTop, setMeasuredOrbTop] = useState<number | null>(null);
-  const [measuredTypeFallbackTop, setMeasuredTypeFallbackTop] = useState<number | null>(null);
-  const ORB_GAP_PX = isExhibition ? 100 : 40;
-  const TYPE_FALLBACK_GAP_PX = isExhibition ? 40 : 16;
+  const ORB_GAP_PX = 40;
 
   useLayoutEffect(() => {
-    if (isTablet) return;
+    if (isTablet || isExhibition) return;
     function measure() {
       const promptEl = promptRef.current;
       const screenEl = screenRef.current;
       if (!promptEl || !screenEl) return;
       const promptBottom = promptEl.offsetTop + promptEl.offsetHeight;
-      const orbTop = promptBottom + ORB_GAP_PX;
-      setMeasuredOrbTop(orbTop);
-
-      // The orb's own height is fixed by CSS (doesn't reflow with text),
-      // but re-measure it directly rather than hardcode it a second time
-      // here — .recordButtonWrap only gets its top overridden above, so
-      // its rendered height still comes straight from the stylesheet.
-      const orbEl = recordButtonWrapRef.current;
-      if (orbEl) {
-        setMeasuredTypeFallbackTop(orbTop + orbEl.offsetHeight + TYPE_FALLBACK_GAP_PX);
-      }
+      setMeasuredOrbTop(promptBottom + ORB_GAP_PX);
     }
     measure();
     // Hebrew's Ploni font can finish loading (and reflow the text it's
@@ -169,7 +153,7 @@ export default function RecordPage() {
     document.fonts?.ready?.then(measure).catch(() => {});
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, [isTablet, isExhibition, ORB_GAP_PX, TYPE_FALLBACK_GAP_PX, lang, status, isRecording, showSendHint, screenRef]);
+  }, [isTablet, isExhibition, lang, status, isRecording, showSendHint, screenRef]);
 
   useEffect(() => {
     if (isRecording) resumeIdleAnim();
@@ -338,7 +322,6 @@ export default function RecordPage() {
       />
 
       <div
-        ref={recordButtonWrapRef}
         className={`${styles.recordButtonWrap} ${isRecording ? styles.recordButtonWrapActive : ""}`}
         style={measuredOrbTop !== null ? { top: `${measuredOrbTop}px` } : undefined}
       >
@@ -377,10 +360,7 @@ export default function RecordPage() {
       </div>
 
       {!isRecording && (
-        <div
-          className={styles.typeFallback}
-          style={measuredTypeFallbackTop !== null ? { top: `${measuredTypeFallbackTop}px` } : undefined}
-        >
+        <div className={styles.typeFallback}>
           <span className={`${styles.typeFallbackOr} ${lang === "he" ? styles.typeFallbackOrHe : ""}`}>{t.recordOr}</span>
           <Link className={`${styles.typeFallbackLink} ${lang === "he" ? styles.typeFallbackLinkHe : ""}`} href="/record/type">
             {t.recordTypeIt}
