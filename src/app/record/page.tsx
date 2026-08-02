@@ -145,30 +145,20 @@ export default function RecordPage() {
   useLayoutEffect(() => {
     if (isTablet) return;
     function measure() {
-      // This whole calculation is a display-polish nice-to-have — if any
-      // DOM API used here ever behaves unexpectedly in some browser/
-      // in-app-webview, it must never take the whole page down with it
-      // (that's exactly what letting it throw did, once, in production).
-      // Worst case on a caught error: the orb/type-fallback simply keep
-      // whatever position the plain CSS fallback already gives them.
-      try {
-        const promptEl = promptRef.current;
-        const screenEl = screenRef.current;
-        if (!promptEl || !screenEl) return;
-        const promptBottom = promptEl.offsetTop + promptEl.offsetHeight;
-        const orbTop = promptBottom + ORB_GAP_PX;
-        setMeasuredOrbTop(orbTop);
+      const promptEl = promptRef.current;
+      const screenEl = screenRef.current;
+      if (!promptEl || !screenEl) return;
+      const promptBottom = promptEl.offsetTop + promptEl.offsetHeight;
+      const orbTop = promptBottom + ORB_GAP_PX;
+      setMeasuredOrbTop(orbTop);
 
-        // The orb's own height is fixed by CSS (doesn't reflow with text),
-        // but re-measure it directly rather than hardcode it a second time
-        // here — .recordButtonWrap only gets its top overridden above, so
-        // its rendered height still comes straight from the stylesheet.
-        const orbEl = recordButtonWrapRef.current;
-        if (orbEl) {
-          setMeasuredTypeFallbackTop(orbTop + orbEl.offsetHeight + TYPE_FALLBACK_GAP_PX);
-        }
-      } catch (err) {
-        console.error("record prompt/orb measurement failed:", err);
+      // The orb's own height is fixed by CSS (doesn't reflow with text),
+      // but re-measure it directly rather than hardcode it a second time
+      // here — .recordButtonWrap only gets its top overridden above, so
+      // its rendered height still comes straight from the stylesheet.
+      const orbEl = recordButtonWrapRef.current;
+      if (orbEl) {
+        setMeasuredTypeFallbackTop(orbTop + orbEl.offsetHeight + TYPE_FALLBACK_GAP_PX);
       }
     }
     measure();
@@ -176,7 +166,7 @@ export default function RecordPage() {
     // already painted in a fallback font) after this first measurement —
     // re-measuring once it's ready catches that shift instead of leaving
     // a stale, now-wrong position from the fallback font's layout.
-    document.fonts?.ready?.then(measure, () => {});
+    document.fonts?.ready?.then(measure).catch(() => {});
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
   }, [isTablet, isExhibition, ORB_GAP_PX, TYPE_FALLBACK_GAP_PX, lang, status, isRecording, showSendHint, screenRef]);
