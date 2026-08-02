@@ -764,6 +764,38 @@
   gap: 12px;
 }
 
+/* Exhibition Mode's "Scan to keep your dream" modal — deliberately much
+   bigger than .printModalCard (342px): this is read from a few steps
+   back on a kiosk display, and the QR itself needs real size plus a
+   generous plain-white quiet zone around it to stay scannable, not just
+   visually large. */
+.scanModalCard {
+  width: 560px;
+  max-width: 100%;
+  background: #fff;
+  border-radius: 32px;
+  box-shadow: 0px 4px 25px 0px rgba(0, 0, 0, 0.25);
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.scanQrImage {
+  display: block;
+  width: 420px;
+  height: 420px;
+}
+
+.scanStatusText,
+.scanSubtitleText {
+  margin: 0;
+  font-size: 16px;
+  color: rgba(0, 0, 0, 0.65);
+  text-align: center;
+}
+
 .printModalTitle {
   margin: 0;
   font-size: 18px;
@@ -915,7 +947,9 @@
 /* Print modal: Ploni */
 :global([lang="he"]) .printModalTitle,
 :global([lang="he"]) .printModalCancel,
-:global([lang="he"]) .printModalConfirm {
+:global([lang="he"]) .printModalConfirm,
+:global([lang="he"]) .scanStatusText,
+:global([lang="he"]) .scanSubtitleText {
   font-family: var(--font-ploni), serif;
 }
 
