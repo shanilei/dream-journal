@@ -133,6 +133,7 @@ export default function RecordPage() {
   // their own already-tuned, separate CSS positioning untouched (this
   // never overrides them).
   const promptRef = useRef<HTMLParagraphElement>(null);
+  const recordButtonWrapRef = useRef<HTMLDivElement>(null);
   const [measuredOrbTop, setMeasuredOrbTop] = useState<number | null>(null);
   const ORB_GAP_PX = 40;
 
@@ -141,7 +142,22 @@ export default function RecordPage() {
     function measure() {
       const promptEl = promptRef.current;
       const screenEl = screenRef.current;
-      if (!promptEl || !screenEl) return;
+      const wrapEl = recordButtonWrapRef.current;
+      if (!promptEl || !screenEl || !wrapEl) return;
+      // This measurement only makes sense for the mobile layout, where
+      // .recordButtonWrap is position:absolute and needs a computed `top`
+      // to sit under the prompt. The "EXHIBITION PORTRAIT" CSS breakpoint
+      // (a big mouse-driven monitor rotated to portrait, matched purely by
+      // viewport size — no `pointer: coarse` requirement, unlike the
+      // isTablet/isExhibition flags above) turns .recordButtonWrap into a
+      // position:relative flex item instead. Applying a `top` there
+      // doesn't reposition it in the flex flow — it just shifts it further
+      // down, past the "OR / Type it" block that already followed it,
+      // which is exactly the bug this guard prevents.
+      if (getComputedStyle(wrapEl).position !== "absolute") {
+        setMeasuredOrbTop(null);
+        return;
+      }
       const promptBottom = promptEl.offsetTop + promptEl.offsetHeight;
       setMeasuredOrbTop(promptBottom + ORB_GAP_PX);
     }
@@ -322,6 +338,7 @@ export default function RecordPage() {
       />
 
       <div
+        ref={recordButtonWrapRef}
         className={`${styles.recordButtonWrap} ${isRecording ? styles.recordButtonWrapActive : ""}`}
         style={measuredOrbTop !== null ? { top: `${measuredOrbTop}px` } : undefined}
       >

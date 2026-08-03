@@ -518,6 +518,16 @@
    touchscreen remains present as a secondary pointer. No UA sniffing.
    Keep this block in sync with TABLET_QUERY in src/lib/useIsTablet.ts.
 
+   Third comma-branch: a mouse-driven exhibition monitor rotated to
+   portrait (no touch, so `any-pointer: coarse` never matches it) — same
+   physical-size thresholds as the "EXHIBITION PORTRAIT" block below,
+   which only adds size deltas on top of this composition and assumed
+   (wrongly, until this branch was added) that this block's flex-column/
+   position reset always applied alongside it. Without this branch, that
+   monitor matched the size overrides below but stayed in the mobile's
+   absolute-position layout underneath them, so a bigger font/orb just
+   overflowed past fixed offsets tuned for the small mobile sizes.
+
    This is a dedicated composition, not the mobile layout scaled up: the
    idle-state content (prompt / orb / "type it" fallback) switches from
    the mobile's hand-placed absolute-position soup to a real centered
@@ -529,7 +539,8 @@
    canvas and safe areas. Mobile rules above are untouched. */
 @media
   (min-width: 768px) and (min-height: 900px) and (any-pointer: coarse),
-  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse)
+  (min-width: 900px) and (min-height: 768px) and (any-pointer: coarse),
+  (min-width: 900px) and (min-height: 1400px) and (orientation: portrait)
 {
   /* iOS Safari's most visible repaint flicker on this screen comes from
      re-compositing the largest animated/blurred layers on every frame —
